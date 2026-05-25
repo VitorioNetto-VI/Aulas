@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Curso Interativo: Fundamentos de SQL</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.19/400.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.19/600.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.19/700.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/fira-code@5.0.19/400.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/fira-code@5.0.19/500.css">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --info: #0ea5e9;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg-gradient-start: #0f172a;
+            --bg-gradient-end: #1e1b4b;
+            --card-bg: #ffffff;
+            --text-dark: #1e293b;
+            --text-light: #f8fafc;
+            --border-light: #e2e8f0;
+            --border-dark: #0f172a;
+            --code-bg: #1e1e2e;
+            --radius-lg: 16px;
+            --radius-md: 8px;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-hover: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+            color: var(--text-dark);
+            min-height: 100vh;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        #progress-bar {
+            position: fixed; top: 0; left: 0; height: 4px; background: var(--success);
+            width: 0%; z-index: 1000; transition: width 0.2s;
+        }
+
+        .container {
+            max-width: 1280px; margin: 0 auto; padding: 20px;
+            display: grid; grid-template-columns: 260px 1fr; gap: 30px;
+        }
+
+        #sidebar {
+            position: sticky; top: 20px; height: fit-content;
+            background: var(--card-bg); border-radius: var(--radius-lg);
+            padding: 20px; box-shadow: var(--shadow);
+            border: 1px solid var(--border-light);
+        }
+        #sidebar ul { list-style: none; }
+        #sidebar li { margin-bottom: 8px; }
+        #sidebar a {
+            display: block; padding: 10px 12px; text-decoration: none;
+            color: var(--text-dark); border-radius: var(--radius-md);
+            font-weight: 500; transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+        #sidebar a:hover, #sidebar a.active {
+            background: var(--primary); color: var(--text-light);
+            border-color: var(--primary-dark);
+        }
+
+        main { display: flex; flex-direction: column; gap: 30px; }
+        header {
+            background: var(--card-bg); border-radius: var(--radius-lg);
+            padding: 30px; box-shadow: var(--shadow); border: 1px solid var(--border-light);
+            text-align: center; position: relative; overflow: hidden;
+        }
+        header h1 { font-size: 2.5rem; color: var(--primary-dark); margin-bottom: 8px; }
+        header p { color: #64748b; font-size: 1.1rem; }
+        .hero-img {
+            max-width: 100%; height: auto; border-radius: var(--radius-md);
+            margin-top: 20px; box-shadow: var(--shadow);
+        }
+
+        .card {
+            background: var(--card-bg); border-radius: var(--radius-lg);
+            padding: 25px; box-shadow: var(--shadow); border: 1px solid var(--border-light);
+            transition: transform 0.3s, box-shadow 0.3s; opacity: 0; transform: translateY(20px);
+        }
+        .card.visible { opacity: 1; transform: translateY(0); }
+        .card:hover { box-shadow: var(--shadow-hover); transform: translateY(-3px); }
+
+        .section-title { font-size: 1.5rem; margin-bottom: 15px; color: var(--primary-dark); border-bottom: 2px solid var(--border-light); padding-bottom: 8px; }
+        
+        .badge {
+            display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem;
+            font-weight: 700; text-transform: uppercase; margin-right: 8px; border: 1px solid;
+        }
+        .badge.info { background: #e0f2fe; color: #0284c7; border-color: #bae6fd; }
+        .badge.success { background: #dcfce7; color: #15803d; border-color: #bbf7d0; }
+        .badge.warning { background: #fef3c7; color: #b45309; border-color: #fde047; }
+        .badge.danger { background: #fee2e2; color: #b91c1c; border-color: #fca5a5; }
+
+        .tabs { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
+        .tab-btn {
+            padding: 8px 16px; border: 1px solid var(--border-light); background: #f8fafc;
+            border-radius: var(--radius-md); cursor: pointer; font-weight: 500; transition: 0.2s;
+            border: 1px solid transparent; color: var(--text-dark);
+        }
+        .tab-btn.active { background: var(--primary); color: var(--text-light); border-color: var(--primary-dark); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s; }
+
+        .code-block {
+            position: relative; background: var(--code-bg); border-radius: var(--radius-md);
+            padding: 20px; margin: 15px 0; overflow-x: auto;
+            border-left: 4px solid var(--primary); font-family: 'Fira Code', monospace;
+            color: #e2e8f0; line-height: 1.7;
+        }
+        .code-block .copy-btn {
+            position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2); color: #cbd5e1; padding: 5px 10px;
+            border-radius: 6px; cursor: pointer; font-size: 0.8rem; transition: 0.2s;
+        }
+        .code-block .copy-btn:hover { background: rgba(255,255,255,0.2); }
+        .sql-keyword { color: #c678dd; font-weight: 500; }
+        .sql-func { color: #61afef; }
+        .sql-string { color: #98c379; }
+        .sql-comment { color: #5c6370; font-style: italic; }
+        .sql-number { color: #d19a66; }
+
+        .info-box {
+            padding: 15px; border-radius: var(--radius-md); margin: 15px 0;
+            border-left: 4px solid; font-size: 0.95rem;
+        }
+        .info-box.success { background: #f0fdf4; border-color: var(--success); color: #166534; border: 1px solid #bbf7d0; color: #14532d; }
+        .info-box.warning { background: #fefce8; border-color: var(--warning); color: #713f12; border: 1px solid #fde047; }
+        .info-box.info { background: #eff6ff; border-color: var(--info); color: #1e3a8a; border: 1px solid #bfdbfe; }
+        
+        .info-box.dark { background: rgba(0,0,0,0.2); border: 1px solid #334155; color: #e2e8f0; }
+
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; background: #f8fafc; border-radius: var(--radius-md); overflow: hidden; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--border-light); }
+        th { background: var(--primary); color: white; font-weight: 600; }
+        tr:last-child td { border-bottom: none; }
+
+        .collapsible {
+            background: #f8fafc; border: 1px solid var(--border-light); border-radius: var(--radius-md);
+            margin-bottom: 10px; overflow: hidden;
+        }
+        .collapsible-header {
+            padding: 12px 15px; cursor: pointer; font-weight: 600; display: flex; justify-content: space-between; align-items: center;
+            transition: 0.2s; border: 1px solid transparent; color: var(--text-dark);
+        }
+        .collapsible-header:hover { background: #e2e8f0; }
+        .collapsible-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; padding: 0 15px; background: #f1f5f9; }
+        .collapsible.open .collapsible-content { max-height: 300px; padding: 15px; }
+
+        .simulator {
+            background: #0f172a; color: #e2e8f0; border-radius: var(--radius-lg);
+            padding: 20px; border: 1px solid #334155; font-family: 'Fira Code', monospace;
+        }
+        .sim-controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; }
+        .sim-btn {
+            background: var(--primary); color: white; border: none; padding: 8px 14px;
+            border-radius: 6px; cursor: pointer; font-family: 'Inter', sans-serif; font-weight: 500;
+            border: 1px solid var(--primary-dark); transition: 0.2s;
+        }
+        .sim-btn:hover { background: var(--info); border-color: var(--info); }
+        .sim-output {
+            background: #1e293b; border-radius: 8px; padding: 15px; min-height: 150px;
+            border: 1px dashed #475569; white-space: pre-wrap; font-size: 0.9rem;
+        }
+        .sim-cursor { display: inline-block; width: 8px; height: 15px; background: var(--success); animation: blink 1s infinite; vertical-align: middle; }
+
+        footer {
+            background: var(--card-bg); border-radius: var(--radius-lg); padding: 20px;
+            margin-top: 30px; text-align: center; border: 1px solid var(--border-light);
+            box-shadow: var(--shadow); color: #64748b;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+        @media (max-width: 900px) {
+            .container { grid-template-columns: 1fr; }
+            #sidebar { position: relative; top: 0; margin-bottom: 20px; }
+            .tabs { flex-direction: column; }
+        }
+        @media (max-width: 600px) {
+            header h1 { font-size: 1.8rem; }
+            .code-block { padding: 15px 10px; font-size: 0.85rem; }
+        }
+    </style>
+</head>
+<body>
+    <div id="progress-bar"></div>
+    <div class="container">
+        <nav id="sidebar">
+            <ul>
+                <li><a href="#intro">📖 Introdução</a></li>
+                <li><a href="#ddl">🏗️ DDL: Estruturas</a></li>
+                <li><a href="#dml">💾 DML: Manipulação</a></li>
+                <li><a href="#dql">🔍 DQL: Consultas</a></li>
+                <li><a href="#avancado">🚀 Aprofundamento</a></li>
+                <li><a href="#simulador">💻 Simulador</a></li>
+                <li><a href="#desafio">🎯 Desafio</a></li>
+                <li><a href="#resumo">📝 Resumo</a></li>
+            </ul>
+        </nav>
+
+        <main>
+            <header>
+                <h1>Fundamentos de SQL</h1>
+                <p>Do Zero à Consultas Relacionais: Criação, Manipulação e Visões</p>
+                <img src="https://image.pollinations.ai/prompt/Modern%20isometric%20illustration%20of%20a%20relational%20database%20with%20interconnected%20tables%2C%20SQL%20syntax%20floating%2C%20clean%20flat%20design%20purple%20and%20blue%20gradient%20tones%2C%20educational%20tech%20course%20high%20quality" alt="Ilustração de banco de dados relacional e SQL" class="hero-img">
+            </header>
+
+            <section id="intro" class="card">
+                <h2 class="section-title">Introdução</h2>
+                <span class="badge info">Básico</span> <span class="badge success">Prático</span>
+                <p style="margin-top: 10px;">O SQL (Structured Query Language) é a linguagem padrão para comunicação com bancos de dados relacionais. Nesta aula, exploraremos como estruturar bancos, criar entidades, relacionar dados e extrair informações de forma eficiente. Ao final, você dominará os comandos essenciais utilizados no mercado.</p>
+                <div class="info-box info">
+                    <strong>💡 Objetivo:</strong> Entender a sintaxe SQL, aplicar boas práticas de nomenclatura e executar consultas em ambientes reais (MySQL/PostgreSQL/SQLite).
+                </div>
+            </section>
+
+            <section id="ddl" class="card">
+                <h2 class="section-title">1. Estruturação de Dados (DDL)</h2>
+                <p>A linguagem de Definição de Dados (DDL) foca na criação e modificação da estrutura do banco. Os comandos mais utilizados são <code>CREATE DATABASE</code>, <code>CREATE TABLE</code> e definições de chaves.</p>
+                
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="tab-db">Base & Tabelas</button>
+                    <button class="tab-btn" data-tab="tab-rel">Relacionamentos</button>
+                </div>
+
+                <div id="tab-db" class="tab-content active">
+                    <div class="code-block">
+                        <button class="copy-btn">📋 Copiar</button>
+                        <code class="language-sql">-- Criação segura do banco de dados
+CREATE DATABASE IF NOT EXISTS `meu_banco`;
+USE `meu_banco`;
+
+-- Definição da entidade principal
+CREATE TABLE `Pessoa` (
+  `idpessoa` INT PRIMARY KEY,
+  `nome_pessoa` VARCHAR(255),
+  `cpf` CHAR(11),
+  `nascimento` DATE
+);</code>
+                    </div>
+                    <div class="info-box warning">
+                        <strong>⚠️ Atenção:</strong> Sempre utilize `USE nome_do_banco;` antes de executar comandos para garantir que você está operando no contexto correto e evitar alterações acidentais em outros bancos.
+                    </div>
+                </div>
+
+                <div id="tab-rel" class="tab-content">
+                    <div class="code-block">
+                        <button class="copy-btn">📋 Copiar</button>
+                        <code class="language-sql">CREATE TABLE `Endereco` (
+  `idendereco` INT PRIMARY KEY,
+  `idpessoa` INT,
+  `rua` VARCHAR(255),
+  `numero` INT,
+  FOREIGN KEY (`idpessoa`) REFERENCES `Pessoa`(`idpessoa`)
+);
+
+CREATE TABLE `Contatos` (
+  `idcontato` INT PRIMARY KEY,
+  `idpessoa` INT,
+  `celular` VARCHAR(20),
+  `email` VARCHAR(100),
+  FOREIGN KEY (`idpessoa`) REFERENCES `Pessoa`(`idpessoa`)
+);</code>
+                    </div>
+                    <p>As <code>FOREIGN KEY</code> garantem a integridade referencial. Elas vinculam registros da tabela filha a um registro válido na tabela pai.</p>
+                </div>
+            </section>
+
+            <section id="dml" class="card">
+                <h2 class="section-title">2. Inserção de Dados (DML)</h2>
+                <p>A Linguagem de Manipulação de Dados (DML) permite adicionar, atualizar ou remover registros. O comando <code>INSERT INTO</code> é fundamental para popular as tabelas.</p>
+                <div class="code-block">
+                    <button class="copy-btn">📋 Copiar</button>
+                    <code class="language-sql">-- Inserção múltipla em uma única execução
+INSERT INTO `Pessoa` (`idpessoa`, `nome_pessoa`, `cpf`, `nascimento`)
+VALUES 
+  (1, 'Ana Silva', '12345678901', '2000-01-01'),
+  (2, 'João Souza', '23456789012', '2001-02-02'),
+  (3, 'Maria Oliveira', '34567890123', '1998-05-15');</code>
+                </div>
+                <div class="collapsible">
+                    <div class="collapsible-header">💡 Dica de Performance <span>▼</span></div>
+                    <div class="collapsible-content">
+                        <p>Inserções em lote (múltiplas linhas em um único <code>INSERT</code>) são significativamente mais rápidas do que executar um <code>INSERT</code> por linha, pois reduzem a sobrecarga de comunicação com o servidor.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="dql" class="card">
+                <h2 class="section-title">3. Consultas e Relacionamentos (DQL)</h2>
+                <p>Para extrair dados, utilizamos <code>SELECT</code>. Combinado com <code>JOIN</code>, podemos cruzar informações de múltiplas tabelas.</p>
+                
+                <table>
+                    <thead>
+                        <tr><th>Cláusula</th><th>Função</th><th>Exemplo</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>SELECT</code></td><td>Define colunas</td><td><code>SELECT nome, email</code></td></tr>
+                        <tr><td><code>WHERE</code></td><td>Filtra registros</td><td><code>WHERE idade > 18</code></td></tr>
+                        <tr><td><code>JOIN</code></td><td>Une tabelas</td><td><code>FROM Pessoa JOIN Endereco...</code></td></tr>
+                        <tr><td><code>GROUP BY</code></td><td>Agrupa resultados</td><td><code>GROUP BY cidade</code></td></tr>
+                    </tbody>
+                </table>
+
+                <div class="code-block">
+                    <button class="copy-btn">📋 Copiar</button>
+                    <code class="language-sql">-- Consulta com JOIN e Agrupamento
+SELECT 
+  P.nome_pessoa, 
+  COUNT(C.idcontato) as total_contatos
+FROM Pessoa P
+LEFT JOIN Contatos C ON P.idpessoa = C.idpessoa
+GROUP BY P.idpessoa, P.nome_pessoa;</code>
+                </div>
+            </section>
+
+            <section id="avancado" class="card">
+                <h2 class="section-title">4. Visões e Alterações (Avançado)</h2>
+                <p><code>VIEW</code> armazena uma consulta como uma tabela virtual. <code>ALTER TABLE</code> modifica estruturas existentes.</p>
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="tab-view">Criando Views</button>
+                    <button class="tab-btn" data-tab="tab-alter">Alterando FK</button>
+                </div>
+                <div id="tab-view" class="tab-content active">
+                    <div class="code-block">
+                        <button class="copy-btn">📋 Copiar</button>
+                        <code class="language-sql">CREATE VIEW `Tele_lista_view` AS
+SELECT 
+  p.nome_pessoa, 
+  c.email, 
+  c.celular
+FROM Pessoa p
+JOIN Contatos c ON p.idpessoa = c.idpessoa;
+
+-- Consulta simplificada
+SELECT * FROM `Tele_lista_view`;</code>
+                    </div>
+                </div>
+                <div id="tab-alter" class="tab-content">
+                    <div class="code-block">
+                        <button class="copy-btn">📋 Copiar</button>
+                        <code class="language-sql">-- Remover índice antigo e adicionar novo
+ALTER TABLE `Contatos` DROP INDEX `idpessoa`, 
+ADD INDEX `idnovo` (`idendereco`) USING BTREE;
+
+-- Renomear coluna e tipo
+ALTER TABLE `Contatos` 
+CHANGE `idpess` `idendereco` INT;
+
+-- Atualizar registros
+UPDATE `Contatos` 
+SET `idendereco` = NULL WHERE `idcontato` = 5;</code>
+                    </div>
+                </div>
+            </section>
+
+            <section id="simulador" class="card">
+                <h2 class="section-title">💻 Simulador Interativo</h2>
+                <p>Experimente executar os comandos abaixo e veja o retorno simulado do banco de dados.</p>
+                <div class="simulator">
+                    <div class="sim-controls">
+                        <button class="sim-btn" onclick="runSim('create')">CREATE TABLE</button>
+                        <button class="sim-btn" onclick="runSim('insert')">INSERT INTO</button>
+                        <button class="sim-btn" onclick="runSim('select')">SELECT *</button>
+                        <button class="sim-btn" onclick="runSim('view')">CREATE VIEW</button>
+                        <button class="sim-btn" onclick="runSim('join')">JOIN QUERY</button>
+                        <button class="sim-btn" onclick="runSim('clear')">Limpar</button>
+                    </div>
+                    <div class="sim-output" id="simOutput">
+                        <span style="color: #64748b;">// Aguardando comando... Clique nos botões acima para simular a execução.</span>
+                    </div>
+                </div>
+            </section>
+
+            <section id="desafio" class="card">
+                <h2 class="section-title">🎯 Desafio Prático</h2>
+                <span class="badge danger">Avaliativo</span>
+                <p>Crie um script SQL completo que implemente o seguinte cenário:</p>
+                <ul style="margin: 15px 20px 0;">
+                    <li>Banco: `loja_online`</li>
+                    <li>Tabelas: `Clientes` (id, nome, email), `Pedidos` (id, id_cliente, valor, data)</li>
+                    <li>Insira 3 clientes e 5 pedidos.</li>
+                    <li>Crie uma <code>VIEW</code> chamada `Resumo_Pedidos` que mostre nome do cliente e valor total gasto.</li>
+                    <li>Execute um <code>SELECT</code> filtrando apenas pedidos acima de R$ 150,00.</li>
+                </ul>
+                <div class="info-box success dark">
+                    <strong>✅ Critérios:</strong> Relacionamentos corretos, uso de aliases, sintaxe limpa e comentários explicativos.
+                </div>
+            </section>
+
+            <section id="resumo" class="card">
+                <h2 class="section-title">📝 Resumo Final</h2>
+                <p>Parabéns por concluir a aula! Revisamos os pilares do SQL:</p>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
+                    <div style="padding: 15px; background: #f8fafc; border-radius: 8px; border-left: 4px solid var(--primary);">
+                        <strong>DDL</strong><br>Cria estrutura (CREATE, ALTER, DROP)
+                    </div>
+                    <div style="padding: 15px; background: #f8fafc; border-radius: 8px; border-left: 4px solid var(--info);">
+                        <strong>DML</strong><br>Manipula dados (INSERT, UPDATE, DELETE)
+                    </div>
+                    <div style="padding: 15px; background: #f8fafc; border-radius: 8px; border-left: 4px solid var(--success);">
+                        <strong>DQL</strong><br>Consulta dados (SELECT, WHERE, JOIN)
+                    </div>
+                    <div style="padding: 15px; background: #f8fafc; border-radius: 8px; border-left: 4px solid var(--warning);">
+                        <strong>Views</strong><br>Simplifica consultas complexas
+                    </div>
+                </div>
+                <div class="info-box info" style="margin-top: 15px;">
+                    <strong>🚀 Próximos Passos:</strong> Explore índices (INDEX), transações (COMMIT/ROLLBACK) e funções de agregação avançadas (HAVING, WINDOW FUNCTIONS).
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <footer>
+        <p>© 2024 Curso Interativo SQL. Desenvolvido para fins educacionais. | Baseado em padrões ANSI SQL.</p>
+    </footer>
+
+    <script>
+        // Progress Bar & Scroll Spy
+        const progressBar = document.getElementById('progress-bar');
+        const sections = document.querySelectorAll('section');
+        const navLinks = document.querySelectorAll('#sidebar a');
+
+        window.addEventListener('scroll', () => {
+            const scrollTop = document.documentElement.scrollTop;
+            const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const progress = (scrollTop / scrollHeight) * 100;
+            progressBar.style.width = progress + '%';
+
+            // Active link
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop - 100;
+                if (scrollTop >= sectionTop) current = '#' + section.getAttribute('id');
+            });
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === current) link.classList.add('active');
+            });
+        });
+
+        // Intersection Observer for Animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.card').forEach(card => observer.observe(card));
+
+        // Tabs Logic
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const parent = btn.closest('.tabs');
+                const tabId = btn.dataset.tab;
+                const container = parent.parentElement;
+
+                parent.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                container.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+
+        // Collapsible Logic
+        document.querySelectorAll('.collapsible-header').forEach(header => {
+            header.addEventListener('click', () => {
+                const parent = header.parentElement;
+                parent.classList.toggle('open');
+                header.querySelector('span').textContent = parent.classList.contains('open') ? '▲' : '▼';
+            });
+        });
+
+        // Copy Code Logic
+        document.querySelectorAll('.copy-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const code = btn.parentElement.querySelector('code').innerText;
+                navigator.clipboard.writeText(code).then(() => {
+                    const original = btn.textContent;
+                    btn.textContent = '✅ Copiado!';
+                    setTimeout(() => btn.textContent = original, 2000);
+                });
+            });
+        });
+
+        // SQL Syntax Highlighter (Basic)
+        function highlightSQL(sql) {
+            const keywords = /\b(CREATE|DATABASE|IF|NOT|EXISTS|USE|TABLE|PRIMARY|KEY|INT|VARCHAR|CHAR|DATE|FOREIGN|REFERENCES|INSERT|INTO|VALUES|SELECT|FROM|WHERE|JOIN|LEFT|RIGHT|ON|GROUP|BY|COUNT|AS|ALTER|DROP|INDEX|CHANGE|SET|UPDATE|VIEW|AND|OR|NULL|USING|BTREE)\b/gi;
+            const funcs = /\b(COUNT|MAX|MIN|AVG|SUM)\b/gi;
+            
+            let highlighted = sql
+                .replace(/--.*$/gm, '<span class="sql-comment">$&</span>')
+                .replace(/'[^']*'/g, '<span class="sql-string">$&</span>')
+                .replace(/`[^`]*`/g, '<span class="sql-string">$&</span>')
+                .replace(/\b(\d+)\b/g, '<span class="sql-number">$1</span>');
+                
+            highlighted = highlighted.replace(keywords, '<span class="sql-keyword">$1</span>');
+            highlighted = highlighted.replace(funcs, '<span class="sql-func">$1</span>');
+            return highlighted;
+        }
+
+        document.querySelectorAll('.language-sql').forEach(el => {
+            el.innerHTML = highlightSQL(el.innerText);
+        });
+
+        // Simulator Logic
+        function runSim(type) {
+            const output = document.getElementById('simOutput');
+            let result = '';
+            const cursor = '<span class="sim-cursor"></span>';
+            
+            const responses = {
+                create: `> EXECUTANDO: CREATE TABLE...
+✅ Tabela 'Pessoa' criada com sucesso.
+   Colunas: idpessoa (PK), nome_pessoa, cpf, nascimento
+   Status: OK (0.045 sec) ${cursor}`,
+                insert: `> EXECUTANDO: INSERT INTO...
+✅ Registros inseridos.
+   3 linha(s) afetada(s).
+   ID Gerado: 1, 2, 3
+   Status: OK (0.012 sec) ${cursor}`,
+                select: `> EXECUTANDO: SELECT * FROM Pessoa...
++----+--------------+-------------+------------+
+| id | nome_pessoa  | cpf         | nascimento |
++----+--------------+-------------+------------+
+|  1 | Ana Silva    | 12345678901 | 2000-01-01 |
+|  2 | João Souza   | 23456789012 | 2001-02-02 |
+|  3 | Maria Oliv.  | 34567890123 | 1998-05-15 |
++----+--------------+-------------+------------+
+3 rows in set (0.002 sec) ${cursor}`,
+                view: `> EXECUTANDO: CREATE VIEW Tele_lista_view...
+✅ Visão criada.
+   SELECT * FROM Tele_lista_view
+   Retorna: Nome, Email, Celular
+   Status: OK (0.008 sec) ${cursor}`,
+                join: `> EXECUTANDO: SELECT P.nome, COUNT(C.id)...
++--------------+----------------+
+| nome_pessoa  | total_contatos |
++--------------+----------------+
+| Ana Silva    |              1 |
+| João Souza   |              2 |
+| Maria Oliv.  |              0 |
++--------------+----------------+
+3 rows in set (0.004 sec) ${cursor}`,
+                clear: ``
+            };
+
+            if (type === 'clear') {
+                output.innerHTML = `<span style="color: #64748b;">// Aguardando comando... Clique nos botões acima para simular a execução.</span>`;
+                return;
+            }
+            
+            output.innerHTML = responses[type];
+        }
+    </script>
+</body>
+</html>
+

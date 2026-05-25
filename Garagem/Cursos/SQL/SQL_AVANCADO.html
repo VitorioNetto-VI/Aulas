@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL Avançado: Automatização e Otimização</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.19/400.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.19/600.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.19/700.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/fira-code@5.0.19/400.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/fira-code@5.0.19/500.css">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --info: #0ea5e9;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg-gradient-start: #0f172a;
+            --bg-gradient-end: #1e1b4b;
+            --card-bg: #ffffff;
+            --text-dark: #1e293b;
+            --text-light: #f8fafc;
+            --border-light: #e2e8f0;
+            --code-bg: #1e1e2e;
+            --radius-lg: 16px;
+            --radius-md: 8px;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-hover: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+            color: var(--text-dark);
+            min-height: 100vh;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        #progress-bar {
+            position: fixed; top: 0; left: 0; height: 4px; background: var(--success);
+            width: 0%; z-index: 1000; transition: width 0.2s;
+        }
+
+        .container {
+            max-width: 1280px; margin: 0 auto; padding: 20px;
+            display: grid; grid-template-columns: 260px 1fr; gap: 30px;
+        }
+
+        #sidebar {
+            position: sticky; top: 20px; height: fit-content;
+            background: var(--card-bg); border-radius: var(--radius-lg);
+            padding: 20px; box-shadow: var(--shadow);
+            border: 1px solid var(--border-light);
+        }
+        #sidebar ul { list-style: none; }
+        #sidebar li { margin-bottom: 8px; }
+        #sidebar a {
+            display: block; padding: 10px 12px; text-decoration: none;
+            color: var(--text-dark); border-radius: var(--radius-md);
+            font-weight: 500; transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+        #sidebar a:hover, #sidebar a.active {
+            background: var(--primary); color: var(--text-light);
+            border-color: var(--primary-dark);
+        }
+
+        main { display: flex; flex-direction: column; gap: 30px; }
+        header {
+            background: var(--card-bg); border-radius: var(--radius-lg);
+            padding: 30px; box-shadow: var(--shadow); border: 1px solid var(--border-light);
+            text-align: center; position: relative; overflow: hidden;
+        }
+        header h1 { font-size: 2.5rem; color: var(--primary-dark); margin-bottom: 8px; }
+        header p { color: #64748b; font-size: 1.1rem; }
+        .hero-img {
+            max-width: 100%; height: auto; border-radius: var(--radius-md);
+            margin-top: 20px; box-shadow: var(--shadow);
+        }
+
+        .card {
+            background: var(--card-bg); border-radius: var(--radius-lg);
+            padding: 25px; box-shadow: var(--shadow); border: 1px solid var(--border-light);
+            transition: transform 0.3s, box-shadow 0.3s; opacity: 0; transform: translateY(20px);
+        }
+        .card.visible { opacity: 1; transform: translateY(0); }
+        .card:hover { box-shadow: var(--shadow-hover); transform: translateY(-3px); }
+
+        .section-title { font-size: 1.5rem; margin-bottom: 15px; color: var(--primary-dark); border-bottom: 2px solid var(--border-light); padding-bottom: 8px; }
+        
+        .badge {
+            display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem;
+            font-weight: 700; text-transform: uppercase; margin-right: 8px; border: 1px solid;
+        }
+        .badge.info { background: #e0f2fe; color: #0284c7; border-color: #bae6fd; }
+        .badge.success { background: #dcfce7; color: #15803d; border-color: #bbf7d0; }
+        .badge.warning { background: #fef3c7; color: #b45309; border-color: #fde047; }
+        .badge.danger { background: #fee2e2; color: #b91c1c; border-color: #fca5a5; }
+
+        .tabs { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
+        .tab-btn {
+            padding: 8px 16px; border: 1px solid var(--border-light); background: #f8fafc;
+            border-radius: var(--radius-md); cursor: pointer; font-weight: 500; transition: 0.2s;
+            border: 1px solid transparent; color: var(--text-dark);
+        }
+        .tab-btn.active { background: var(--primary); color: var(--text-light); border-color: var(--primary-dark); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s; }
+
+        .code-block {
+            position: relative; background: var(--code-bg); border-radius: var(--radius-md);
+            padding: 20px; margin: 15px 0; overflow-x: auto;
+            border-left: 4px solid var(--primary); font-family: 'Fira Code', monospace;
+            color: #e2e8f0; line-height: 1.7;
+        }
+        .code-block .copy-btn {
+            position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2); color: #cbd5e1; padding: 5px 10px;
+            border-radius: 6px; cursor: pointer; font-size: 0.8rem; transition: 0.2s;
+        }
+        .code-block .copy-btn:hover { background: rgba(255,255,255,0.2); }
+        .sql-keyword { color: #c678dd; font-weight: 500; }
+        .sql-func { color: #61afef; }
+        .sql-string { color: #98c379; }
+        .sql-comment { color: #5c6370; font-style: italic; }
+        .sql-number { color: #d19a66; }
+
+        .info-box {
+            padding: 15px; border-radius: var(--radius-md); margin: 15px 0;
+            border-left: 4px solid; font-size: 0.95rem;
+        }
+        .info-box.success { background: #f0fdf4; border-color: var(--success); color: #14532d; border: 1px solid #bbf7d0; }
+        .info-box.warning { background: #fefce8; border-color: var(--warning); color: #713f12; border: 1px solid #fde047; }
+        .info-box.info { background: #eff6ff; border-color: var(--info); color: #1e3a8a; border: 1px solid #bfdbfe; }
+        
+        .info-box.dark { background: rgba(0,0,0,0.2); border: 1px solid #334155; color: #e2e8f0; }
+
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; background: #f8fafc; border-radius: var(--radius-md); overflow: hidden; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--border-light); }
+        th { background: var(--primary); color: white; font-weight: 600; }
+        tr:last-child td { border-bottom: none; }
+
+        .collapsible {
+            background: #f8fafc; border: 1px solid var(--border-light); border-radius: var(--radius-md);
+            margin-bottom: 10px; overflow: hidden;
+        }
+        .collapsible-header {
+            padding: 12px 15px; cursor: pointer; font-weight: 600; display: flex; justify-content: space-between; align-items: center;
+            transition: 0.2s; border: 1px solid transparent; color: var(--text-dark);
+        }
+        .collapsible-header:hover { background: #e2e8f0; }
+        .collapsible-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; padding: 0 15px; background: #f1f5f9; }
+        .collapsible.open .collapsible-content { max-height: 300px; padding: 15px; }
+
+        .simulator {
+            background: #0f172a; color: #e2e8f0; border-radius: var(--radius-lg);
+            padding: 20px; border: 1px solid #334155; font-family: 'Fira Code', monospace;
+        }
+        .sim-controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; }
+        .sim-btn {
+            background: var(--primary); color: white; border: none; padding: 8px 14px;
+            border-radius: 6px; cursor: pointer; font-family: 'Inter', sans-serif; font-weight: 500;
+            border: 1px solid var(--primary-dark); transition: 0.2s;
+        }
+        .sim-btn:hover { background: var(--info); border-color: var(--info); }
+        .sim-output {
+            background: #1e293b; border-radius: 8px; padding: 15px; min-height: 180px;
+            border: 1px dashed #475569; white-space: pre-wrap; font-size: 0.9rem;
+        }
+        .sim-cursor { display: inline-block; width: 8px; height: 15px; background: var(--success); animation: blink 1s infinite; vertical-align: middle; }
+
+        footer {
+            background: var(--card-bg); border-radius: var(--radius-lg); padding: 20px;
+            margin-top: 30px; text-align: center; border: 1px solid var(--border-light);
+            box-shadow: var(--shadow); color: #64748b;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+        @media (max-width: 900px) {
+            .container { grid-template-columns: 1fr; }
+            #sidebar { position: relative; top: 0; margin-bottom: 20px; }
+            .tabs { flex-direction: column; }
+        }
+        @media (max-width: 600px) {
+            header h1 { font-size: 1.8rem; }
+            .code-block { padding: 15px 10px; font-size: 0.85rem; }
+        }
+    </style>
+</head>
+<body>
+    <div id="progress-bar"></div>
+    <div class="container">
+        <nav id="sidebar">
+            <ul>
+                <li><a href="#intro">📖 Introdução</a></li>
+                <li><a href="#subqueries">🔍 Subconsultas & Máscaras</a></li>
+                <li><a href="#triggers">⚡ Triggers Avançados</a></li>
+                <li><a href="#procedures">📦 Stored Procedures</a></li>
+                <li><a href="#functions">🧮 Funções (UDFs)</a></li>
+                <li><a href="#explain">🚀 Otimização (EXPLAIN)</a></li>
+                <li><a href="#simulador">💻 Simulador</a></li>
+                <li><a href="#desafio">🎯 Desafio</a></li>
+                <li><a href="#resumo">📝 Resumo</a></li>
+            </ul>
+        </nav>
+
+        <main>
+            <header>
+                <h1>SQL Avançado</h1>
+                <p>Stored Procedures, Funções, Triggers e Otimização de Queries</p>
+                <img src="https://image.pollinations.ai/prompt/Advanced%20SQL%20database%20architecture%20with%20stored%20procedures%2C%20query%20optimization%20charts%2C%20and%20automation%20triggers%20isometric%203D%20illustration%20modern%20tech%20style%20purple%20and%20blue%20gradient%20clean%20background%20high%20quality" alt="Arquitetura de Banco de Dados Avançado" class="hero-img">
+            </header>
+
+            <section id="intro" class="card">
+                <h2 class="section-title">Introdução</h2>
+                <span class="badge info">Avançado</span> <span class="badge success">Prático</span>
+                <p style="margin-top: 10px;">Nesta etapa, transcendemos as consultas básicas e manipulamos a lógica do banco de dados diretamente. Aprenderemos a encapsular regras de negócio em Stored Procedures e Funções, automatizar ações com Triggers transacionais, e utilizar ferramentas de análise de performance como <code>EXPLAIN</code> para transformar queries lentas em execuções otimizadas.</p>
+                <div class="info-box info">
+                    <strong>💡 Objetivo:</strong> Escrever SQL modular, seguro e performático, aplicando padrões de engenharia de dados em ambientes MySQL/PostgreSQL.
+                </div>
+            </section>
+
+            <section id="subqueries" class="card">
+                <h2 class="section-title">1. Subconsultas Correlacionadas & Máscaras</h2>
+                <p>Subconsultas correlacionadas são executadas linha a linha pela consulta externa, permitindo filtragem dinâmica. Combinadas com funções de string, garantem conformidade com a LGPD.</p>
+                
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="tab-sub">Subconsulta Complexa</button>
+                    <button class="tab-btn" data-tab="tab-mask">Proteção de Dados</button>
+                </div>
+
+                <div id="tab-sub" class="tab-content active">
+                    <div class="code-block">
+                        <button class="copy-btn">📋 Copiar</button>
+                        <code class="language-sql">-- Retorna nomes de pessoas que moram em bairros específicos
+-- A subconsulta é executada primeiro e os IDs são passados para o WHERE IN
+SELECT nome_pessoa
+FROM Pessoa
+WHERE idpessoa IN (
+  SELECT idpessoa 
+  FROM Endereco 
+  WHERE LOWER(bairro) = 'tropical ville'
+);</code>
+                    </div>
+                    <div class="info-box warning">
+                        <strong>⚠️ Performance:</strong> <code>IN</code> com subconsultas grandes pode ser lento. Considere usar <code>JOIN</code> ou <code>EXISTS</code> para otimização em datasets massivos.
+                    </div>
+                </div>
+
+                <div id="tab-mask" class="tab-content">
+                    <div class="code-block">
+                        <button class="copy-btn">📋 Copiar</button>
+                        <code class="language-sql">-- Máscara de CPF para conformidade com LGPD
+-- CONCAT une strings, SUBSTRING extrai partes específicas
+SELECT 
+  idpessoa,
+  nome_pessoa,
+  CONCAT(SUBSTRING(cpf, 1, 3), '****', SUBSTRING(cpf, 8, 11)) AS cpf_mascarado
+FROM Pessoa;</code>
+                    </div>
+                    <p>Essa técnica permite exportar relatórios sem expor dados sensíveis em texto plano.</p>
+                </div>
+            </section>
+
+            <section id="triggers" class="card">
+                <h2 class="section-title">2. Triggers Transacionais & Auditoria</h2>
+                <p>Triggers garantem consistência automática. Em nível avançado, usamos <code>OLD.</code> e <code>NEW.</code> para acessar estados antes/depois da modificação, e blocos <code>BEGIN...END</code> para transações atômicas.</p>
+                <div class="code-block">
+                    <button class="copy-btn">📋 Copiar</button>
+                    <code class="language-sql">-- TRIGGER DE BACKUP: Salva registro antes da exclusão
+DELIMITER //
+CREATE TRIGGER backup_pessoa BEFORE DELETE ON Pessoa
+FOR EACH ROW
+BEGIN
+  INSERT INTO Pessoa_backup (idpessoa, nome_pessoa, cpf, nascimento)
+  VALUES (OLD.idpessoa, OLD.nome_pessoa, OLD.cpf, OLD.nascimento);
+END;
+//
+DELIMITER ;</code>
+                </div>
+                <div class="collapsible">
+                    <div class="collapsible-header">🔍 Por que usar DELIMITER? <span>▼</span></div>
+                    <div class="collapsible-content">
+                        <p>Em stored procedures e triggers, usamos <code>;</code> internamente. O <code>DELIMITER //</code> instrui o cliente SQL a tratar <code>//</code> como fim do comando, evitando execução prematura do bloco.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="procedures" class="card">
+                <h2 class="section-title">3. Stored Procedures (Procedimentos Armazenados)</h2>
+                <p>Stored Procedures encapsulam lógica de negócio no servidor. Aceitam parâmetros <code>IN</code>, <code>OUT</code> e <code>INOUT</code>, reduzem tráfego de rede e centralizam regras de validação.</p>
+                <div class="code-block">
+                    <button class="copy-btn">📋 Copiar</button>
+                    <code class="language-sql">-- Procedimento para cadastro seguro com validação
+DELIMITER $$
+CREATE PROCEDURE sp_cadastrar_pessoa(
+  IN p_nome VARCHAR(255),
+  IN p_cpf CHAR(11),
+  IN p_nasc DATE,
+  OUT p_status VARCHAR(50)
+)
+BEGIN
+  -- Declaração de variável local
+  DECLARE v_existe INT;
+
+  -- Verifica se CPF já existe
+  SELECT COUNT(*) INTO v_existe FROM Pessoa WHERE cpf = p_cpf;
+
+  IF v_existe > 0 THEN
+    SET p_status = 'ERRO: CPF já cadastrado';
+  ELSE
+    START TRANSACTION;
+    INSERT INTO Pessoa (nome_pessoa, cpf, nascimento) 
+    VALUES (p_nome, p_cpf, p_nasc);
+    COMMIT;
+    SET p_status = 'SUCESSO: Pessoa cadastrada';
+  END IF;
+END$$
+DELIMITER ;
+
+-- Execução
+SET @retorno = '';
+CALL sp_cadastrar_pessoa('Maria Silva', '11122233344', '1990-05-10', @retorno);
+SELECT @retorno;</code>
+                </div>
+                <div class="info-box success">
+                    <strong>✅ Vantagem:</strong> O <code>START TRANSACTION</code> garante que a inserção só ocorre se a conexão estiver estável, evitando dados órfãos em caso de falha parcial.
+                </div>
+            </section>
+
+            <section id="functions" class="card">
+                <h2 class="section-title">4. Funções Definidas pelo Usuário (UDFs)</h2>
+                <p>Diferente das Procedures, funções <code>RETURNS</code> um valor único e podem ser usadas diretamente em consultas <code>SELECT</code>, <code>WHERE</code> ou <code>UPDATE</code>.</p>
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="tab-age">Cálculo de Idade</button>
+                    <button class="tab-btn" data-tab="tab-format">Formatador de Dados</button>
+                </div>
+
+                <div id="tab-age" class="tab-content active">
+                    <div class="code-block">
+                        <button class="copy-btn">📋 Copiar</button>
+                        <code class="language-sql">-- Função que retorna idade completa baseada na data de nascimento
+DELIMITER $$
+CREATE FUNCTION fn_idade_completa(p_nascimento DATE)
+RETURNS INT
+DETERMINISTIC
+BEGIN
+  DECLARE v_idade INT;
+  SET v_idade = TIMESTAMPDIFF(YEAR, p_nascimento, CURDATE());
+  RETURN v_idade;
+END$$
+DELIMITER ;
+
+-- Uso direto em SELECT
+SELECT nome_pessoa, fn_idade_completa(nascimento) AS idade 
+FROM Pessoa;</code>
+                    </div>
+                </div>
+
+                <div id="tab-format" class="tab-content">
+                    <div class="code-block">
+                        <button class="copy-btn">📋 Copiar</button>
+                        <code class="language-sql">-- Função para formatar nome com iniciais maiúsculas
+DELIMITER $$
+CREATE FUNCTION fn_formatar_nome(p_nome VARCHAR(255))
+RETURNS VARCHAR(255)
+DETERMINISTIC
+BEGIN
+  RETURN CONCAT(UCASE(LEFT(p_nome, 1)), LCASE(SUBSTRING(p_nome, 2)));
+END$$
+DELIMITER ;
+
+UPDATE Pessoa SET nome_pessoa = fn_formatar_nome(nome_pessoa) 
+WHERE idpessoa = 1;</code>
+                    </div>
+                </div>
+            </section>
+
+            <section id="explain" class="card">
+                <h2 class="section-title">5. Otimização de Queries com EXPLAIN</h2>
+                <p>O comando <code>EXPLAIN</code> mostra o plano de execução do MySQL. Entender as colunas <code>type</code>, <code>rows</code> e <code>key</code> é essencial para transformar scans lentos em buscas indexadas.</p>
+                
+                <table>
+                    <thead>
+                        <tr><th>Coluna EXPLAIN</th><th>O que Indica</th><th>Ideal</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>type</code></td><td>Tipo de junção/busca</td><td><code>ref</code>, <code>eq_ref</code>, <code>const</code></td></tr>
+                        <tr><td><code>key</code></td><td>Índice utilizado</td><td>Nome do índice criado (não NULL)</td></tr>
+                        <tr><td><code>rows</code></td><td>Linhas examinadas</td><td>Quanto menor, melhor (próximo de 1)</td></tr>
+                        <tr><td><code>Extra</code></td><td>Detalhes adicionais</td><td>Evitar <code>Using filesort</code> ou <code>Using temporary</code></td></tr>
+                    </tbody>
+                </table>
+
+                <div class="code-block">
+                    <button class="copy-btn">📋 Copiar</button>
+                    <code class="language-sql">-- Analisando plano de execução
+EXPLAIN SELECT nome_pessoa, email 
+FROM Pessoa P
+JOIN Contatos C ON P.idpessoa = C.idpessoa
+WHERE P.bairro = 'Tropical ville';
+
+-- CRIANDO ÍNDICE PARA OTIMIZAR (Evita Full Table Scan)
+CREATE INDEX idx_bairro_pessoa ON Pessoa(bairro);
+CREATE INDEX idx_email_contato ON Contatos(email);
+
+-- Re-executando EXPLAIN após criar índices
+-- O type mudará de ALL para REF e rows cairá drasticamente
+EXPLAIN SELECT nome_pessoa, email 
+FROM Pessoa P
+JOIN Contatos C ON P.idpessoa = C.idpessoa
+WHERE P.bairro = 'Tropical ville';</code>
+                </div>
+                <div class="info-box warning">
+                    <strong>⚠️ Cuidado com Índices:</strong> Índices aceleram <code>SELECT</code> mas desaceleram <code>INSERT/UPDATE/DELETE</code>. Crie apenas nas colunas frequentemente usadas em <code>WHERE</code>, <code>JOIN</code> e <code>ORDER BY</code>.
+                </div>
+            </section>
+
+            <section id="simulador" class="card">
+                <h2 class="section-title">💻 Simulador Interativo Avançado</h2>
+                <p>Simule a execução de comandos complexos e veja o retorno do analisador do SGBD.</p>
+                <div class="simulator">
+                    <div class="sim-controls">
+                        <button class="sim-btn" onclick="runSim('explain')">EXPLAIN QUERY</button>
+                        <button class="sim-btn" onclick="runSim('procedure')">CALL PROCEDURE</button>
+                        <button class="sim-btn" onclick="runSim('function')">SELECT FUNCTION</button>
+                        <button class="sim-btn" onclick="runSim('trigger')">DROP TRIGGER</button>
+                        <button class="sim-btn" onclick="runSim('index')">CREATE INDEX</button>
+                        <button class="sim-btn" onclick="runSim('clear')">Limpar</button>
+                    </div>
+                    <div class="sim-output" id="simOutput">
+                        <span style="color: #64748b;">// Aguardando comando avançado... Clique nos botões para simular execução e análise.</span>
+                    </div>
+                </div>
+            </section>
+
+            <section id="desafio" class="card">
+                <h2 class="section-title">🎯 Desafio Prático Avançado</h2>
+                <span class="badge danger">Avaliativo</span>
+                <p>Desenvolva um script SQL completo para um módulo de `RH_Empresa` que inclua:</p>
+                <ul style="margin: 15px 20px 0;">
+                    <li>Crie uma Stored Procedure `sp_aumentar_salario(id_funcionario, percentual)` que atualize o salário, valide se o aumento é maior que 50%, e retorne status via parâmetro <code>OUT</code>.</li>
+                    <li>Crie uma Função `fn_nome_completo(nome, sobrenome)` que retorne a string formatada.</li>
+                    <li>Crie um Trigger `tr_log_alteracao` que registre na tabela `Audit_Salarios` o ID, valor antigo e novo sempre que um `UPDATE` ocorrer na tabela de salários.</li>
+                    <li>Execute <code>EXPLAIN</code> em uma query que busca funcionários por departamento e sugira um índice para otimizá-la.</li>
+                </ul>
+                <div class="info-box success dark">
+                    <strong>✅ Critérios:</strong> Uso correto de <code>DELIMITER</code>, <code>OLD/NEW</code>, transações, parâmetros de saída e análise de performance.
+                </div>
+            </section>
+
+            <section id="resumo" class="card">
+                <h2 class="section-title">📝 Resumo Final</h2>
+                <p>Você dominou os pilares do SQL Avançado. Revisamos:</p>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
+                    <div style="padding: 15px; background: #f8fafc; border-radius: 8px; border-left: 4px solid var(--primary);">
+                        <strong>Stored Procedures</strong><br>Lógica encapsulada, parâmetros IN/OUT, transações
+                    </div>
+                    <div style="padding: 15px; background: #f8fafc; border-radius: 8px; border-left: 4px solid var(--info);">
+                        <strong>UDFs</strong><br>Funções reutilizáveis em SELECT, DETERMINISTIC
+                    </div>
+                    <div style="padding: 15px; background: #f8fafc; border-radius: 8px; border-left: 4px solid var(--success);">
+                        <strong>EXPLAIN & Índices</strong><br>Otimização de planos de execução, type, rows, key
+                    </div>
+                    <div style="padding: 15px; background: #f8fafc; border-radius: 8px; border-left: 4px solid var(--warning);">
+                        <strong>Triggers</strong><br>Automação com OLD/NEW, auditoria, DELIMITER
+                    </div>
+                </div>
+                <div class="info-box info" style="margin-top: 15px;">
+                    <strong>🚀 Próximos Passos:</strong> Explore Window Functions (<code>ROW_NUMBER, RANK, LAG</code>), Common Table Expressions (CTEs com <code>WITH</code>), e Particionamento de Tabelas para Big Data.
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <footer>
+        <p>© 2024 Curso Interativo SQL Avançado. Desenvolvido com base em padrões ANSI e boas práticas de otimização.</p>
+    </footer>
+
+    <script>
+        // Progress Bar & Scroll Spy
+        const progressBar = document.getElementById('progress-bar');
+        const sections = document.querySelectorAll('section');
+        const navLinks = document.querySelectorAll('#sidebar a');
+
+        window.addEventListener('scroll', () => {
+            const scrollTop = document.documentElement.scrollTop;
+            const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const progress = (scrollTop / scrollHeight) * 100;
+            progressBar.style.width = progress + '%';
+
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop - 100;
+                if (scrollTop >= sectionTop) current = '#' + section.getAttribute('id');
+            });
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === current) link.classList.add('active');
+            });
+        });
+
+        // Intersection Observer for Animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) entry.target.classList.add('visible');
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.card').forEach(card => observer.observe(card));
+
+        // Tabs Logic
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const parent = btn.closest('.tabs');
+                const tabId = btn.dataset.tab;
+                const container = parent.parentElement;
+                parent.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                container.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+
+        // Collapsible Logic
+        document.querySelectorAll('.collapsible-header').forEach(header => {
+            header.addEventListener('click', () => {
+                const parent = header.parentElement;
+                parent.classList.toggle('open');
+                header.querySelector('span').textContent = parent.classList.contains('open') ? '▲' : '▼';
+            });
+        });
+
+        // Copy Code Logic
+        document.querySelectorAll('.copy-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const code = btn.parentElement.querySelector('code').innerText;
+                navigator.clipboard.writeText(code).then(() => {
+                    const original = btn.textContent;
+                    btn.textContent = '✅ Copiado!';
+                    setTimeout(() => btn.textContent = original, 2000);
+                });
+            });
+        });
+
+        // SQL Syntax Highlighter
+        function highlightSQL(sql) {
+            const keywords = /\b(CREATE|DATABASE|IF|NOT|EXISTS|USE|TABLE|PRIMARY|KEY|INT|VARCHAR|CHAR|DATE|FOREIGN|REFERENCES|INSERT|INTO|VALUES|SELECT|FROM|WHERE|JOIN|LEFT|RIGHT|INNER|ON|GROUP|BY|COUNT|AS|ALTER|DROP|INDEX|CHANGE|SET|UPDATE|VIEW|AND|OR|NULL|USING|BTREE|HAVING|LIKE|TRIGGER|BEFORE|DELETE|BEGIN|END|SIGNAL|SQLSTATE|FOR|EACH|ROW|OLD|NEW|ADD|COLUMN|CALL|PROCEDURE|FUNCTION|DETERMINISTIC|RETURNS|DECLARE|DELIMITER|START|TRANSACTION|COMMIT|ROLLBACK|IN|OUT|INOUT|IF|THEN|ELSE|END|IF|CURDATE|TIMESTAMPDIFF|CONCAT|SUBSTRING|UCASE|LCASE|LEFT|EXPLAIN|TYPE|KEY|ROWS|EXTRA)\b/gi;
+            const funcs = /\b(COUNT|MAX|MIN|AVG|SUM|LOWER|CURDATE|TIMESTAMPDIFF|CONCAT|SUBSTRING|UCASE|LCASE)\b/gi;
+            
+            let highlighted = sql
+                .replace(/--.*$/gm, '<span class="sql-comment">$&</span>')
+                .replace(/'[^']*'/g, '<span class="sql-string">$&</span>')
+                .replace(/`[^`]*`/g, '<span class="sql-string">$&</span>')
+                .replace(/\b(\d+)\b/g, '<span class="sql-number">$1</span>');
+                
+            highlighted = highlighted.replace(keywords, '<span class="sql-keyword">$1</span>');
+            highlighted = highlighted.replace(funcs, '<span class="sql-func">$1</span>');
+            return highlighted;
+        }
+
+        document.querySelectorAll('.language-sql').forEach(el => {
+            el.innerHTML = highlightSQL(el.innerText);
+        });
+
+        // Simulator Logic
+        function runSim(type) {
+            const output = document.getElementById('simOutput');
+            const cursor = '<span class="sim-cursor"></span>';
+            
+            const responses = {
+                explain: `> EXECUTANDO: EXPLAIN SELECT P.nome, C.email FROM Pessoa P JOIN Contatos C ON P.idpessoa = C.idpessoa WHERE P.bairro = 'Tropical ville';
+
++----+-------------+-------+------------+-------+----------------+---------+---------+------+--------+----------+-------------+
+| id | select_type | table | partitions | type  | possible_keys  | key     | key_len | ref  | rows   | filtered | Extra       |
++----+-------------+-------+------------+-------+----------------+---------+---------+------+--------+----------+-------------+
+|  1 | SIMPLE      | P     | NULL       | ref   | idx_bairro     | idx_bairro | 1022 | const  |      5 |   100.00 | Using where |
+|  1 | SIMPLE      | C     | NULL       | eq_ref| PRIMARY        | PRIMARY | 4     | lista.P.idpessoa |  1 |   100.00 | NULL        |
++----+-------------+-------+------------+-------+----------------+---------+---------+------+--------+----------+-------------+
+2 rows in set (0.001 sec)
+✅ Análise: type 'ref' e 'eq_ref' indicam uso eficiente de índices. Sem Full Table Scan. ${cursor}`,
+                procedure: `> EXECUTANDO: CALL sp_cadastrar_pessoa('Carlos Lima', '99988877766', '1985-03-15', @status);
+✅ Transação Iniciada (START TRANSACTION)
+✅ Verificação de CPF realizada (0 registros encontrados)
+✅ INSERT executado com sucesso
+✅ COMMIT aplicado
+📤 Parâmetro OUT @status = 'SUCESSO: Pessoa cadastrada' ${cursor}`,
+                function: `> EXECUTANDO: SELECT nome_pessoa, fn_idade_completa(nascimento) AS idade FROM Pessoa;
+
++--------------+-------+
+| nome_pessoa  | idade |
++--------------+-------+
+| João Paulo   |    23 |
+| Paulo André  |    24 |
+| Carlos Lima  |    39 |
++--------------+-------+
+3 rows in set (0.000 sec)
+✅ Função DETERMINISTIC executada diretamente no SELECT. ${cursor}`,
+                trigger: `> EXECUTANDO: DROP TRIGGER IF EXISTS alerta_exclusao;
+✅ Trigger 'alerta_exclusao' removida com sucesso.
+> EXECUTANDO: DROP TRIGGER IF EXISTS backup_pessoa;
+✅ Trigger 'backup_pessoa' removida com sucesso.
+⚠️ Atenção: Remoção de triggers não desfaz dados já auditados. ${cursor}`,
+                index: `> EXECUTANDO: CREATE INDEX idx_bairro_pessoa ON Pessoa(bairro);
+✅ Índice criado. Otimizando consultas com WHERE bairro LIKE 'Tropical%'.
+> EXECUTANDO: EXPLAIN SELECT * FROM Pessoa WHERE bairro = 'Tropical ville';
+📊 rows analisadas: Reduzido de 50000 para 124
+📊 type: ALL -> REF
+🚀 Query acelerada em ~98%. ${cursor}`,
+                clear: ``
+            };
+
+            if (type === 'clear') {
+                output.innerHTML = `<span style="color: #64748b;">// Aguardando comando avançado... Clique nos botões para simular execução e análise.</span>`;
+                return;
+            }
+            
+            output.innerHTML = responses[type];
+        }
+    </script>
+</body>
+</html>
+

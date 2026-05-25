@@ -1,0 +1,1970 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Curso Interativo: Análise e Projeto de Sistemas 2026</title>
+<!-- Fontes Google -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<!-- html2pdf.js CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+:root {
+--primary: #6366f1;
+--primary-dark: #4f46e5;
+--secondary: #ec4899;
+--success: #10b981;
+--warning: #f59e0b;
+--danger: #ef4444;
+--info: #3b82f6;
+--bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%);
+--card-bg: rgba(255, 255, 255, 0.98);
+--code-bg: #1e1e2e;
+--text-main: #1e293b;
+--text-light: #64748b;
+--border-color: #e2e8f0;
+}
+* {
+box-sizing: border-box;
+margin: 0;
+padding: 0;
+}
+html {
+scroll-behavior: smooth;
+}
+body {
+font-family: 'Inter', sans-serif;
+background: var(--bg-gradient);
+color: var(--text-main);
+line-height: 1.6;
+min-height: 100vh;
+display: flex;
+flex-direction: column;
+}
+/* Barra de Progresso */
+#progress-container {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 6px;
+background: rgba(255,255,255,0.1);
+z-index: 1000;
+}
+#progress-bar {
+height: 100%;
+background: linear-gradient(90deg, var(--primary), var(--secondary));
+width: 0%;
+transition: width 0.2s ease;
+box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+}
+/* Layout Principal */
+.container {
+display: grid;
+grid-template-columns: 280px 1fr;
+max-width: 1400px;
+margin: 0 auto;
+width: 100%;
+flex: 1;
+}
+/* Menu Lateral */
+aside {
+position: sticky;
+top: 20px;
+height: calc(100vh - 40px);
+background: rgba(255, 255, 255, 0.1);
+backdrop-filter: blur(10px);
+border-radius: 16px;
+margin: 20px;
+padding: 20px;
+display: flex;
+flex-direction: column;
+gap: 8px;
+border: 1px solid rgba(255,255,255,0.1);
+overflow-y: auto;
+}
+aside h3 {
+color: white;
+font-size: 0.85rem;
+text-transform: uppercase;
+letter-spacing: 1.5px;
+margin-bottom: 15px;
+padding-bottom: 10px;
+border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+.nav-link {
+color: rgba(255,255,255,0.7);
+text-decoration: none;
+padding: 12px 15px;
+border-radius: 8px;
+transition: all 0.3s ease;
+font-size: 0.9rem;
+display: flex;
+align-items: center;
+gap: 10px;
+}
+.nav-link:hover, .nav-link.active {
+background: var(--primary);
+color: white;
+transform: translateX(5px);
+box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+.nav-link .icon {
+font-size: 1.1rem;
+}
+/* Conteúdo Principal */
+main {
+padding: 40px 30px;
+overflow-y: auto;
+}
+header {
+text-align: center;
+margin-bottom: 60px;
+color: white;
+animation: fadeInDown 1s ease;
+}
+header h1 {
+font-size: 2.8rem;
+margin-bottom: 15px;
+background: linear-gradient(to right, #818cf8, #f472b6, #34d399);
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+background-clip: text;
+}
+header p {
+font-size: 1.2rem;
+opacity: 0.9;
+max-width: 700px;
+margin: 0 auto;
+}
+header .meta-info {
+display: flex;
+justify-content: center;
+gap: 15px;
+flex-wrap: wrap;
+margin-top: 25px;
+}
+/* Cards e Seções */
+section {
+background: var(--card-bg);
+border-radius: 16px;
+padding: 40px;
+margin-bottom: 40px;
+box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+opacity: 0;
+transform: translateY(30px);
+transition: all 0.6s ease;
+}
+section.visible {
+opacity: 1;
+transform: translateY(0);
+}
+h2 {
+color: var(--primary-dark);
+margin-bottom: 25px;
+font-size: 2rem;
+border-bottom: 3px solid var(--border-color);
+padding-bottom: 15px;
+display: flex;
+align-items: center;
+gap: 12px;
+}
+h3 {
+color: var(--text-main);
+margin: 30px 0 15px;
+font-size: 1.4rem;
+}
+p {
+margin-bottom: 15px;
+color: var(--text-main);
+}
+/* Imagem do Header */
+.header-image {
+max-width: 800px;
+width: 100%;
+margin: 30px auto;
+border-radius: 16px;
+box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+border: 4px solid rgba(255,255,255,0.1);
+}
+/* Info Boxes */
+.info-box {
+padding: 20px 25px;
+border-radius: 12px;
+margin: 25px 0;
+border-left: 5px solid;
+display: flex;
+align-items: start;
+gap: 15px;
+background: white;
+box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+.info-box.success { background: #d1fae5; border-color: var(--success); color: #065f46; }
+.info-box.warning { background: #fef3c7; border-color: var(--warning); color: #92400e; }
+.info-box.info { background: #dbeafe; border-color: var(--info); color: #1e40af; }
+.info-box.danger { background: #fee2e2; border-color: var(--danger); color: #991b1b; }
+.info-box .icon {
+font-size: 1.5rem;
+flex-shrink: 0;
+}
+/* Tabs */
+.tabs-container {
+margin: 30px 0;
+}
+.tabs-header {
+display: flex;
+gap: 5px;
+margin-bottom: 0;
+flex-wrap: wrap;
+}
+.tab-btn {
+padding: 14px 28px;
+background: #e2e8f0;
+border: none;
+border-radius: 10px 10px 0 0;
+cursor: pointer;
+font-weight: 600;
+color: var(--text-light);
+transition: all 0.3s;
+font-size: 0.95rem;
+}
+.tab-btn:hover {
+background: #cbd5e1;
+}
+.tab-btn.active {
+background: var(--card-bg);
+color: var(--primary);
+border-top: 3px solid var(--primary);
+box-shadow: 0 -4px 12px rgba(0,0,0,0.05);
+}
+.tab-content {
+background: var(--card-bg);
+padding: 30px;
+border-radius: 0 12px 12px 12px;
+border: 1px solid var(--border-color);
+border-top: none;
+display: none;
+animation: fadeIn 0.5s;
+}
+.tab-content.active {
+display: block;
+}
+/* Code Blocks */
+pre {
+background: var(--code-bg);
+padding: 25px;
+border-radius: 12px;
+overflow-x: auto;
+position: relative;
+border-left: 5px solid var(--secondary);
+margin: 25px 0;
+box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+code {
+font-family: 'Fira Code', monospace;
+color: #a6accd;
+font-size: 0.9rem;
+line-height: 1.7;
+}
+.copy-btn {
+position: absolute;
+top: 12px;
+right: 12px;
+background: rgba(255,255,255,0.1);
+border: none;
+color: white;
+padding: 8px 14px;
+border-radius: 6px;
+cursor: pointer;
+font-size: 0.8rem;
+transition: all 0.3s;
+font-family: 'Inter', sans-serif;
+}
+.copy-btn:hover {
+background: var(--primary);
+transform: scale(1.05);
+}
+/* Tabelas */
+table {
+width: 100%;
+border-collapse: collapse;
+margin: 25px 0;
+background: white;
+border-radius: 12px;
+overflow: hidden;
+box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+th, td {
+padding: 16px;
+text-align: left;
+border-bottom: 1px solid var(--border-color);
+}
+th {
+background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+color: white;
+font-weight: 700;
+text-transform: uppercase;
+font-size: 0.85rem;
+letter-spacing: 0.5px;
+}
+tr:last-child td {
+border-bottom: none;
+}
+tr:hover {
+background: #f8fafc;
+}
+/* Badges */
+.badge {
+display: inline-block;
+padding: 5px 14px;
+border-radius: 20px;
+font-size: 0.8rem;
+font-weight: 700;
+color: white;
+text-transform: uppercase;
+letter-spacing: 0.5px;
+}
+.badge-f { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); }
+.badge-nf { background: linear-gradient(135deg, var(--secondary), #db2777); }
+.badge-u { background: linear-gradient(135deg, var(--success), #059669); }
+/* Simulador Interativo */
+.simulator-area {
+background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+border-radius: 16px;
+padding: 30px;
+border: 2px dashed var(--primary);
+}
+.chat-box {
+background: white;
+border-radius: 12px;
+height: 350px;
+overflow-y: auto;
+padding: 25px;
+margin-bottom: 25px;
+border: 1px solid var(--border-color);
+display: flex;
+flex-direction: column;
+gap: 15px;
+box-shadow: inset 0 2px 10px rgba(0,0,0,0.05);
+}
+.message {
+max-width: 85%;
+padding: 15px 20px;
+border-radius: 14px;
+font-size: 0.95rem;
+animation: slideIn 0.3s ease;
+line-height: 1.5;
+}
+.msg-user {
+align-self: flex-end;
+background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+color: white;
+border-bottom-right-radius: 4px;
+box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+.msg-ai {
+align-self: flex-start;
+background: #f1f5f9;
+color: var(--text-main);
+border-bottom-left-radius: 4px;
+border: 1px solid var(--border-color);
+}
+.controls {
+display: flex;
+gap: 12px;
+flex-wrap: wrap;
+}
+.option-btn {
+background: white;
+border: 2px solid var(--primary);
+color: var(--primary);
+padding: 12px 24px;
+border-radius: 10px;
+cursor: pointer;
+font-weight: 600;
+transition: all 0.3s;
+flex: 1;
+min-width: 200px;
+font-size: 0.9rem;
+}
+.option-btn:hover {
+background: var(--primary);
+color: white;
+transform: translateY(-2px);
+box-shadow: 0 6px 20px rgba(99, 102, 241, 0.3);
+}
+/* Área de Atividade LLM */
+.llm-activity {
+background: linear-gradient(135deg, #1e1b4b, #312e81);
+border-radius: 16px;
+padding: 35px;
+color: white;
+margin: 30px 0;
+}
+.llm-activity h3 {
+color: white;
+border-bottom: 2px solid rgba(255,255,255,0.2);
+padding-bottom: 15px;
+}
+.prompt-box {
+background: var(--code-bg);
+border-radius: 12px;
+padding: 25px;
+margin: 20px 0;
+border: 1px solid rgba(255,255,255,0.1);
+position: relative;
+}
+.prompt-box pre {
+background: transparent;
+border: none;
+padding: 0;
+margin: 0;
+box-shadow: none;
+}
+.prompt-box code {
+color: #e2e8f0;
+white-space: pre-wrap;
+word-wrap: break-word;
+}
+.copy-prompt-btn {
+position: absolute;
+top: 15px;
+right: 15px;
+background: var(--primary);
+border: none;
+color: white;
+padding: 10px 20px;
+border-radius: 8px;
+cursor: pointer;
+font-weight: 600;
+transition: all 0.3s;
+font-family: 'Inter', sans-serif;
+}
+.copy-prompt-btn:hover {
+background: var(--secondary);
+transform: scale(1.05);
+}
+/* Input Fields para Respostas */
+.question-card {
+background: white;
+border-radius: 12px;
+padding: 25px;
+margin: 20px 0;
+border: 1px solid var(--border-color);
+box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+transition: all 0.3s;
+}
+.question-card:hover {
+box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+transform: translateY(-2px);
+}
+.question-header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 15px;
+flex-wrap: wrap;
+gap: 10px;
+}
+.question-number {
+background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+color: white;
+width: 40px;
+height: 40px;
+border-radius: 50%;
+display: flex;
+align-items: center;
+justify-content: center;
+font-weight: 700;
+font-size: 1.1rem;
+}
+.question-badges {
+display: flex;
+gap: 8px;
+}
+.question-text {
+font-size: 1.1rem;
+font-weight: 600;
+color: var(--text-main);
+margin-bottom: 15px;
+}
+.answer-input {
+width: 100%;
+min-height: 120px;
+padding: 15px;
+border: 2px solid var(--border-color);
+border-radius: 10px;
+font-family: 'Inter', sans-serif;
+font-size: 0.95rem;
+resize: vertical;
+transition: all 0.3s;
+background: #f8fafc;
+}
+.answer-input:focus {
+outline: none;
+border-color: var(--primary);
+background: white;
+box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+}
+.answer-input::placeholder {
+color: var(--text-light);
+}
+/* Tabela de Requisitos Final */
+.requirements-table {
+background: white;
+border-radius: 12px;
+padding: 25px;
+margin: 30px 0;
+border: 1px solid var(--border-color);
+}
+.requirements-table textarea {
+width: 100%;
+min-height: 80px;
+padding: 12px;
+border: 1px solid var(--border-color);
+border-radius: 8px;
+font-family: 'Inter', sans-serif;
+font-size: 0.9rem;
+resize: vertical;
+margin: 8px 0;
+}
+.requirements-table textarea:focus {
+outline: none;
+border-color: var(--primary);
+}
+/* Footer */
+footer {
+background: rgba(0,0,0,0.4);
+color: rgba(255,255,255,0.8);
+text-align: center;
+padding: 50px 30px;
+margin-top: auto;
+}
+footer h4 {
+color: white;
+margin-bottom: 15px;
+}
+footer .badges {
+display: flex;
+justify-content: center;
+gap: 10px;
+flex-wrap: wrap;
+margin: 20px 0;
+}
+/* Responsividade */
+@media (max-width: 1024px) {
+.container {
+grid-template-columns: 1fr;
+}
+aside {
+display: none;
+}
+}
+@media (max-width: 768px) {
+header h1 {
+font-size: 2rem;
+}
+section {
+padding: 25px;
+}
+main {
+padding: 20px 15px;
+}
+.tabs-header {
+flex-direction: column;
+}
+.tab-btn {
+border-radius: 8px;
+margin-bottom: 5px;
+}
+.tab-content {
+border-radius: 12px;
+border-top: 1px solid var(--border-color);
+}
+}
+/* Animações */
+@keyframes fadeInDown {
+from { opacity: 0; transform: translateY(-30px); }
+to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+from { opacity: 0; }
+to { opacity: 1; }
+}
+@keyframes slideIn {
+from { opacity: 0; transform: translateX(-15px); }
+to { opacity: 1; transform: translateX(0); }
+}
+@keyframes pulse {
+0%, 100% { transform: scale(1); }
+50% { transform: scale(1.05); }
+}
+.pulse {
+animation: pulse 2s infinite;
+}
+/* Botão de Ação */
+.action-btn {
+background: linear-gradient(135deg, var(--success), #059669);
+color: white;
+border: none;
+padding: 15px 35px;
+border-radius: 10px;
+cursor: pointer;
+font-weight: 700;
+font-size: 1rem;
+transition: all 0.3s;
+display: inline-flex;
+align-items: center;
+gap: 10px;
+margin-top: 20px;
+}
+.action-btn:hover {
+transform: translateY(-3px);
+box-shadow: 0 10px 30px rgba(16, 185, 129, 0.4);
+}
+.action-btn.secondary {
+background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+}
+/* Personagens Cards */
+.personas-grid {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+gap: 20px;
+margin: 30px 0;
+}
+.persona-card {
+background: white;
+border-radius: 12px;
+padding: 25px;
+border: 1px solid var(--border-color);
+text-align: center;
+transition: all 0.3s;
+}
+.persona-card:hover {
+transform: translateY(-5px);
+box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+border-color: var(--primary);
+}
+.persona-avatar {
+width: 80px;
+height: 80px;
+border-radius: 50%;
+background: linear-gradient(135deg, var(--primary), var(--secondary));
+margin: 0 auto 15px;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 2rem;
+color: white;
+font-weight: 700;
+}
+.persona-name {
+font-weight: 700;
+color: var(--text-main);
+margin-bottom: 5px;
+}
+.persona-role {
+color: var(--primary);
+font-size: 0.9rem;
+margin-bottom: 10px;
+}
+.persona-desc {
+color: var(--text-light);
+font-size: 0.85rem;
+line-height: 1.5;
+}
+
+/* Estilos para Exportação PDF */
+#pdf-export-container {
+display: none;
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: white;
+z-index: 9999;
+padding: 40px;
+overflow-y: auto;
+}
+
+#pdf-export-container.visible {
+display: block;
+}
+
+.pdf-header {
+text-align: center;
+margin-bottom: 40px;
+border-bottom: 3px solid var(--primary);
+padding-bottom: 20px;
+}
+
+.pdf-header h1 {
+color: var(--primary-dark);
+font-size: 2rem;
+margin-bottom: 10px;
+}
+
+.pdf-header .meta {
+color: var(--text-light);
+font-size: 0.9rem;
+}
+
+.pdf-section {
+margin-bottom: 30px;
+page-break-inside: avoid;
+}
+
+.pdf-section h2 {
+color: var(--primary-dark);
+font-size: 1.5rem;
+border-bottom: 2px solid var(--border-color);
+padding-bottom: 10px;
+margin-bottom: 20px;
+}
+
+.pdf-question {
+background: #f8fafc;
+border: 1px solid var(--border-color);
+border-radius: 8px;
+padding: 15px;
+margin-bottom: 15px;
+page-break-inside: avoid;
+}
+
+.pdf-question-number {
+background: var(--primary);
+color: white;
+width: 30px;
+height: 30px;
+border-radius: 50%;
+display: inline-flex;
+align-items: center;
+justify-content: center;
+font-weight: 700;
+margin-right: 10px;
+}
+
+.pdf-question-text {
+font-weight: 600;
+color: var(--text-main);
+display: inline;
+}
+
+.pdf-answer {
+background: white;
+border: 1px solid var(--border-color);
+border-radius: 8px;
+padding: 15px;
+margin-top: 10px;
+font-size: 0.9rem;
+white-space: pre-wrap;
+}
+
+.pdf-answer-label {
+font-weight: 600;
+color: var(--primary);
+margin-bottom: 8px;
+}
+
+.pdf-requirements-table {
+width: 100%;
+border-collapse: collapse;
+margin: 15px 0;
+}
+
+.pdf-requirements-table th,
+.pdf-requirements-table td {
+border: 1px solid var(--border-color);
+padding: 10px;
+text-align: left;
+font-size: 0.85rem;
+}
+
+.pdf-requirements-table th {
+background: var(--primary);
+color: white;
+}
+
+.pdf-footer {
+text-align: center;
+margin-top: 40px;
+padding-top: 20px;
+border-top: 2px solid var(--border-color);
+color: var(--text-light);
+font-size: 0.85rem;
+}
+
+.pdf-close-btn {
+position: fixed;
+top: 20px;
+right: 20px;
+background: var(--danger);
+color: white;
+border: none;
+padding: 12px 24px;
+border-radius: 8px;
+cursor: pointer;
+font-weight: 600;
+z-index: 10000;
+}
+
+.pdf-close-btn:hover {
+background: #dc2626;
+}
+
+.loading-overlay {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: rgba(0,0,0,0.8);
+display: none;
+justify-content: center;
+align-items: center;
+z-index: 10001;
+}
+
+.loading-overlay.visible {
+display: flex;
+}
+
+.loading-content {
+background: white;
+padding: 40px;
+border-radius: 16px;
+text-align: center;
+}
+
+.spinner {
+width: 50px;
+height: 50px;
+border: 4px solid var(--border-color);
+border-top: 4px solid var(--primary);
+border-radius: 50%;
+animation: spin 1s linear infinite;
+margin: 0 auto 20px;
+}
+
+@keyframes spin {
+0% { transform: rotate(0deg); }
+100% { transform: rotate(360deg); }
+}
+
+/* Seção de identificação dos alunos */
+.student-info {
+background: linear-gradient(135deg, #e0f2fe, #bae6fd);
+border-radius: 16px;
+padding: 20px;
+margin-bottom: 30px;
+display: flex;
+flex-wrap: wrap;
+gap: 20px;
+align-items: flex-start;
+justify-content: space-between;
+}
+.student-names {
+flex: 2;
+}
+.student-names label {
+font-weight: 600;
+color: var(--primary-dark);
+display: block;
+margin-bottom: 8px;
+}
+.student-names textarea {
+width: 100%;
+padding: 12px;
+border: 1px solid var(--border-color);
+border-radius: 8px;
+font-family: 'Inter', sans-serif;
+font-size: 0.9rem;
+resize: vertical;
+}
+.doc-id {
+flex: 1;
+text-align: center;
+background: white;
+padding: 15px;
+border-radius: 12px;
+border: 1px solid var(--border-color);
+}
+.doc-id .label {
+font-weight: 600;
+color: var(--text-light);
+font-size: 0.85rem;
+display: block;
+}
+.doc-id .value {
+font-size: 1.3rem;
+font-weight: 700;
+color: var(--primary);
+font-family: monospace;
+letter-spacing: 1px;
+margin-top: 5px;
+}
+</style>
+</head>
+<body>
+<!-- Barra de Progresso -->
+<div id="progress-container">
+<div id="progress-bar"></div>
+</div>
+
+<!-- Container de Exportação PDF -->
+<div id="pdf-export-container">
+<button class="pdf-close-btn" onclick="closePdfExport()">✕ Fechar</button>
+<div id="pdf-content">
+<!-- Conteúdo será gerado dinamicamente -->
+</div>
+</div>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+<div class="loading-content">
+<div class="spinner"></div>
+<h3 style="color: var(--primary);">Gerando PDF...</h3>
+<p style="color: var(--text-light);">Por favor, aguarde</p>
+</div>
+</div>
+
+<div class="container">
+<!-- Menu Lateral -->
+<aside>
+<h3>📚 Conteúdo da Aula</h3>
+<a href="#intro" class="nav-link active"><span class="icon">🎯</span> Introdução</a>
+<a href="#contexto" class="nav-link"><span class="icon">🏢</span> Cenário Saúde & Vida</a>
+<a href="#personagens" class="nav-link"><span class="icon">🎭</span> Personagens</a>
+<a href="#requisitos" class="nav-link"><span class="icon">📋</span> Tipos de Requisitos</a>
+<a href="#simulador" class="nav-link"><span class="icon">🎮</span> Simulador</a>
+<a href="#atividade-llm" class="nav-link"><span class="icon">🤖</span> Atividade com IA</a>
+<a href="#perguntas" class="nav-link"><span class="icon">❓</span> 12 Perguntas</a>
+<a href="#tabela-requisitos" class="nav-link"><span class="icon">📊</span> Tabela de Requisitos</a>
+<a href="#resumo" class="nav-link"><span class="icon">✅</span> Resumo Final</a>
+</aside>
+
+<!-- Conteúdo Principal -->
+<main>
+<header id="topo">
+<h1>Análise e Projeto de Sistemas</h1>
+<p style="color: white">Domine a arte de levantar requisitos e transformar necessidades de negócio em soluções digitais</p>
+<img src="https://image.qwenlm.ai/public_source/054448df-bee7-4325-987a-07c6305abf80/11813607d-ce0a-4f33-ad5e-0699b47ec62a.png" alt="Equipe em reunião de levantamento de requisitos" class="header-image">
+<div class="meta-info">
+<span class="badge badge-f">60h Carga Horária</span>
+<span class="badge badge-nf">5º Semestre</span>
+<span class="badge badge-u">ADS - UNISENAI MT</span>
+</div>
+</header>
+
+<!-- NOVA SEÇÃO: Identificação dos Alunos e ID do Documento -->
+<div class="student-info">
+<div class="student-names">
+<label>👥 Nome dos Alunos (até 5, um por linha)</label>
+<textarea id="studentNames" rows="3" placeholder="Digite os nomes dos alunos participantes&#10;Exemplo:&#10;Ana Paula Silva&#10;João Pedro Santos&#10;Mariana Costa"></textarea>
+</div>
+<div class="doc-id">
+<span class="label">📄 ID Único do Documento</span>
+<span class="value" id="docIdValue">---</span>
+</div>
+</div>
+
+<!-- 1. Introdução -->
+<section id="intro">
+<h2>🚀 Bem-vindo à Missão</h2>
+<p>Em 2026, construir software sem entender profundamente o problema é como construir uma ponte sem saber onde fica o rio. Neste curso completo, vamos abandonar a teoria chata e mergulhar em simulações reais de levantamento de requisitos.</p>
+<div class="info-box info">
+<span class="icon">💡</span>
+<div>
+<strong>Dica do Professor:</strong> O maior erro dos analistas iniciantes é começar a desenhar telas antes de entender a "dor" do cliente. Hoje, você será um detetive de negócios!
+</div>
+</div>
+<div class="tabs-container">
+<div class="tabs-header">
+<button class="tab-btn active" onclick="openTab(event, 'objetivos')">🎯 Objetivos</button>
+<button class="tab-btn" onclick="openTab(event, 'competencias')">📊 Competências</button>
+</div>
+<div id="objetivos" class="tab-content active">
+<h3>O que vamos aprender?</h3>
+<ul style="padding-left: 20px; line-height: 2;">
+<li>✅ Como identificar stakeholders chave e suas necessidades</li>
+<li>✅ A diferença entre requisitos <strong>Funcionais</strong> e <strong>Não-Funcionais</strong></li>
+<li>✅ Técnicas de entrevista usando IA e empatia</li>
+<li>✅ Documentação de requisitos com Documento de Visão</li>
+<li>✅ Modelagem UML para representar o sistema</li>
+</ul>
+</div>
+<div id="competencias" class="tab-content">
+<h3>Competências a Desenvolver</h3>
+<p>Conforme o Plano de Ensino UNISENAI MT 2026/1:</p>
+<ul style="padding-left: 20px; line-height: 2;">
+<li>Identificar necessidades do cliente</li>
+<li>Reconhecer normas e regras de negócio</li>
+<li>Classificar requisitos (F, NF, U)</li>
+<li>Traduzir requisitos para especificações técnicas</li>
+<li>Utilizar diagramas UML para modelagem</li>
+</ul>
+</div>
+</div>
+</section>
+
+<!-- 2. Contexto -->
+<section id="contexto">
+<h2>🏢 Cenário: Rede Saúde & Vida</h2>
+<p>Você foi contratado pela <strong>Saúde & Vida</strong>, uma rede de farmácias com 200 unidades no Brasil. Fundada há 25 anos, ela cresceu muito, mas a tecnologia ficou para trás.</p>
+<div class="info-box warning">
+<span class="icon">⚠️</span>
+<div>
+<strong>Problema Atual:</strong> Gestão fragmentada entre unidades, sem canal online com clientes, logística e estoque desorganizados.
+</div>
+</div>
+<div class="info-box success">
+<span class="icon">🎯</span>
+<div>
+<strong>Oportunidade:</strong> Criar um sistema Web e aplicativo para integrar operações, gerentes e clientes em uma experiência digital unificada.
+</div>
+</div>
+<h3>Histórico da Empresa</h3>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 20px;">
+<div style="background: #f8fafc; padding: 20px; border-radius: 12px; border-left: 4px solid var(--primary);">
+<h4 style="color: var(--primary); margin-bottom: 10px;">📅 25 Anos</h4>
+<p style="margin: 0; font-size: 0.9rem;">De uma única farmácia no Morumbi (SP) para 200 unidades</p>
+</div>
+<div style="background: #f8fafc; padding: 20px; border-radius: 12px; border-left: 4px solid var(--secondary);">
+<h4 style="color: var(--secondary); margin-bottom: 10px;">🇧🇷 Nacional</h4>
+<p style="margin: 0; font-size: 0.9rem;">Presente em todas as capitais do Brasil</p>
+</div>
+<div style="background: #f8fafc; padding: 20px; border-radius: 12px; border-left: 4px solid var(--success);">
+<h4 style="color: var(--success); margin-bottom: 10px;">❤️ Humanizado</h4>
+<p style="margin: 0; font-size: 0.9rem;">Foco em atendimento humanizado e fidelidade</p>
+</div>
+</div>
+</section>
+
+<!-- 3. Personagens -->
+<section id="personagens">
+<h2>🎭 Personagens da Simulação</h2>
+<p>Conheça os stakeholders que você irá entrevistar durante o levantamento de requisitos:</p>
+<div class="personas-grid">
+<div class="persona-card">
+<div class="persona-avatar">ME</div>
+<div class="persona-name">Maria Eduarda</div>
+<div class="persona-role">CEO / Fundadora • 55 anos</div>
+<div class="persona-desc">Prática, direta, visionária. Limitações em tecnologia, mas entusiasta da modernização.</div>
+</div>
+<div class="persona-card">
+<div class="persona-avatar">EH</div>
+<div class="persona-name">Eduardo Henrique</div>
+<div class="persona-role">Gerente Geral • 40 anos</div>
+<div class="persona-desc">Crítico, pouco direto. Focado em resultados e eficiência operacional.</div>
+</div>
+<div class="persona-card">
+<div class="persona-avatar">CS</div>
+<div class="persona-name">Carla Souza</div>
+<div class="persona-role">Gerente de RH • 30 anos</div>
+<div class="persona-desc">Analítica, aberta a sugestões. Preocupada com impacto nos funcionários.</div>
+</div>
+<div class="persona-card">
+<div class="persona-avatar">EG</div>
+<div class="persona-name">Enzo Gabriel</div>
+<div class="persona-role">Almoxarifado • 21 anos</div>
+<div class="persona-desc">Conectado com tecnologia, "sabe-tudo". Impaciente com processos lentos.</div>
+</div>
+<div class="persona-card">
+<div class="persona-avatar">MV</div>
+<div class="persona-name">Maria Valentina</div>
+<div class="persona-role">Logística • 23 anos</div>
+<div class="persona-desc">Conectada com tecnologia, aberta a mudanças. Foco em eficiência.</div>
+</div>
+</div>
+</section>
+
+<!-- 4. Requisitos -->
+<section id="requisitos">
+<h2>📋 Tipos de Requisitos</h2>
+<p>Nem todo pedido de um cliente é um requisito técnico. Precisamos traduzir "quero que seja rápido" para especificações mensuráveis.</p>
+<table>
+<thead>
+<tr>
+<th>Tipo</th>
+<th>Definição</th>
+<th>Pergunta Chave</th>
+<th>Exemplo</th>
+<th>Tag</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Funcional (F)</strong></td>
+<td>O que o sistema DEVE fazer</td>
+<td>"Que ação o sistema realiza?"</td>
+<td>"O sistema deve permitir cadastro de medicamentos"</td>
+<td><span class="badge badge-f">F</span></td>
+</tr>
+<tr>
+<td><strong>Não-Funcional (NF)</strong></td>
+<td>Como o sistema se comporta</td>
+<td>"Qual a qualidade esperada?"</td>
+<td>"Consulta deve responder em menos de 2 segundos"</td>
+<td><span class="badge badge-nf">NF</span></td>
+</tr>
+<tr>
+<td><strong>Usuário (U)</strong></td>
+<td>O que o usuário precisa alcançar</td>
+<td>"Qual objetivo do usuário?"</td>
+<td>"Gerente precisa ver estoque da loja vizinha"</td>
+<td><span class="badge badge-u">U</span></td>
+</tr>
+</tbody>
+</table>
+<div class="info-box warning">
+<span class="icon">⚠️</span>
+<div>
+<strong>Cuidado!</strong> Requisitos não funcionais são frequentemente esquecidos, mas são eles que definem se o sistema vai travar quando 200 lojas acessarem ao mesmo tempo!
+</div>
+</div>
+</section>
+
+<!-- 5. Simulador -->
+<section id="simulador">
+<h2>🎮 Simulador de Entrevista</h2>
+<p>Você está na sala de reuniões com a CEO <strong>Maria Eduarda</strong>. Ela acabou de dizer: <em>"Precisamos modernizar, mas tenho medo de gastar muito e não funcionar."</em></p>
+<p><strong>Sua vez!</strong> Escolha a melhor pergunta para extrair requisitos valiosos:</p>
+<div class="simulator-area">
+<div class="chat-box" id="chatBox">
+<div class="message msg-ai">
+<strong>Maria Eduarda (CEO):</strong><br>
+"Fico feliz que você tenha aceito o desafio. Sabe, a 'Saúde & Vida' é o trabalho da minha vida. Eu sei que temos que modernizar, mas confesso que sou mais da área de saúde do que de tecnologia. O que você gostaria de saber primeiro?"
+</div>
+</div>
+<div class="controls" id="controlsArea">
+<button class="option-btn" onclick="handleChoice(1)">Quais são os principais desafios na gestão hoje que o sistema deve resolver?</button>
+<button class="option-btn" onclick="handleChoice(2)">Você prefere que o sistema seja feito em Java ou Python?</button>
+<button class="option-btn" onclick="handleChoice(3)">Podemos começar codificando a tela de login amanhã?</button>
+</div>
+<div id="feedbackArea" style="margin-top: 20px; font-weight: 600; padding: 15px; border-radius: 8px;"></div>
+</div>
+<div class="info-box info" style="margin-top: 25px;">
+<span class="icon">🧠</span>
+<div>
+<strong>Por que isso importa?</strong> A pergunta 1 foca no <strong>Problema de Negócio</strong> (Requisito de Usuário). As perguntas 2 e 3 pulam etapas essenciais e focam em solução técnica prematura.
+</div>
+</div>
+</section>
+
+<!-- 6. Atividade com LLM -->
+<section id="atividade-llm">
+<h2>🤖 Atividade Prática com IA</h2>
+<p>Agora você vai realizar uma entrevista completa de levantamento de requisitos usando um LLM (ChatGPT, Claude, Gemini, etc.). Siga os passos abaixo:</p>
+<div class="llm-activity">
+<h3>📌 Passo 1: Copie o Prompt</h3>
+<p>Clique no botão abaixo para copiar o prompt completo para sua área de transferência:</p>
+<div class="prompt-box">
+<button class="copy-prompt-btn" onclick="copyPrompt()">📋 Copiar Prompt</button>
+<pre><code id="promptText">Prompt para IA, Treinamento de Levantamento de Requisitos
+Prompt de Simulação – Levantamento de Requisitos
+Contexto de Uso: Treinamento de analistas de negócios para entrevistas com stakeholders.
+🎭 Personagens
+• Nome: Maria Eduarda | Idade: 55 anos | Cargo: Fundadora e CEO
+Personalidade: Prática, direta, visionária. Limitações em tecnologia.
+• Nome: Eduardo Henrique | Idade: 40 anos | Cargo: Gerente Geral
+Personalidade: Crítico, pouco direto.
+• Nome: Carla Souza | Idade: 30 anos | Cargo: Gerente de RH
+Personalidade: Analítica, Aberta a sugestões.
+• Nome: Enzo Gabriel | Idade: 21 anos | Cargo: Gerente de Almoxarifado
+Personalidade: Conectado com tecnologia, Metido a sabe-tudo.
+• Nome: Maria Valentina | Idade: 23 anos | Cargo: Gerente de Logística
+Personalidade: Conectada com tecnologia, aberta a mudanças.
+🏢 Sobre a Empresa
+• Rede fundada há 25 anos, a partir de uma única farmácia no Morumbi (SP)
+• Atualmente possui 200 farmácias em todas as capitais do Brasil
+• Problema: gestão fragmentada, sem canal online, logística desorganizada
+• Oportunidade: criar sistema Web + App para integração total
+📖 Instrução para a IA
+Você é os Personagens da rede Saúde & Vida. Responda como se estivesse em uma reunião de levantamento de requisitos.
+• Use tom de conversa realista, misturando entusiasmo com desconfiança
+• Demonstre visão estratégica, mas também dúvidas sobre termos técnicos
+• Fale baseado nas personalidades de cada personagem
+• Sempre traga preocupações práticas do negócio
+• Não revele que é uma simulação
+• Introduza todos os personagens conforme as perguntas realizadas
+📌 Início da Simulação
+Maria Eduarda se apresenta:
+"Fico feliz que você tenha aceito o desafio. Sabe, a 'Saúde & Vida' é o trabalho da minha vida, e chegou a hora de darmos o próximo passo. Eu sei que temos que modernizar, mas confesso que sou mais da área de saúde do que de tecnologia. Por isso, preciso de alguém que me ajude a organizar as ideias e a entender como tudo isso pode virar realidade. O que você gostaria de saber primeiro?"</code></pre>
+</div>
+<div class="info-box success">
+<span class="icon">✅</span>
+<div>
+<strong>Passo 2:</strong> Cole o prompt em seu LLM de preferência (ChatGPT, Claude, Gemini, etc.)
+</div>
+</div>
+<div class="info-box info">
+<span class="icon">📝</span>
+<div>
+<strong>Passo 3:</strong> Faça as 12 perguntas abaixo e copie as respostas para os campos de resposta
+</div>
+</div>
+</div>
+</section>
+
+<!-- 7. 12 Perguntas -->
+<section id="perguntas">
+<h2>❓ 12 Perguntas de Levantamento</h2>
+<p>Realize cada pergunta no LLM e cole a resposta no campo correspondente. Use as badges para identificar o tipo de requisito predominante em cada resposta.</p>
+
+<!-- Pergunta 1 -->
+<div class="question-card" data-question="1">
+<div class="question-header">
+<div style="display: flex; align-items: center; gap: 15px;">
+<div class="question-number">1</div>
+<div class="question-badges">
+<span class="badge badge-f">F: 5</span>
+<span class="badge badge-nf">NF: 1</span>
+<span class="badge badge-u">U: 3</span>
+</div>
+</div>
+</div>
+<div class="question-text">Quais são os principais desafios que você enfrenta hoje na gestão das farmácias que um sistema poderia resolver?</div>
+<textarea class="answer-input" placeholder="Cole aqui a resposta do LLM..."></textarea>
+</div>
+
+<!-- Pergunta 2 -->
+<div class="question-card" data-question="2">
+<div class="question-header">
+<div style="display: flex; align-items: center; gap: 15px;">
+<div class="question-number">2</div>
+<div class="question-badges">
+<span class="badge badge-f">F: 5</span>
+<span class="badge badge-nf">NF: 2</span>
+<span class="badge badge-u">U: 2</span>
+</div>
+</div>
+</div>
+<div class="question-text">Como você imagina que o cliente final deveria interagir com a farmácia pelo aplicativo?</div>
+<textarea class="answer-input" placeholder="Cole aqui a resposta do LLM..."></textarea>
+</div>
+
+<!-- Pergunta 3 -->
+<div class="question-card" data-question="3">
+<div class="question-header">
+<div style="display: flex; align-items: center; gap: 15px;">
+<div class="question-number">3</div>
+<div class="question-badges">
+<span class="badge badge-f">F: 4</span>
+<span class="badge badge-nf">NF: 3</span>
+<span class="badge badge-u">U: 4</span>
+</div>
+</div>
+</div>
+<div class="question-text">Quais informações são críticas para você ter em tempo real na tela inicial do sistema?</div>
+<textarea class="answer-input" placeholder="Cole aqui a resposta do LLM..."></textarea>
+</div>
+
+<!-- Pergunta 4 -->
+<div class="question-card" data-question="4">
+<div class="question-header">
+<div style="display: flex; align-items: center; gap: 15px;">
+<div class="question-number">4</div>
+<div class="question-badges">
+<span class="badge badge-f">F: 2</span>
+<span class="badge badge-nf">NF: 5</span>
+<span class="badge badge-u">U: 2</span>
+</div>
+</div>
+</div>
+<div class="question-text">O sistema precisa funcionar em dispositivos móveis (celular/tablet) ou apenas em computadores?</div>
+<textarea class="answer-input" placeholder="Cole aqui a resposta do LLM..."></textarea>
+</div>
+
+<!-- Pergunta 5 -->
+<div class="question-card" data-question="5">
+<div class="question-header">
+<div style="display: flex; align-items: center; gap: 15px;">
+<div class="question-number">5</div>
+<div class="question-badges">
+<span class="badge badge-f">F: 5</span>
+<span class="badge badge-nf">NF: 2</span>
+<span class="badge badge-u">U: 3</span>
+</div>
+</div>
+</div>
+<div class="question-text">Que tipo de relatórios e indicadores de desempenho (KPIs) você gostaria de acompanhar?</div>
+<textarea class="answer-input" placeholder="Cole aqui a resposta do LLM..."></textarea>
+</div>
+
+<!-- Pergunta 6 -->
+<div class="question-card" data-question="6">
+<div class="question-header">
+<div style="display: flex; align-items: center; gap: 15px;">
+<div class="question-number">6</div>
+<div class="question-badges">
+<span class="badge badge-f">F: 2</span>
+<span class="badge badge-nf">NF: 5</span>
+<span class="badge badge-u">U: 3</span>
+</div>
+</div>
+</div>
+<div class="question-text">Existe alguma preocupação com segurança, como controle de acesso por cargo ou proteção de dados de clientes?</div>
+<textarea class="answer-input" placeholder="Cole aqui a resposta do LLM..."></textarea>
+</div>
+
+<!-- Pergunta 7 -->
+<div class="question-card" data-question="7">
+<div class="question-header">
+<div style="display: flex; align-items: center; gap: 15px;">
+<div class="question-number">7</div>
+<div class="question-badges">
+<span class="badge badge-f">F: 5</span>
+<span class="badge badge-nf">NF: 2</span>
+<span class="badge badge-u">U: 4</span>
+</div>
+</div>
+</div>
+<div class="question-text">Como você lida hoje com o estoque e a logística entre as lojas? O que funciona e o que não funciona?</div>
+<textarea class="answer-input" placeholder="Cole aqui a resposta do LLM..."></textarea>
+</div>
+
+<!-- Pergunta 8 -->
+<div class="question-card" data-question="8">
+<div class="question-header">
+<div style="display: flex; align-items: center; gap: 15px;">
+<div class="question-number">8</div>
+<div class="question-badges">
+<span class="badge badge-f">F: 3</span>
+<span class="badge badge-nf">NF: 4</span>
+<span class="badge badge-u">U: 2</span>
+</div>
+</div>
+</div>
+<div class="question-text">O sistema precisará se integrar com outros softwares que vocês já usam (ex: financeiro, RH)?</div>
+<textarea class="answer-input" placeholder="Cole aqui a resposta do LLM..."></textarea>
+</div>
+
+<!-- Pergunta 9 -->
+<div class="question-card" data-question="9">
+<div class="question-header">
+<div style="display: flex; align-items: center; gap: 15px;">
+<div class="question-number">9</div>
+<div class="question-badges">
+<span class="badge badge-f">F: 1</span>
+<span class="badge badge-nf">NF: 5</span>
+<span class="badge badge-u">U: 1</span>
+</div>
+</div>
+</div>
+<div class="question-text">Qual deve ser o tempo máximo de resposta para uma consulta de preço ou emissão de nota fiscal?</div>
+<textarea class="answer-input" placeholder="Cole aqui a resposta do LLM..."></textarea>
+</div>
+
+<!-- Pergunta 10 -->
+<div class="question-card" data-question="10">
+<div class="question-header">
+<div style="display: flex; align-items: center; gap: 15px;">
+<div class="question-number">10</div>
+<div class="question-badges">
+<span class="badge badge-f">F: 4</span>
+<span class="badge badge-nf">NF: 1</span>
+<span class="badge badge-u">U: 5</span>
+</div>
+</div>
+</div>
+<div class="question-text">Que funcionalidades facilitariam o dia a dia dos funcionários da loja e dos gerentes?</div>
+<textarea class="answer-input" placeholder="Cole aqui a resposta do LLM..."></textarea>
+</div>
+
+<!-- Pergunta 11 -->
+<div class="question-card" data-question="11">
+<div class="question-header">
+<div style="display: flex; align-items: center; gap: 15px;">
+<div class="question-number">11</div>
+<div class="question-badges">
+<span class="badge badge-f">F: 1</span>
+<span class="badge badge-nf">NF: 5</span>
+<span class="badge badge-u">U: 1</span>
+</div>
+</div>
+</div>
+<div class="question-text">Vocês pensam em escalar o sistema para mais lojas no futuro? Isso influencia a arquitetura?</div>
+<textarea class="answer-input" placeholder="Cole aqui a resposta do LLM..."></textarea>
+</div>
+
+<!-- Pergunta 12 -->
+<div class="question-card" data-question="12">
+<div class="question-header">
+<div style="display: flex; align-items: center; gap: 15px;">
+<div class="question-number">12</div>
+<div class="question-badges">
+<span class="badge badge-f">F: 5</span>
+<span class="badge badge-nf">NF: 2</span>
+<span class="badge badge-u">U: 3</span>
+</div>
+</div>
+</div>
+<div class="question-text">Como vocês gostariam de gerenciar o programa de fidelidade existente? Quais regras de negócio são importantes?</div>
+<textarea class="answer-input" placeholder="Cole aqui a resposta do LLM..."></textarea>
+</div>
+</section>
+
+<!-- 8. Tabela de Requisitos -->
+<section id="tabela-requisitos">
+<h2>📊 Tabela de Classificação de Requisitos</h2>
+<p>Com base nas respostas obtidas, identifique e classifique os requisitos encontrados. Preencha a tabela abaixo:</p>
+<div class="requirements-table">
+<h3 style="color: var(--primary);">📝 Requisitos Funcionais (F)</h3>
+<p style="font-size: 0.9rem; color: var(--text-light);">O que o sistema DEVE fazer</p>
+<table id="tblFuncionais">
+<thead>
+<tr>
+<th style="width: 10%;">ID</th>
+<th style="width: 70%;">Descrição do Requisito</th>
+<th style="width: 20%;">Pergunta Origem</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><input type="text" class="rf-id" placeholder="RF-01" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px;"></td>
+<td><textarea class="rf-desc" placeholder="Descreva o requisito funcional..." style="min-height: 60px; margin: 0;"></textarea></td>
+<td><input type="number" class="rf-orig" placeholder="#" min="1" max="12" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px;"></td>
+</tr>
+<tr>
+<td><input type="text" class="rf-id" placeholder="RF-02" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px;"></td>
+<td><textarea class="rf-desc" placeholder="Descreva o requisito funcional..." style="min-height: 60px; margin: 0;"></textarea></td>
+<td><input type="number" class="rf-orig" placeholder="#" min="1" max="12" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px;"></td>
+</tr>
+<tr>
+<td><input type="text" class="rf-id" placeholder="RF-03" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px;"></td>
+<td><textarea class="rf-desc" placeholder="Descreva o requisito funcional..." style="min-height: 60px; margin: 0;"></textarea></td>
+<td><input type="number" class="rf-orig" placeholder="#" min="1" max="12" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px;"></td>
+</tr>
+</tbody>
+</table>
+
+<h3 style="color: var(--secondary); margin-top: 30px;">⚡ Requisitos Não-Funcionais (NF)</h3>
+<p style="font-size: 0.9rem; color: var(--text-light);">Como o sistema se comporta (qualidade)</p>
+<table id="tblNaoFuncionais">
+<thead>
+<tr>
+<th style="width: 10%;">ID</th>
+<th style="width: 70%;">Descrição do Requisito</th>
+<th style="width: 20%;">Pergunta Origem</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><input type="text" class="rnf-id" placeholder="RNF-01" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px;"></td>
+<td><textarea class="rnf-desc" placeholder="Descreva o requisito não-funcional..." style="min-height: 60px; margin: 0;"></textarea></td>
+<td><input type="number" class="rnf-orig" placeholder="#" min="1" max="12" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px;"></td>
+</tr>
+<tr>
+<td><input type="text" class="rnf-id" placeholder="RNF-02" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px;"></td>
+<td><textarea class="rnf-desc" placeholder="Descreva o requisito não-funcional..." style="min-height: 60px; margin: 0;"></textarea></td>
+<td><input type="number" class="rnf-orig" placeholder="#" min="1" max="12" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px;"></td>
+</tr>
+<tr>
+<td><input type="text" class="rnf-id" placeholder="RNF-03" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px;"></td>
+<td><textarea class="rnf-desc" placeholder="Descreva o requisito não-funcional..." style="min-height: 60px; margin: 0;"></textarea></td>
+<td><input type="number" class="rnf-orig" placeholder="#" min="1" max="12" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px;"></td>
+</tr>
+</tbody>
+</table>
+
+<h3 style="color: var(--success); margin-top: 30px;">👤 Requisitos de Usuário (U)</h3>
+<p style="font-size: 0.9rem; color: var(--text-light);">O que o usuário precisa alcançar</p>
+<table id="tblUsuario">
+<thead>
+<tr>
+<th style="width: 10%;">ID</th>
+<th style="width: 70%;">Descrição do Requisito</th>
+<th style="width: 20%;">Pergunta Origem</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><input type="text" class="ru-id" placeholder="RU-01" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px;"></td>
+<td><textarea class="ru-desc" placeholder="Descreva o requisito de usuário..." style="min-height: 60px; margin: 0;"></textarea></td>
+<td><input type="number" class="ru-orig" placeholder="#" min="1" max="12" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px;"></td>
+</tr>
+<tr>
+<td><input type="text" class="ru-id" placeholder="RU-02" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px;"></td>
+<td><textarea class="ru-desc" placeholder="Descreva o requisito de usuário..." style="min-height: 60px; margin: 0;"></textarea></td>
+<td><input type="number" class="ru-orig" placeholder="#" min="1" max="12" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px;"></td>
+</tr>
+<tr>
+<td><input type="text" class="ru-id" placeholder="RU-03" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px;"></td>
+<td><textarea class="ru-desc" placeholder="Descreva o requisito de usuário..." style="min-height: 60px; margin: 0;"></textarea></td>
+<td><input type="number" class="ru-orig" placeholder="#" min="1" max="12" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px;"></td>
+</tr>
+</tbody>
+</table>
+<button class="action-btn" onclick="exportRequirements()">💾 Salvar PDF</button>
+</div>
+</section>
+
+<!-- 9. Resumo -->
+<section id="resumo">
+<h2>✅ Resumo Final</h2>
+<p>Parabéns por completar esta aula completa de Levantamento de Requisitos! Você aprendeu:</p>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin: 30px 0;">
+<div style="background: linear-gradient(135deg, #d1fae5, #a7f3d0); padding: 25px; border-radius: 12px;">
+<h4 style="color: #065f46; margin-bottom: 10px;">🎯 Identificação</h4>
+<p style="margin: 0; font-size: 0.9rem;">Como identificar stakeholders e suas necessidades reais de negócio</p>
+</div>
+<div style="background: linear-gradient(135deg, #dbeafe, #bfdbfe); padding: 25px; border-radius: 12px;">
+<h4 style="color: #1e40af; margin-bottom: 10px;">📋 Classificação</h4>
+<p style="margin: 0; font-size: 0.9rem;">Diferença entre requisitos Funcionais, Não-Funcionais e de Usuário</p>
+</div>
+<div style="background: linear-gradient(135deg, #fef3c7, #fde68a); padding: 25px; border-radius: 12px;">
+<h4 style="color: #92400e; margin-bottom: 10px;">🤖 IA como Ferramenta</h4>
+<p style="margin: 0; font-size: 0.9rem;">Como usar LLMs para simular entrevistas e extrair requisitos</p>
+</div>
+</div>
+<div class="info-box info">
+<span class="icon">📚</span>
+<div>
+<strong>Próxima Aula:</strong> Modelagem UML - Transformando esses requisitos em Diagramas de Caso de Uso e Diagrama de Classes!
+</div>
+</div>
+<div style="text-align: center; margin-top: 40px;">
+<button class="action-btn" onclick="concluirAula()">🏆 Concluir Aula</button>
+</div>
+</section>
+</main>
+</div>
+
+<footer>
+<h4>🎓 Análise e Projeto de Sistemas</h4>
+<p>UNISENAI MT - Centro Universitário SENAI Mato Grosso</p>
+<p>Curso Superior de Tecnologia em Análise e Desenvolvimento de Sistemas</p>
+<div class="badges">
+<span class="badge badge-f">2026/1</span>
+<span class="badge badge-nf">5º Semestre</span>
+<span class="badge badge-u">60h</span>
+</div>
+<p style="font-size: 0.85rem; margin-top: 20px; opacity: 0.7;">Desenvolvido com práticas modernas de ensino para futuros líderes de tecnologia</p>
+</footer>
+
+<script>
+// --- Geração de ID Único ---
+function generateUniqueId() {
+    const timestamp = Date.now();
+    const random = Math.random().toString(36).substring(2, 8).toUpperCase();
+    return `DOC-${timestamp}-${random}`;
+}
+
+// --- Gerenciamento de Auto-save (localStorage) ---
+function saveAllData() {
+    const data = {
+        studentNames: document.getElementById('studentNames').value,
+        docId: document.getElementById('docIdValue').innerText,
+        answers: [],
+        functionalReqs: [],
+        nonFunctionalReqs: [],
+        userReqs: []
+    };
+    
+    // Salvar respostas das perguntas
+    document.querySelectorAll('.question-card').forEach((card, idx) => {
+        const answer = card.querySelector('.answer-input').value;
+        data.answers.push(answer);
+    });
+    
+    // Salvar requisitos funcionais
+    document.querySelectorAll('#tblFuncionais tbody tr').forEach(row => {
+        data.functionalReqs.push({
+            id: row.querySelector('.rf-id').value,
+            desc: row.querySelector('.rf-desc').value,
+            orig: row.querySelector('.rf-orig').value
+        });
+    });
+    
+    // Salvar requisitos não-funcionais
+    document.querySelectorAll('#tblNaoFuncionais tbody tr').forEach(row => {
+        data.nonFunctionalReqs.push({
+            id: row.querySelector('.rnf-id').value,
+            desc: row.querySelector('.rnf-desc').value,
+            orig: row.querySelector('.rnf-orig').value
+        });
+    });
+    
+    // Salvar requisitos de usuário
+    document.querySelectorAll('#tblUsuario tbody tr').forEach(row => {
+        data.userReqs.push({
+            id: row.querySelector('.ru-id').value,
+            desc: row.querySelector('.ru-desc').value,
+            orig: row.querySelector('.ru-orig').value
+        });
+    });
+    
+    localStorage.setItem('requisitosData', JSON.stringify(data));
+}
+
+function loadAllData() {
+    const saved = localStorage.getItem('requisitosData');
+    if (!saved) return;
+    
+    const data = JSON.parse(saved);
+    
+    // Carregar nomes dos alunos
+    if (data.studentNames) document.getElementById('studentNames').value = data.studentNames;
+    // Carregar ID do documento (se existir, senão mantém o gerado)
+    if (data.docId) document.getElementById('docIdValue').innerText = data.docId;
+    
+    // Carregar respostas das perguntas
+    if (data.answers && data.answers.length) {
+        const answers = data.answers;
+        document.querySelectorAll('.question-card').forEach((card, idx) => {
+            if (answers[idx] !== undefined) {
+                card.querySelector('.answer-input').value = answers[idx];
+            }
+        });
+    }
+    
+    // Carregar requisitos funcionais
+    if (data.functionalReqs && data.functionalReqs.length) {
+        const rows = document.querySelectorAll('#tblFuncionais tbody tr');
+        data.functionalReqs.forEach((req, idx) => {
+            if (rows[idx]) {
+                rows[idx].querySelector('.rf-id').value = req.id || '';
+                rows[idx].querySelector('.rf-desc').value = req.desc || '';
+                rows[idx].querySelector('.rf-orig').value = req.orig || '';
+            }
+        });
+    }
+    
+    // Carregar requisitos não-funcionais
+    if (data.nonFunctionalReqs && data.nonFunctionalReqs.length) {
+        const rows = document.querySelectorAll('#tblNaoFuncionais tbody tr');
+        data.nonFunctionalReqs.forEach((req, idx) => {
+            if (rows[idx]) {
+                rows[idx].querySelector('.rnf-id').value = req.id || '';
+                rows[idx].querySelector('.rnf-desc').value = req.desc || '';
+                rows[idx].querySelector('.rnf-orig').value = req.orig || '';
+            }
+        });
+    }
+    
+    // Carregar requisitos de usuário
+    if (data.userReqs && data.userReqs.length) {
+        const rows = document.querySelectorAll('#tblUsuario tbody tr');
+        data.userReqs.forEach((req, idx) => {
+            if (rows[idx]) {
+                rows[idx].querySelector('.ru-id').value = req.id || '';
+                rows[idx].querySelector('.ru-desc').value = req.desc || '';
+                rows[idx].querySelector('.ru-orig').value = req.orig || '';
+            }
+        });
+    }
+}
+
+// Auto-save em todos os campos editáveis
+function attachAutoSaveListeners() {
+    const elements = document.querySelectorAll('textarea, input[type="text"], input[type="number"]');
+    elements.forEach(el => {
+        el.addEventListener('input', () => saveAllData());
+    });
+    // Especificamente para os nomes dos alunos
+    document.getElementById('studentNames').addEventListener('input', () => saveAllData());
+}
+
+// --- Geração de Conteúdo para PDF ---
+function generatePdfContent() {
+    const date = new Date().toLocaleDateString('pt-BR');
+    const studentNames = document.getElementById('studentNames').value.trim();
+    const docId = document.getElementById('docIdValue').innerText;
+    
+    // Coletar perguntas e respostas
+    let questionsHtml = '';
+    const questionCards = document.querySelectorAll('.question-card');
+    questionCards.forEach((card, idx) => {
+        const num = idx + 1;
+        const text = card.querySelector('.question-text').innerText;
+        const answer = card.querySelector('.answer-input').value.trim() || '(Sem resposta)';
+        questionsHtml += `
+            <div class="pdf-question">
+                <div>
+                    <span class="pdf-question-number">${num}</span>
+                    <span class="pdf-question-text">${text}</span>
+                </div>
+                <div class="pdf-answer">
+                    <div class="pdf-answer-label">📝 Resposta:</div>
+                    ${answer}
+                </div>
+            </div>
+        `;
+    });
+    
+    // Coletar requisitos funcionais
+    let rfRows = '';
+    document.querySelectorAll('#tblFuncionais tbody tr').forEach(row => {
+        const id = row.querySelector('.rf-id').value.trim();
+        const desc = row.querySelector('.rf-desc').value.trim();
+        const orig = row.querySelector('.rf-orig').value.trim();
+        if (id || desc || orig) {
+            rfRows += `<tr><td>${id || '—'}</td><td>${desc || '—'}</td><td>${orig || '—'}</td></tr>`;
+        }
+    });
+    if (!rfRows) rfRows = '<tr><td colspan="3" style="text-align: center;">Nenhum requisito funcional registrado</td></tr>';
+    
+    // Coletar requisitos não-funcionais
+    let rnfRows = '';
+    document.querySelectorAll('#tblNaoFuncionais tbody tr').forEach(row => {
+        const id = row.querySelector('.rnf-id').value.trim();
+        const desc = row.querySelector('.rnf-desc').value.trim();
+        const orig = row.querySelector('.rnf-orig').value.trim();
+        if (id || desc || orig) {
+            rnfRows += `<tr><td>${id || '—'}</td><td>${desc || '—'}</td><td>${orig || '—'}</td></tr>`;
+        }
+    });
+    if (!rnfRows) rnfRows = '<tr><td colspan="3" style="text-align: center;">Nenhum requisito não-funcional registrado</td></tr>';
+    
+    // Coletar requisitos de usuário
+    let ruRows = '';
+    document.querySelectorAll('#tblUsuario tbody tr').forEach(row => {
+        const id = row.querySelector('.ru-id').value.trim();
+        const desc = row.querySelector('.ru-desc').value.trim();
+        const orig = row.querySelector('.ru-orig').value.trim();
+        if (id || desc || orig) {
+            ruRows += `<tr><td>${id || '—'}</td><td>${desc || '—'}</td><td>${orig || '—'}</td></tr>`;
+        }
+    });
+    if (!ruRows) ruRows = '<tr><td colspan="3" style="text-align: center;">Nenhum requisito de usuário registrado</td></tr>';
+    
+    return `
+        <div style="padding: 40px; max-width: 800px; margin: 0 auto; background: white; font-family: 'Inter', sans-serif;">
+            <div class="pdf-header">
+                <h1>📋 Levantamento de Requisitos</h1>
+                <p style="font-size: 1.2rem; color: var(--primary);">Rede Saúde & Vida</p>
+                <div class="meta">
+                    <p><strong>Disciplina:</strong> Análise e Projeto de Sistemas</p>
+                    <p><strong>Instituição:</strong> UNISENAI MT - Centro Universitário SENAI Mato Grosso</p>
+                    <p><strong>Curso:</strong> Análise e Desenvolvimento de Sistemas | 5º Semestre</p>
+                    <p><strong>Data:</strong> ${date}</p>
+                    <p><strong>ID do Documento:</strong> ${docId}</p>
+                    <p><strong>Alunos:</strong> ${studentNames.replace(/\n/g, '<br>') || 'Não informado'}</p>
+                </div>
+            </div>
+            
+            <div class="pdf-section">
+                <h2>❓ Perguntas e Respostas da Entrevista</h2>
+                ${questionsHtml}
+            </div>
+            
+            <div class="pdf-section">
+                <h2>📝 Requisitos Funcionais (F)</h2>
+                <p style="font-size: 0.85rem; color: var(--text-light);">O que o sistema DEVE fazer</p>
+                <table class="pdf-requirements-table">
+                    <thead><tr><th>ID</th><th>Descrição do Requisito</th><th>Pergunta Origem</th></tr></thead>
+                    <tbody>${rfRows}</tbody>
+                </table>
+            </div>
+            
+            <div class="pdf-section">
+                <h2>⚡ Requisitos Não-Funcionais (NF)</h2>
+                <p style="font-size: 0.85rem; color: var(--text-light);">Como o sistema se comporta (qualidade)</p>
+                <table class="pdf-requirements-table">
+                    <thead><tr><th>ID</th><th>Descrição do Requisito</th><th>Pergunta Origem</th></tr></thead>
+                    <tbody>${rnfRows}</tbody>
+                </table>
+            </div>
+            
+            <div class="pdf-section">
+                <h2>👤 Requisitos de Usuário (U)</h2>
+                <p style="font-size: 0.85rem; color: var(--text-light);">O que o usuário precisa alcançar</p>
+                <table class="pdf-requirements-table">
+                    <thead><tr><th>ID</th><th>Descrição do Requisito</th><th>Pergunta Origem</th></tr></thead>
+                    <tbody>${ruRows}</tbody>
+                </table>
+            </div>
+            
+            <div class="pdf-footer">
+                <p><strong>Documento gerado automaticamente pela Plataforma de Ensino Interativo</strong></p>
+                <p>UNISENAI MT | 2026/1 | Análise e Projeto de Sistemas</p>
+            </div>
+        </div>
+    `;
+}
+
+// --- Exportar PDF (apenas exibe, sem download automático) ---
+function exportRequirements() {
+    // Salvar dados antes de gerar a visualização
+    saveAllData();
+    
+    const pdfContainer = document.getElementById('pdf-export-container');
+    const pdfContentDiv = document.getElementById('pdf-content');
+    
+    // Gerar conteúdo atualizado
+    pdfContentDiv.innerHTML = generatePdfContent();
+    
+    // Mostrar container (agora apenas visual)
+    pdfContainer.classList.add('visible');
+    
+    // Rolar suavemente para o início do container
+    pdfContainer.scrollIntoView({ behavior: 'smooth' });
+}
+
+function closePdfExport() {
+    document.getElementById('pdf-export-container').classList.remove('visible');
+}
+
+// --- Concluir Aula (redirecionar) ---
+function concluirAula() {
+    saveAllData(); // garantir que dados são salvos antes de sair
+    window.location.href = 'Aula2.php';
+}
+
+// --- Inicialização e listeners ---
+document.addEventListener('DOMContentLoaded', () => {
+    // Gerar ID único se não existir no localStorage
+    let savedId = null;
+    const savedData = localStorage.getItem('requisitosData');
+    if (savedData) {
+        try {
+            const parsed = JSON.parse(savedData);
+            savedId = parsed.docId;
+        } catch(e) {}
+    }
+    const docIdSpan = document.getElementById('docIdValue');
+    if (savedId) {
+        docIdSpan.innerText = savedId;
+    } else {
+        const newId = generateUniqueId();
+        docIdSpan.innerText = newId;
+        saveAllData(); // salvar o ID recém-criado
+    }
+    
+    // Carregar dados salvos
+    loadAllData();
+    
+    // Configurar auto-save
+    attachAutoSaveListeners();
+    
+    // Revelar seções ao scroll
+    revealSections();
+});
+
+// --- Funções existentes mantidas (scroll, tabs, simulador, copy, etc.) ---
+window.onscroll = function() {
+    let winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+    let height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    let scrolled = (winScroll / height) * 100;
+    document.getElementById("progress-bar").style.width = scrolled + "%";
+    updateActiveLink();
+    revealSections();
+};
+
+function revealSections() {
+    const sections = document.querySelectorAll('section');
+    sections.forEach(section => {
+        const rect = section.getBoundingClientRect();
+        if (rect.top < window.innerHeight - 100) {
+            section.classList.add('visible');
+        }
+    });
+}
+
+function updateActiveLink() {
+    const sections = document.querySelectorAll('section');
+    const navLinks = document.querySelectorAll('.nav-link');
+    let current = '';
+    sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        if (scrollY >= sectionTop - 150) {
+            current = section.getAttribute('id');
+        }
+    });
+    navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href').includes(current)) {
+            link.classList.add('active');
+        }
+    });
+}
+
+function openTab(evt, tabName) {
+    let i, tabcontent, tablinks;
+    tabcontent = document.getElementsByClassName("tab-content");
+    for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+        tabcontent[i].classList.remove("active");
+    }
+    tablinks = document.getElementsByClassName("tab-btn");
+    for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+    document.getElementById(tabName).style.display = "block";
+    setTimeout(() => document.getElementById(tabName).classList.add("active"), 10);
+    evt.currentTarget.className += " active";
+}
+
+function handleChoice(choice) {
+    const chatBox = document.getElementById('chatBox');
+    const controls = document.getElementById('controlsArea');
+    const feedback = document.getElementById('feedbackArea');
+    let userText = "";
+    let aiResponse = "";
+    let isCorrect = false;
+    if (choice === 1) {
+        userText = "Quais são os principais desafios na gestão hoje que o sistema deve resolver?";
+        aiResponse = "<strong>Maria Eduarda:</strong> 'Excelente pergunta! O maior desafio é a falta de visão unificada. Hoje, demoro 3 dias para saber o estoque total. Se o sistema resolver isso, já valeu o investimento.'";
+        isCorrect = true;
+    } else if (choice === 2) {
+        userText = "Você prefere que o sistema seja feito em Java ou Python?";
+        aiResponse = "<strong>Maria Eduarda:</strong> 'Humm... sinceramente? Eu não sei a diferença. Isso não é com você, técnico? Eu só quero que funcione e não seja caro.'";
+        isCorrect = false;
+    } else {
+        userText = "Podemos começar codificando a tela de login amanhã?";
+        aiResponse = "<strong>Maria Eduarda:</strong> 'Calma lá! Nem sabemos direito o que o sistema precisa fazer. Primeiro entenda meu negócio!'";
+        isCorrect = false;
+    }
+    const userMsg = document.createElement('div');
+    userMsg.className = 'message msg-user';
+    userMsg.innerText = userText;
+    chatBox.appendChild(userMsg);
+    setTimeout(() => {
+        const aiMsg = document.createElement('div');
+        aiMsg.className = 'message msg-ai';
+        aiMsg.innerHTML = aiResponse;
+        chatBox.appendChild(aiMsg);
+        chatBox.scrollTop = chatBox.scrollHeight;
+        if (isCorrect) {
+            feedback.innerHTML = "<span style='color: var(--success)'>✅ Correto! Você focou na dor do negócio (Requisito de Usuário).</span>";
+            feedback.style.background = '#d1fae5';
+            controls.style.pointerEvents = 'none';
+        } else {
+            feedback.innerHTML = "<span style='color: var(--warning)'>⚠️ Atenção: Foque nas necessidades do negócio, não na solução técnica ainda.</span>";
+            feedback.style.background = '#fef3c7';
+        }
+    }, 800);
+}
+
+function copyPrompt() {
+    const promptText = document.getElementById('promptText').innerText;
+    navigator.clipboard.writeText(promptText).then(() => {
+        const btn = document.querySelector('.copy-prompt-btn');
+        btn.innerText = '✅ Copiado!';
+        btn.style.background = 'var(--success)';
+        setTimeout(() => {
+            btn.innerText = '📋 Copiar Prompt';
+            btn.style.background = 'var(--primary)';
+        }, 2000);
+    });
+}
+
+document.querySelectorAll('pre').forEach(block => {
+    if (!block.querySelector('.copy-btn')) {
+        const btn = document.createElement('button');
+        btn.className = 'copy-btn';
+        btn.innerText = '📋 Copiar';
+        btn.onclick = () => {
+            navigator.clipboard.writeText(block.querySelector('code').innerText);
+            btn.innerText = '✅ Copiado!';
+            setTimeout(() => btn.innerText = '📋 Copiar', 2000);
+        };
+        block.appendChild(btn);
+    }
+});
+</script>
+</body>
+</html>

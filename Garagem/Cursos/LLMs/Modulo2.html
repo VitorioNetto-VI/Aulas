@@ -1,0 +1,3053 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IA na Prática - Módulo 2: Arquitetura de Agentes com Qwen AI</title>
+<link href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/400.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/600.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/700.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@fontsource/fira-code@5.1.0/400.css" rel="stylesheet">
+<style>
+:root {
+--primary: #6C63FF;
+--primary-dark: #5A52D5;
+--primary-light: #8B85FF;
+--secondary: #00D9FF;
+--success: #10B981;
+--success-light: #D1FAE5;
+--success-dark: #065F46;
+--warning: #F59E0B;
+--warning-light: #FEF3C7;
+--warning-dark: #92400E;
+--danger: #EF4444;
+--danger-light: #FEE2E2;
+--danger-dark: #991B1B;
+--info: #3B82F6;
+--info-light: #DBEAFE;
+--info-dark: #1E40AF;
+--bg-gradient-start: #1a1040;
+--bg-gradient-mid: #2d1b69;
+--bg-gradient-end: #1e3a5f;
+--card-bg: #FFFFFF;
+--text-primary: #1F2937;
+--text-secondary: #6B7280;
+--text-light: #9CA3AF;
+--code-bg: #1e1e2e;
+--sidebar-width: 280px;
+--header-height: 60px;
+--border-radius-card: 16px;
+--border-radius-element: 8px;
+--shadow-card: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+--shadow-card-hover: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+--shadow-elevated: 0 25px 50px -12px rgba(0,0,0,0.25);
+--transition-fast: 0.2s ease;
+--transition-normal: 0.3s ease;
+--transition-slow: 0.5s ease;
+}
+
+* {
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+html {
+scroll-behavior: smooth;
+scroll-padding-top: var(--header-height);
+}
+
+body {
+font-family: 'Inter', sans-serif;
+background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-mid) 50%, var(--bg-gradient-end) 100%);
+color: var(--text-primary);
+line-height: 1.7;
+min-height: 100vh;
+}
+
+.progress-bar {
+position: fixed;
+top: 0;
+left: 0;
+width: 0%;
+height: 4px;
+background: linear-gradient(90deg, var(--primary), var(--secondary), var(--primary-light));
+z-index: 10000;
+transition: width 0.1s linear;
+border-radius: 0 2px 2px 0;
+box-shadow: 0 0 10px rgba(108, 99, 255, 0.5);
+}
+
+.header {
+position: fixed;
+top: 4px;
+left: 0;
+right: 0;
+height: var(--header-height);
+background: rgba(26, 16, 64, 0.95);
+backdrop-filter: blur(20px);
+-webkit-backdrop-filter: blur(20px);
+z-index: 9999;
+display: flex;
+align-items: center;
+justify-content: space-between;
+padding: 0 24px;
+border-bottom: 1px solid rgba(108, 99, 255, 0.2);
+}
+
+.header-logo {
+display: flex;
+align-items: center;
+gap: 12px;
+color: white;
+font-weight: 700;
+font-size: 1.1rem;
+}
+
+.header-logo .logo-icon {
+width: 36px;
+height: 36px;
+background: linear-gradient(135deg, var(--primary), var(--secondary));
+border-radius: 10px;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 1.2rem;
+}
+
+.header-nav {
+display: flex;
+align-items: center;
+gap: 16px;
+}
+
+.header-nav .badge-timer {
+background: rgba(108, 99, 255, 0.2);
+color: var(--primary-light);
+padding: 6px 14px;
+border-radius: 20px;
+font-size: 0.85rem;
+font-weight: 600;
+display: flex;
+align-items: center;
+gap: 6px;
+}
+
+.header-nav .badge-level {
+background: rgba(0, 217, 255, 0.2);
+color: var(--secondary);
+padding: 6px 14px;
+border-radius: 20px;
+font-size: 0.85rem;
+font-weight: 600;
+}
+
+.menu-toggle {
+display: none;
+background: none;
+border: none;
+color: white;
+font-size: 1.5rem;
+cursor: pointer;
+padding: 8px;
+}
+
+.sidebar {
+position: fixed;
+top: calc(var(--header-height) + 4px);
+left: 0;
+width: var(--sidebar-width);
+height: calc(100vh - var(--header-height) - 4px);
+background: rgba(26, 16, 64, 0.6);
+backdrop-filter: blur(10px);
+-webkit-backdrop-filter: blur(10px);
+z-index: 9998;
+overflow-y: auto;
+padding: 24px 16px;
+border-right: 1px solid rgba(108, 99, 255, 0.15);
+transition: transform var(--transition-normal);
+}
+
+.sidebar::-webkit-scrollbar {
+width: 4px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+background: rgba(108, 99, 255, 0.3);
+border-radius: 2px;
+}
+
+.sidebar-title {
+color: var(--text-light);
+font-size: 0.7rem;
+text-transform: uppercase;
+letter-spacing: 2px;
+font-weight: 700;
+margin-bottom: 16px;
+padding-left: 12px;
+}
+
+.sidebar-nav {
+list-style: none;
+}
+
+.sidebar-nav li {
+margin-bottom: 2px;
+}
+
+.sidebar-nav a {
+display: flex;
+align-items: center;
+gap: 10px;
+padding: 10px 12px;
+color: rgba(255,255,255,0.7);
+text-decoration: none;
+border-radius: var(--border-radius-element);
+font-size: 0.9rem;
+transition: all var(--transition-fast);
+position: relative;
+}
+
+.sidebar-nav a:hover,
+.sidebar-nav a.active {
+color: white;
+background: rgba(108, 99, 255, 0.2);
+}
+
+.sidebar-nav a.active::before {
+content: '';
+position: absolute;
+left: 0;
+top: 50%;
+transform: translateY(-50%);
+width: 3px;
+height: 60%;
+background: var(--primary);
+border-radius: 0 3px 3px 0;
+}
+
+.sidebar-nav a .nav-icon {
+font-size: 1.1rem;
+width: 24px;
+text-align: center;
+flex-shrink: 0;
+}
+
+.sidebar-nav a .nav-section-num {
+background: rgba(108, 99, 255, 0.15);
+color: var(--primary-light);
+font-size: 0.7rem;
+font-weight: 700;
+padding: 2px 8px;
+border-radius: 10px;
+margin-left: auto;
+}
+
+.main-content {
+margin-left: var(--sidebar-width);
+padding-top: calc(var(--header-height) + 4px);
+min-height: 100vh;
+}
+
+.content-wrapper {
+max-width: 900px;
+margin: 0 auto;
+padding: 40px 48px 80px;
+}
+
+.hero {
+text-align: center;
+padding: 60px 0 40px;
+}
+
+.hero-badge {
+display: inline-flex;
+align-items: center;
+gap: 8px;
+background: rgba(0, 217, 255, 0.15);
+border: 1px solid rgba(0, 217, 255, 0.3);
+color: var(--secondary);
+padding: 8px 20px;
+border-radius: 30px;
+font-size: 0.85rem;
+font-weight: 600;
+margin-bottom: 24px;
+}
+
+.hero h1 {
+font-size: 2.8rem;
+font-weight: 700;
+color: white;
+margin-bottom: 12px;
+line-height: 1.2;
+}
+
+.hero h1 span {
+background: linear-gradient(135deg, var(--secondary), var(--primary-light));
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+background-clip: text;
+}
+
+.hero-subtitle {
+font-size: 1.15rem;
+color: rgba(255,255,255,0.6);
+max-width: 600px;
+margin: 0 auto 32px;
+line-height: 1.6;
+}
+
+.hero-image {
+max-width: 800px;
+width: 100%;
+margin: 0 auto 40px;
+border-radius: var(--border-radius-card);
+overflow: hidden;
+box-shadow: var(--shadow-elevated);
+border: 2px solid rgba(0, 217, 255, 0.2);
+}
+
+.hero-image img {
+width: 100%;
+display: block;
+}
+
+.hero-meta {
+display: flex;
+justify-content: center;
+gap: 24px;
+flex-wrap: wrap;
+}
+
+.hero-meta-item {
+display: flex;
+align-items: center;
+gap: 8px;
+color: rgba(255,255,255,0.5);
+font-size: 0.9rem;
+}
+
+.hero-meta-item span:first-child {
+font-size: 1.1rem;
+}
+
+.section {
+margin-bottom: 56px;
+opacity: 0;
+transform: translateY(30px);
+transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.section.visible {
+opacity: 1;
+transform: translateY(0);
+}
+
+.section-header {
+display: flex;
+align-items: center;
+gap: 16px;
+margin-bottom: 28px;
+}
+
+.section-number {
+width: 48px;
+height: 48px;
+background: linear-gradient(135deg, var(--secondary), #00a8cc);
+color: white;
+border-radius: 14px;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 1.2rem;
+font-weight: 700;
+flex-shrink: 0;
+box-shadow: 0 4px 15px rgba(0, 217, 255, 0.4);
+}
+
+.section-title {
+font-size: 1.8rem;
+font-weight: 700;
+color: white;
+line-height: 1.3;
+}
+
+.section-title small {
+display: block;
+font-size: 0.75rem;
+color: var(--secondary);
+font-weight: 600;
+text-transform: uppercase;
+letter-spacing: 1.5px;
+margin-bottom: 4px;
+}
+
+.card {
+background: var(--card-bg);
+border-radius: var(--border-radius-card);
+padding: 28px 32px;
+margin-bottom: 20px;
+box-shadow: var(--shadow-card);
+transition: all var(--transition-normal);
+border: 1px solid rgba(0,0,0,0.05);
+}
+
+.card:hover {
+box-shadow: var(--shadow-card-hover);
+transform: translateY(-2px);
+}
+
+.card-title {
+font-size: 1.15rem;
+font-weight: 700;
+color: var(--text-primary);
+margin-bottom: 12px;
+display: flex;
+align-items: center;
+gap: 10px;
+}
+
+.card-title .card-icon {
+font-size: 1.3rem;
+}
+
+.card p {
+color: var(--text-secondary);
+line-height: 1.8;
+}
+
+.card p + p {
+margin-top: 12px;
+}
+
+.info-box {
+border-radius: var(--border-radius-element);
+padding: 20px 24px;
+margin: 20px 0;
+display: flex;
+gap: 14px;
+align-items: flex-start;
+border-left: 4px solid;
+}
+
+.info-box .info-icon {
+font-size: 1.3rem;
+flex-shrink: 0;
+margin-top: 2px;
+}
+
+.info-box .info-content {
+flex: 1;
+}
+
+.info-box .info-label {
+font-weight: 700;
+font-size: 0.85rem;
+text-transform: uppercase;
+letter-spacing: 1px;
+margin-bottom: 4px;
+}
+
+.info-box .info-text {
+font-size: 0.95rem;
+line-height: 1.7;
+}
+
+.info-box.info-success {
+background: var(--success-light);
+border-color: var(--success);
+color: var(--success-dark);
+}
+
+.info-box.info-warning {
+background: var(--warning-light);
+border-color: var(--warning);
+color: var(--warning-dark);
+}
+
+.info-box.info-danger {
+background: var(--danger-light);
+border-color: var(--danger);
+color: var(--danger-dark);
+}
+
+.info-box.info-info {
+background: var(--info-light);
+border-color: var(--info);
+color: var(--info-dark);
+}
+
+.code-block {
+background: var(--code-bg);
+border-radius: var(--border-radius-card);
+margin: 20px 0;
+overflow: hidden;
+box-shadow: var(--shadow-card);
+border: 1px solid rgba(0, 217, 255, 0.15);
+}
+
+.code-block-header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 12px 20px;
+background: rgba(0, 217, 255, 0.1);
+border-bottom: 1px solid rgba(0, 217, 255, 0.1);
+}
+
+.code-block-lang {
+display: flex;
+align-items: center;
+gap: 8px;
+color: var(--secondary);
+font-size: 0.8rem;
+font-weight: 600;
+text-transform: uppercase;
+letter-spacing: 1px;
+}
+
+.code-block-lang .lang-dot {
+width: 8px;
+height: 8px;
+border-radius: 50%;
+}
+
+.copy-btn {
+background: rgba(255,255,255,0.1);
+border: 1px solid rgba(255,255,255,0.15);
+color: rgba(255,255,255,0.6);
+padding: 6px 14px;
+border-radius: 6px;
+cursor: pointer;
+font-size: 0.8rem;
+font-family: 'Inter', sans-serif;
+font-weight: 600;
+display: flex;
+align-items: center;
+gap: 6px;
+transition: all var(--transition-fast);
+position: relative;
+}
+
+.copy-btn:hover {
+background: rgba(0, 217, 255, 0.3);
+color: white;
+border-color: rgba(0, 217, 255, 0.5);
+}
+
+.copy-btn.copied {
+background: rgba(16, 185, 129, 0.3);
+color: var(--success);
+border-color: rgba(16, 185, 129, 0.5);
+}
+
+.copy-btn .copy-tooltip {
+position: absolute;
+bottom: calc(100% + 8px);
+right: 0;
+background: var(--text-primary);
+color: white;
+padding: 4px 10px;
+border-radius: 4px;
+font-size: 0.7rem;
+white-space: nowrap;
+opacity: 0;
+pointer-events: none;
+transition: opacity var(--transition-fast);
+}
+
+.copy-btn .copy-tooltip.show {
+opacity: 1;
+}
+
+.code-block pre {
+padding: 20px;
+overflow-x: auto;
+font-family: 'Fira Code', monospace;
+font-size: 0.9rem;
+line-height: 1.7;
+color: #cdd6f4;
+}
+
+.code-block code {
+font-family: 'Fira Code', monospace;
+}
+
+.token-keyword { color: #cba6f7; }
+.token-string { color: #a6e3a1; }
+.token-comment { color: #6c7086; font-style: italic; }
+.token-function { color: #89b4fa; }
+.token-operator { color: #f38ba8; }
+.token-number { color: #fab387; }
+.token-type { color: #89dceb; }
+.token-variable { color: #f5c2e7; }
+
+.tabs-container {
+margin: 24px 0;
+}
+
+.tabs-header {
+display: flex;
+gap: 4px;
+background: rgba(0,0,0,0.05);
+padding: 4px;
+border-radius: 12px;
+margin-bottom: 0;
+overflow-x: auto;
+}
+
+.tab-btn {
+padding: 10px 20px;
+background: transparent;
+border: none;
+border-radius: 8px;
+cursor: pointer;
+font-family: 'Inter', sans-serif;
+font-size: 0.9rem;
+font-weight: 600;
+color: var(--text-secondary);
+transition: all var(--transition-fast);
+white-space: nowrap;
+display: flex;
+align-items: center;
+gap: 6px;
+}
+
+.tab-btn:hover {
+color: var(--text-primary);
+background: rgba(0, 217, 255, 0.1);
+}
+
+.tab-btn.active {
+background: white;
+color: var(--secondary);
+box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.tab-content {
+display: none;
+padding: 24px 0;
+}
+
+.tab-content.active {
+display: block;
+animation: fadeInTab 0.3s ease;
+}
+
+@keyframes fadeInTab {
+from { opacity: 0; transform: translateY(8px); }
+to { opacity: 1; transform: translateY(0); }
+}
+
+.table-wrapper {
+overflow-x: auto;
+margin: 20px 0;
+border-radius: var(--border-radius-card);
+box-shadow: var(--shadow-card);
+}
+
+table {
+width: 100%;
+border-collapse: collapse;
+background: white;
+}
+
+thead th {
+background: linear-gradient(135deg, var(--secondary), #00a8cc);
+color: white;
+padding: 14px 20px;
+text-align: left;
+font-size: 0.85rem;
+font-weight: 700;
+text-transform: uppercase;
+letter-spacing: 0.5px;
+}
+
+tbody td {
+padding: 14px 20px;
+border-bottom: 1px solid #f0f0f0;
+font-size: 0.9rem;
+color: var(--text-secondary);
+}
+
+tbody tr:hover {
+background: rgba(0, 217, 255, 0.04);
+}
+
+tbody tr:last-child td {
+border-bottom: none;
+}
+
+tbody td:first-child {
+font-weight: 600;
+color: var(--text-primary);
+}
+
+.badge {
+display: inline-flex;
+align-items: center;
+gap: 4px;
+padding: 3px 10px;
+border-radius: 12px;
+font-size: 0.75rem;
+font-weight: 700;
+text-transform: uppercase;
+letter-spacing: 0.5px;
+}
+
+.badge-primary { background: rgba(108, 99, 255, 0.15); color: var(--primary); }
+.badge-success { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+.badge-warning { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+.badge-danger { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
+.badge-info { background: rgba(0, 217, 255, 0.15); color: var(--secondary); }
+.badge-cyan { background: rgba(0, 217, 255, 0.15); color: var(--secondary); }
+
+.hint-toggle {
+background: none;
+border: none;
+width: 100%;
+text-align: left;
+padding: 16px 20px;
+display: flex;
+align-items: center;
+gap: 12px;
+cursor: pointer;
+font-family: 'Inter', sans-serif;
+font-size: 0.95rem;
+font-weight: 600;
+color: #25ff00;
+border-radius: var(--border-radius-element);
+transition: all var(--transition-fast);
+}
+
+.hint-toggle:hover {
+background: rgba(0, 217, 255, 0.05);
+}
+
+.hint-toggle .hint-arrow {
+transition: transform var(--transition-fast);
+font-size: 0.8rem;
+color: var(--text-light);
+margin-left: auto;
+}
+
+.hint-toggle.open .hint-arrow {
+transform: rotate(180deg);
+}
+
+.hint-content {
+max-height: 0;
+overflow: hidden;
+transition: max-height 0.4s ease, padding 0.3s ease;
+padding: 0 20px;
+}
+
+.hint-content.open {
+max-height: 500px;
+padding: 0 20px 16px;
+}
+
+.hint-content p {
+color: #ffbf00;
+font-size: 0.9rem;
+line-height: 1.7;
+}
+
+.simulator {
+background: white;
+border-radius: var(--border-radius-card);
+padding: 32px;
+margin: 24px 0;
+box-shadow: var(--shadow-card);
+border: 2px solid rgba(0, 217, 255, 0.2);
+}
+
+.simulator-title {
+font-size: 1.2rem;
+font-weight: 700;
+color: var(--text-primary);
+margin-bottom: 8px;
+display: flex;
+align-items: center;
+gap: 10px;
+}
+
+.simulator-subtitle {
+color: var(--text-secondary);
+font-size: 0.9rem;
+margin-bottom: 24px;
+}
+
+.simulator-field {
+margin-bottom: 16px;
+}
+
+.simulator-field label {
+display: block;
+font-size: 0.85rem;
+font-weight: 700;
+color: var(--text-primary);
+margin-bottom: 6px;
+text-transform: uppercase;
+letter-spacing: 0.5px;
+}
+
+.simulator-field .field-icon {
+margin-right: 4px;
+}
+
+.simulator-field input,
+.simulator-field textarea,
+.simulator-field select {
+width: 100%;
+padding: 12px 16px;
+border: 2px solid #e5e7eb;
+border-radius: var(--border-radius-element);
+font-family: 'Inter', sans-serif;
+font-size: 0.9rem;
+color: var(--text-primary);
+transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+background: #f9fafb;
+}
+
+.simulator-field input:focus,
+.simulator-field textarea:focus,
+.simulator-field select:focus {
+outline: none;
+border-color: var(--secondary);
+box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.15);
+background: white;
+}
+
+.simulator-field textarea {
+min-height: 80px;
+resize: vertical;
+}
+
+.simulator-result {
+background: var(--code-bg);
+border-radius: var(--border-radius-element);
+padding: 20px;
+margin-top: 20px;
+display: none;
+animation: fadeInTab 0.3s ease;
+}
+
+.simulator-result.visible {
+display: block;
+}
+
+.simulator-result .result-header {
+display: flex;
+align-items: center;
+gap: 8px;
+color: var(--secondary);
+font-size: 0.85rem;
+font-weight: 700;
+margin-bottom: 12px;
+text-transform: uppercase;
+letter-spacing: 1px;
+}
+
+.simulator-result .result-text {
+color: #cdd6f4;
+font-size: 0.95rem;
+line-height: 1.7;
+white-space: pre-wrap;
+}
+
+.simulator-actions {
+display: flex;
+gap: 12px;
+margin-top: 20px;
+}
+
+.btn {
+padding: 12px 28px;
+border: none;
+border-radius: var(--border-radius-element);
+cursor: pointer;
+font-family: 'Inter', sans-serif;
+font-size: 0.95rem;
+font-weight: 700;
+display: flex;
+align-items: center;
+gap: 8px;
+transition: all var(--transition-fast);
+}
+
+.btn-primary {
+background: linear-gradient(135deg, var(--secondary), #00a8cc);
+color: white;
+box-shadow: 0 4px 15px rgba(0, 217, 255, 0.4);
+}
+
+.btn-primary:hover {
+transform: translateY(-2px);
+box-shadow: 0 6px 20px rgba(0, 217, 255, 0.5);
+}
+
+.btn-secondary {
+background: rgba(0, 217, 255, 0.1);
+color: var(--secondary);
+}
+
+.btn-secondary:hover {
+background: rgba(0, 217, 255, 0.2);
+}
+
+.btn-purple {
+background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+color: white;
+box-shadow: 0 4px 15px rgba(108, 99, 255, 0.4);
+}
+
+.btn-purple:hover {
+transform: translateY(-2px);
+}
+
+.challenge-card {
+background: linear-gradient(135deg, rgb(60 81 31 / 73%), rgba(0, 217, 255, 0.05));
+border: 2px solid rgba(0, 217, 255, 0.2);
+border-radius: var(--border-radius-card);
+padding: 32px;
+margin: 24px 0;
+}
+
+.challenge-header {
+display: flex;
+align-items: center;
+gap: 12px;
+margin-bottom: 16px;
+}
+
+.challenge-header .challenge-icon {
+font-size: 2rem;
+}
+
+.challenge-header h3 {
+font-size: 1.3rem;
+font-weight: 700;
+color: #00f1f3;
+}
+
+.challenge-criteria {
+list-style: none;
+margin: 16px 0;
+}
+
+.challenge-criteria li {
+padding: 8px 0;
+display: flex;
+align-items: flex-start;
+gap: 10px;
+color: #0bff42;
+font-size: 0.9rem;
+}
+
+.challenge-criteria li .criteria-icon {
+flex-shrink: 0;
+margin-top: 2px;
+}
+
+.summary-card {
+    background: linear-gradient(135deg, #25045f, #00a8cc);
+    border-radius: var(--border-radius-card);
+    padding: 32px;
+    color: white;
+    margin: 24px 0;
+}
+
+.summary-card h3 {
+font-size: 1.3rem;
+font-weight: 700;
+margin-bottom: 16px;
+display: flex;
+align-items: center;
+gap: 10px;
+}
+
+.summary-list {
+list-style: none;
+}
+
+.summary-list li {
+padding: 10px 0;
+display: flex;
+align-items: flex-start;
+gap: 10px;
+font-size: 0.95rem;
+color: rgba(255,255,255,0.9);
+border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.summary-list li:last-child {
+border-bottom: none;
+}
+
+.summary-list li .check {
+flex-shrink: 0;
+margin-top: 2px;
+}
+
+.next-module {
+background: linear-gradient(135deg, rgba(0, 217, 255, 0.1), rgba(108, 99, 255, 0.1));
+border: 2px solid rgba(0, 217, 255, 0.3);
+border-radius: var(--border-radius-card);
+padding: 28px 32px;
+margin: 24px 0;
+display: flex;
+align-items: center;
+gap: 20px;
+transition: all var(--transition-normal);
+}
+
+.next-module:hover {
+transform: translateY(-2px);
+box-shadow: var(--shadow-card-hover);
+}
+
+.next-module .next-icon {
+width: 56px;
+height: 56px;
+background: linear-gradient(135deg, var(--primary), #7c3aed);
+border-radius: 14px;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 1.5rem;
+flex-shrink: 0;
+}
+
+.next-module .next-info h4 {
+color: var(--text-primary);
+font-size: 1.1rem;
+font-weight: 700;
+margin-bottom: 4px;
+}
+
+.next-module .next-info p {
+color: var(--text-secondary);
+font-size: 0.9rem;
+}
+
+.footer {
+margin-left: var(--sidebar-width);
+background: rgba(15, 10, 30, 0.8);
+backdrop-filter: blur(10px);
+-webkit-backdrop-filter: blur(10px);
+border-top: 1px solid rgba(0, 217, 255, 0.15);
+padding: 32px 48px;
+}
+
+.footer-content {
+max-width: 900px;
+margin: 0 auto;
+display: flex;
+justify-content: space-between;
+align-items: center;
+flex-wrap: wrap;
+gap: 16px;
+}
+
+.footer-left p {
+color: rgba(255,255,255,0.5);
+font-size: 0.85rem;
+}
+
+.footer-left p strong {
+color: rgba(255,255,255,0.8);
+}
+
+.footer-right {
+display: flex;
+gap: 20px;
+}
+
+.footer-right a {
+color: rgba(255,255,255,0.4);
+text-decoration: none;
+font-size: 0.85rem;
+transition: color var(--transition-fast);
+}
+
+.footer-right a:hover {
+color: var(--secondary);
+}
+
+@media (max-width: 768px) {
+.menu-toggle {
+display: block;
+}
+
+.sidebar {
+transform: translateX(-100%);
+z-index: 10001;
+}
+
+.sidebar.open {
+transform: translateX(0);
+}
+
+.sidebar-overlay {
+display: none;
+position: fixed;
+inset: 0;
+background: rgba(0,0,0,0.5);
+z-index: 10000;
+}
+
+.sidebar-overlay.open {
+display: block;
+}
+
+.main-content {
+margin-left: 0;
+}
+
+.content-wrapper {
+padding: 24px 20px 60px;
+}
+
+.footer {
+margin-left: 0;
+padding: 24px 20px;
+}
+
+.hero h1 {
+font-size: 1.8rem;
+}
+
+.hero-subtitle {
+font-size: 1rem;
+}
+
+.section-title {
+font-size: 1.4rem;
+}
+
+.card {
+padding: 20px 24px;
+}
+
+.simulator {
+padding: 20px;
+}
+
+.challenge-card {
+padding: 20px;
+}
+
+.footer-content {
+flex-direction: column;
+text-align: center;
+}
+
+.tabs-header {
+overflow-x: auto;
+}
+
+.tab-btn {
+padding: 8px 14px;
+font-size: 0.8rem;
+}
+
+.next-module {
+flex-direction: column;
+text-align: center;
+}
+}
+
+@media (max-width: 480px) {
+.hero h1 {
+font-size: 1.5rem;
+}
+
+.hero-meta {
+flex-direction: column;
+align-items: center;
+}
+
+.section-header {
+flex-direction: column;
+align-items: flex-start;
+gap: 12px;
+}
+
+.simulator-actions {
+flex-direction: column;
+}
+
+.btn {
+justify-content: center;
+width: 100%;
+}
+}
+
+::-webkit-scrollbar {
+width: 8px;
+}
+
+::-webkit-scrollbar-track {
+background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+background: rgba(0, 217, 255, 0.3);
+border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+background: rgba(0, 217, 255, 0.5);
+}
+
+@keyframes pulse {
+0%, 100% { opacity: 1; }
+50% { opacity: 0.6; }
+}
+
+.animate-pulse {
+animation: pulse 2s infinite;
+}
+
+p code,
+li code,
+.info-text code {
+background: rgba(0, 217, 255, 0.1);
+color: var(--secondary);
+padding: 2px 8px;
+border-radius: 4px;
+font-family: 'Fira Code', monospace;
+font-size: 0.85em;
+}
+
+strong {
+color: #b700ff;
+}
+
+.section-divider {
+height: 1px;
+background: linear-gradient(90deg, transparent, rgba(0, 217, 255, 0.3), transparent);
+margin: 48px 0;
+}
+
+.highlight {
+background: linear-gradient(135deg, rgba(0, 217, 255, 0.15), rgba(108, 99, 255, 0.1));
+padding: 2px 6px;
+border-radius: 4px;
+font-weight: 600;
+}
+
+.checklist-item {
+display: flex;
+align-items: center;
+gap: 12px;
+padding: 12px 16px;
+border-radius: var(--border-radius-element);
+cursor: pointer;
+transition: all var(--transition-fast);
+margin-bottom: 8px;
+background: rgba(255,255,255,0.05);
+border: 1px solid transparent;
+}
+
+.checklist-item:hover {
+background: rgba(0, 217, 255, 0.1);
+border-color: rgba(0, 217, 255, 0.2);
+}
+
+.checklist-item.checked {
+background: rgba(16, 185, 129, 0.1);
+border-color: rgba(16, 185, 129, 0.3);
+}
+
+.checklist-checkbox {
+width: 22px;
+height: 22px;
+border: 2px solid rgba(255,255,255,0.3);
+border-radius: 6px;
+display: flex;
+align-items: center;
+justify-content: center;
+flex-shrink: 0;
+transition: all var(--transition-fast);
+font-size: 0.7rem;
+color: transparent;
+}
+
+.checklist-item.checked .checklist-checkbox {
+background: var(--success);
+border-color: var(--success);
+color: white;
+}
+
+.checklist-text {
+color: rgba(255,255,255,0.7);
+font-size: 0.9rem;
+}
+
+.checklist-item.checked .checklist-text {
+color: rgba(255,255,255,0.9);
+text-decoration: line-through;
+}
+
+.stars-container {
+display: flex;
+gap: 4px;
+margin: 12px 0;
+}
+
+.star {
+font-size: 1.8rem;
+cursor: pointer;
+transition: all var(--transition-fast);
+color: rgba(255,255,255,0.2);
+}
+
+.star:hover,
+.star.active {
+color: var(--warning);
+transform: scale(1.2);
+}
+
+.progress-steps {
+display: flex;
+justify-content: space-between;
+margin: 32px 0 16px;
+position: relative;
+}
+
+.progress-steps::before {
+content: '';
+position: absolute;
+top: 20px;
+left: 40px;
+right: 40px;
+height: 3px;
+background: rgba(255,255,255,0.1);
+border-radius: 2px;
+}
+
+.progress-step {
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 8px;
+z-index: 1;
+}
+
+.step-circle {
+width: 40px;
+height: 40px;
+border-radius: 50%;
+background: rgba(255,255,255,0.1);
+border: 3px solid rgba(255,255,255,0.2);
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 0.85rem;
+font-weight: 700;
+color: rgba(255,255,255,0.5);
+transition: all var(--transition-fast);
+}
+
+.step-circle.active {
+background: var(--secondary);
+border-color: var(--secondary);
+color: white;
+box-shadow: 0 0 15px rgba(0, 217, 255, 0.5);
+}
+
+.step-circle.completed {
+background: var(--success);
+border-color: var(--success);
+color: white;
+}
+
+.step-label {
+font-size: 0.75rem;
+color: rgba(255,255,255,0.4);
+font-weight: 600;
+text-align: center;
+}
+
+.step-circle.active + .step-label,
+.step-circle.completed + .step-label {
+color: rgba(255,255,255,0.8);
+}
+
+/* Agent architecture diagram */
+.agent-arch {
+display: grid;
+grid-template-columns: repeat(3, 1fr);
+gap: 16px;
+margin: 24px 0;
+}
+
+.arch-node {
+    background: rgb(184 229 221);
+    border: 2px solid rgba(0, 217, 255, 0.2);
+    border-radius: 16px;
+    padding: 24px 20px;
+    text-align: center;
+    transition: all var(--transition-normal);
+    position: relative;
+}
+
+.arch-node:hover {
+transform: translateY(-4px);
+border-color: rgba(0, 217, 255, 0.5);
+box-shadow: 0 8px 25px rgba(0, 217, 255, 0.15);
+}
+
+.arch-node.central {
+grid-column: 1 / -1;
+background: linear-gradient(135deg, rgba(108, 99, 255, 0.15), rgba(0, 217, 255, 0.15));
+border-color: rgba(108, 99, 255, 0.3);
+}
+
+.arch-node .node-icon {
+font-size: 2.5rem;
+margin-bottom: 12px;
+display: block;
+}
+
+.arch-node .node-title {
+font-weight: 700;
+color: var(--text-primary);
+font-size: 1rem;
+margin-bottom: 6px;
+}
+
+.arch-node .node-desc {
+font-size: 0.8rem;
+color: var(--text-secondary);
+line-height: 1.5;
+}
+
+.arch-node.central .node-title {
+color: white;
+font-size: 1.2rem;
+}
+
+.arch-node.central .node-desc {
+color: rgba(255,255,255,0.7);
+}
+
+/* Tool cards */
+.tool-cards {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+gap: 16px;
+margin: 20px 0;
+}
+
+.tool-card {
+background: white;
+border-radius: 12px;
+padding: 20px;
+border: 2px solid #e5e7eb;
+transition: all var(--transition-normal);
+text-align: center;
+}
+
+.tool-card:hover {
+border-color: var(--secondary);
+transform: translateY(-2px);
+box-shadow: var(--shadow-card-hover);
+}
+
+.tool-card .tool-icon {
+font-size: 2rem;
+margin-bottom: 8px;
+display: block;
+}
+
+.tool-card .tool-name {
+font-weight: 700;
+color: var(--text-primary);
+font-size: 0.95rem;
+margin-bottom: 4px;
+}
+
+.tool-card .tool-desc {
+font-size: 0.8rem;
+color: var(--text-secondary);
+}
+
+/* Flow diagram */
+.flow-steps {
+display: flex;
+align-items: center;
+gap: 8px;
+flex-wrap: wrap;
+margin: 20px 0;
+}
+
+.flow-step {
+    background: rgb(0 217 255 / 84%);
+    border: 1px solid rgba(0, 217, 255, 0.2);
+    border-radius: 10px;
+    padding: 12px 18px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.flow-arrow {
+color: var(--secondary);
+font-size: 1.2rem;
+}
+
+/* Comparison cards */
+.comparison-grid {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 20px;
+margin: 24px 0;
+}
+
+.comparison-card {
+border-radius: var(--border-radius-card);
+padding: 28px;
+position: relative;
+overflow: hidden;
+}
+
+.comparison-card.chatbot-card {
+background: linear-gradient(135deg, rgba(239, 68, 68, 0.08), rgba(239, 68, 68, 0.02));
+border: 2px solid rgba(239, 68, 68, 0.2);
+}
+
+.comparison-card.agent-card {
+background: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(16, 185, 129, 0.02));
+border: 2px solid rgba(16, 185, 129, 0.2);
+}
+
+.comparison-card h4 {
+font-size: 1.1rem;
+font-weight: 700;
+margin-bottom: 12px;
+display: flex;
+align-items: center;
+gap: 8px;
+}
+
+.comparison-card.chatbot-card h4 {
+color: var(--danger);
+}
+
+.comparison-card.agent-card h4 {
+color: var(--success);
+}
+
+.comparison-card ul {
+list-style: none;
+}
+
+.comparison-card ul li {
+padding: 6px 0;
+font-size: 0.9rem;
+color: var(--text-secondary);
+display: flex;
+align-items: flex-start;
+gap: 8px;
+}
+
+.comparison-card ul li span {
+flex-shrink: 0;
+}
+
+@media (max-width: 600px) {
+.comparison-grid {
+grid-template-columns: 1fr;
+}
+.agent-arch {
+grid-template-columns: 1fr;
+}
+}
+
+/* Interactive agent builder */
+.agent-stage {
+background: rgba(26, 16, 64, 0.6);
+border: 2px solid rgba(0, 217, 255, 0.2);
+border-radius: var(--border-radius-card);
+padding: 28px;
+margin: 20px 0;
+}
+
+.agent-stage-header {
+display: flex;
+align-items: center;
+gap: 12px;
+margin-bottom: 16px;
+}
+
+.stage-number {
+width: 36px;
+height: 36px;
+background: linear-gradient(135deg, var(--secondary), #00a8cc);
+color: white;
+border-radius: 10px;
+display: flex;
+align-items: center;
+justify-content: center;
+font-weight: 700;
+font-size: 0.9rem;
+flex-shrink: 0;
+}
+
+.stage-title {
+font-weight: 700;
+color: white;
+font-size: 1.05rem;
+}
+
+.stage-desc {
+color: rgba(255,255,255,0.6);
+font-size: 0.85rem;
+margin-bottom: 16px;
+}
+
+.agent-stage .simulator-field label {
+color: rgba(255,255,255,0.8);
+}
+
+.agent-stage .simulator-field input,
+.agent-stage .simulator-field textarea,
+.agent-stage .simulator-field select {
+background: rgba(255,255,255,0.08);
+border-color: rgba(255,255,255,0.15);
+color: white;
+}
+
+.agent-stage .simulator-field input:focus,
+.agent-stage .simulator-field textarea:focus,
+.agent-stage .simulator-field select:focus {
+border-color: var(--secondary);
+box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.15);
+background: rgba(255,255,255,0.12);
+}
+
+.agent-stage .simulator-field input::placeholder,
+.agent-stage .simulator-field textarea::placeholder {
+color: rgba(255,255,255,0.3);
+}
+
+/* Tool selector */
+.tool-selector {
+display: flex;
+flex-wrap: wrap;
+gap: 8px;
+margin-top: 8px;
+}
+
+.tool-option {
+padding: 8px 16px;
+background: rgba(255,255,255,0.08);
+border: 2px solid rgba(255,255,255,0.15);
+border-radius: 8px;
+color: rgba(255,255,255,0.7);
+font-size: 0.85rem;
+font-weight: 600;
+cursor: pointer;
+transition: all var(--transition-fast);
+display: flex;
+align-items: center;
+gap: 6px;
+font-family: 'Inter', sans-serif;
+}
+
+.tool-option:hover {
+border-color: rgba(0, 217, 255, 0.4);
+background: rgba(0, 217, 255, 0.1);
+}
+
+.tool-option.selected {
+border-color: var(--secondary);
+background: rgba(0, 217, 255, 0.2);
+color: white;
+}
+
+/* Rating feedback card */
+.rating-card {
+background: rgba(26, 16, 64, 0.6);
+border: 1px solid rgba(0, 217, 255, 0.2);
+border-radius: var(--border-radius-card);
+padding: 28px;
+margin-top: 24px;
+}
+
+.rating-card .card-title {
+color: white;
+}
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<header class="header">
+<div class="header-logo">
+<div class="logo-icon">🤖</div>
+<span>IA na Prática</span>
+</div>
+<div class="header-nav">
+<div class="badge-timer">🕒 Módulo 2 · 120 min</div>
+<div class="badge-level">Intermediário</div>
+<button class="menu-toggle" id="menuToggle" aria-label="Abrir menu">☰</button>
+</div>
+</header>
+
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<nav class="sidebar" id="sidebar">
+<p class="sidebar-title">Navegação</p>
+<ul class="sidebar-nav">
+<li><a href="#intro" class="active"><span class="nav-icon">📋</span>Introdução</a></li>
+<li><a href="#sec-1"><span class="nav-icon">🏢</span>2.1 Por que o Qwen AI?<span class="nav-section-num">01</span></a></li>
+<li><a href="#sec-2"><span class="nav-icon"></span>2.2 Agentes vs Chatbots<span class="nav-section-num">02</span></a></li>
+<li><a href="#sec-3"><span class="nav-icon">⚙️</span>2.3 Criando seu Agente<span class="nav-section-num">03</span></a></li>
+<li><a href="#sec-sim"><span class="nav-icon">🧪</span>Exercício Prático 2<span class="nav-section-num">04</span></a></li>
+<li><a href="#sec-tools"><span class="nav-icon">🔧</span>Ferramentas do Agente<span class="nav-section-num">05</span></a></li>
+<li><a href="#sec-summary"><span class="nav-icon">📝</span>Resumo Final<span class="nav-section-num">06</span></a></li>
+</ul>
+
+<p class="sidebar-title" style="margin-top:24px;">Progresso</p>
+<div style="padding: 0 12px;">
+<div style="background:rgba(255,255,255,0.1);border-radius:6px;height:6px;overflow:hidden;margin-bottom:8px;">
+<div id="sidebarProgress" style="height:100%;width:0%;background:linear-gradient(90deg,var(--secondary),var(--primary));border-radius:6px;transition:width 0.3s ease;"></div>
+</div>
+<p id="progressPercent" style="color:rgba(255,255,255,0.5);font-size:0.75rem;">0% concluído</p>
+</div>
+</nav>
+
+<main class="main-content">
+<div class="content-wrapper">
+
+<section class="hero" id="intro">
+<div class="hero-badge">🎓 Módulo 2 de 5 · Curso Completo</div>
+<h1>Arquitetura de <span>Agentes com Qwen AI</span></h1>
+<p class="hero-subtitle">Aprenda a construir agentes de IA autônomos que executam processos complexos usando o Qwen, um dos modelos open-source mais poderosos do mercado.</p>
+
+<div class="hero-image">
+<img src="https://image.qwenlm.ai/public_source/86b25ad9-e1b6-4641-913f-121aa9370f10/100d84df6-36d4-416e-940d-0490fb744a25.png" alt="Ilustração representando a arquitetura de um agente Qwen AI com conexões para Web Search, Code Analysis, Knowledge Base e API connections" loading="eager">
+</div>
+
+<div class="hero-meta">
+<div class="hero-meta-item"><span>👨🏫</span> Prof. Vitório Netto</div>
+<div class="hero-meta-item"><span>⏱️</span> 120 minutos</div>
+<div class="hero-meta-item"><span>📊</span> Nível Intermediário</div>
+<div class="hero-meta-item"><span>🎯</span> 3 Objetivos de Aprendizagem</div>
+</div>
+</section>
+
+<div class="section-divider"></div>
+
+<section class="section" id="intro-content">
+<div class="section-header">
+<div class="section-number">📋</div>
+<h2 class="section-title"><small>Introdução</small>Objetivos de Aprendizagem</h2>
+</div>
+
+<div class="card">
+<div class="card-title"><span class="card-icon">🎯</span> O que você vai aprender neste módulo</div>
+<p>Neste módulo, você vai compreender a diferença fundamental entre chatbots e agentes de IA, descobrir por que o Qwen AI é a escolha ideal, e aprender a construir seu próprio agente do zero.</p>
+
+<div style="margin-top:20px;">
+<div class="checklist-item" onclick="toggleChecklist(this)">
+<div class="checklist-checkbox">✓</div>
+<span class="checklist-text">Entender as vantagens do Qwen AI como modelo open-source</span>
+</div>
+<div class="checklist-item" onclick="toggleChecklist(this)">
+<div class="checklist-checkbox">✓</div>
+<span class="checklist-text">Diferenciar chatbots (reagem) de agentes (executam)</span>
+</div>
+<div class="checklist-item" onclick="toggleChecklist(this)">
+<div class="checklist-checkbox">✓</div>
+<span class="checklist-text">Construir um agente completo com Sistema de Instruções, Conhecimentos e Capacidades</span>
+</div>
+<div class="checklist-item" onclick="toggleChecklist(this)">
+<div class="checklist-checkbox">✓</div>
+<span class="checklist-text">Praticar com o simulador interativo de criação de agente</span>
+</div>
+</div>
+</div>
+
+<div class="card" style="background:rgba(26,16,64,0.6);border-color:rgba(0,217,255,0.2);color:white;">
+<div class="card-title" style="color:white;"><span class="card-icon">🗺️</span> Estrutura do Módulo</div>
+<div class="progress-steps">
+<div class="progress-step">
+<div class="step-circle active">1</div>
+<span class="step-label">Qwen AI</span>
+</div>
+<div class="progress-step">
+<div class="step-circle">2</div>
+<span class="step-label">Agentes</span>
+</div>
+<div class="progress-step">
+<div class="step-circle">3</div>
+<span class="step-label">Construção</span>
+</div>
+<div class="progress-step">
+<div class="step-circle">4</div>
+<span class="step-label">Prática</span>
+</div>
+<div class="progress-step">
+<div class="step-circle">5</div>
+<span class="step-label">Ferramentas</span>
+</div>
+</div>
+</div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- 2.1 Por que o Qwen AI? -->
+<section class="section" id="sec-1">
+<div class="section-header">
+<div class="section-number">1</div>
+<h2 class="section-title"><small>2.1 Por que o Qwen AI?</small>O modelo open-source que está revolucionando o mercado</h2>
+</div>
+
+<div class="card">
+<div class="card-title"><span class="card-icon">🏢</span> Qwen: A Escolha Inteligente</div>
+<p>Desenvolvido pela <strong>Alibaba Cloud</strong>, o Qwen destaca-se por ser um modelo <strong>open-source extremamente potente</strong>, com excelente capacidade de codificação e raciocínio lógico.</p>
+<p>O mais impressionante? Ele <span class="highlight">supera muitos modelos pagos</span> em benchmarks importantes, sendo uma alternativa gratuita e poderosa para profissionais e empresas.</p>
+</div>
+
+<div class="info-box info-info">
+<span class="info-icon">💡</span>
+<div class="info-content">
+<div class="info-label">Dica Importante</div>
+<div class="info-text">O Qwen está disponível gratuitamente através da plataforma <strong>ModelScope</strong> e da API da Alibaba Cloud. Isso significa que você pode construir soluções profissionais sem custos de licença de modelo.</div>
+</div>
+</div>
+
+<div class="table-wrapper">
+<table>
+<thead>
+<tr>
+<th>Recurso</th>
+<th>Qwen AI</th>
+<th>GPT-4</th>
+<th>Outros Open-Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Custo</td>
+<td><span class="badge badge-success">Gratuito</span></td>
+<td><span class="badge badge-danger">Pago</span></td>
+<td><span class="badge badge-success">Gratuito</span></td>
+</tr>
+<tr>
+<td>Codificação</td>
+<td><span class="badge badge-success">Excelente</span></td>
+<td><span class="badge badge-success">Excelente</span></td>
+<td><span class="badge badge-warning">Bom</span></td>
+</tr>
+<tr>
+<td>Raciocínio Lógico</td>
+<td><span class="badge badge-success">Excelente</span></td>
+<td><span class="badge badge-success">Excelente</span></td>
+<td><span class="badge badge-warning">Moderado</span></td>
+</tr>
+<tr>
+<td>Agentes</td>
+<td><span class="badge badge-success">Nativo</span></td>
+<td><span class="badge badge-warning">Limitado</span></td>
+<td><span class="badge badge-danger">Básico</span></td>
+</tr>
+<tr>
+<td>Contexto</td>
+<td><span class="badge badge-info">128K tokens</span></td>
+<td><span class="badge badge-info">128K tokens</span></td>
+<td><span class="badge badge-warning">32K tokens</span></td>
+</tr>
+<tr>
+<td>Multi-idiomas</td>
+<td><span class="badge badge-success">29+ idiomas</span></td>
+<td><span class="badge badge-success">50+ idiomas</span></td>
+<td><span class="badge badge-warning">Limitado</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="card">
+<div class="card-title"><span class="card-icon">🚀</span> Por que o Qwen se destaca para Agentes?</div>
+<p>O Qwen foi projetado desde o início com <strong>capacidade de agentes em mente</strong>. Suas principais vantagens são:</p>
+<ul style="margin:12px 0 0 20px;color:var(--text-secondary);line-height:2;">
+<li><strong>Tool Calling Nativo:</strong> Integração natural com ferramentas externas (APIs, web search, etc.)</li>
+<li><strong>Planejamento:</strong> Capacidade de decompor tarefas complexas em etapas executáveis</li>
+<li><strong>Memória de Contexto:</strong> Mantém contexto longo para interações complexas</li>
+<li><strong>Multi-turno:</strong> Excelente em conversas que exigem memória e coerência</li>
+<li><strong>Codificação:</strong> Superior em tarefas de programação e automação</li>
+</ul>
+</div>
+
+<!-- Interactive: Qwen Demo -->
+<div class="simulator">
+<div class="simulator-title">🔍 Simulador: Teste as Capacidades do Qwen</div>
+<div class="simulator-subtitle">Selecione uma categoria e veja como o Qwen responderia a diferentes tipos de tarefas.</div>
+
+<div class="tabs-header" style="margin-bottom:16px;">
+<button class="tab-btn active" onclick="switchQwenTab(event, 'qwen-code')">
+<span></span> Codificação
+</button>
+<button class="tab-btn" onclick="switchQwenTab(event, 'qwen-logic')">
+<span></span> Raciocínio Lógico
+</button>
+<button class="tab-btn" onclick="switchQwenTab(event, 'qwen-agent')">
+<span></span> Agente
+</button>
+</div>
+
+<div class="tab-content active" id="qwen-code" style="padding-top:0;">
+<div class="code-block" style="margin:0;">
+<div class="code-block-header">
+<div class="code-block-lang">
+<span class="lang-dot" style="background:#a6e3a1;"></span>
+Tarefa de Codificação
+</div>
+<button class="copy-btn" onclick="copyCode(this)">📋 Copiar
+<span class="copy-tooltip">Clique para copiar</span>
+</button>
+</div>
+<pre><code><span class="token-comment">// Prompt:</span>
+<span class="token-string">"Crie uma função Python que valide um CPF brasileiro
+e retorne se é válido ou não."</span>
+
+<span class="token-comment">// Resposta do Qwen:</span>
+<span class="token-keyword">def</span> <span class="token-function">validar_cpf</span>(cpf):
+    cpf = cpf.replace(<span class="token-string">'.'</span>, <span class="token-string">''</span>).replace(<span class="token-string">'-'</span>, <span class="token-string">''</span>)
+    <span class="token-keyword">if</span> <span class="token-function">len</span>(cpf) != <span class="token-number">11</span> <span class="token-keyword">or</span> cpf == cpf[<span class="token-number">0</span>] * <span class="token-number">11</span>:
+        <span class="token-keyword">return</span> <span class="token-variable">False</span>
+    soma = <span class="token-function">sum</span>(<span class="token-function">int</span>(cpf[i]) * (<span class="token-number">10</span>-i) <span class="token-keyword">for</span> i <span class="token-keyword">in</span> <span class="token-function">range</span>(<span class="token-number">9</span>))
+    resto = (soma * <span class="token-number">10</span>) % <span class="token-number">11</span>
+    digito1 = <span class="token-number">0</span> <span class="token-keyword">if</span> resto == <span class="token-number">10</span> <span class="token-keyword">else</span> resto
+    <span class="token-comment"># ... cálculo do segundo dígito</span>
+    <span class="token-keyword">return</span> <span class="token-variable">True</span></code></pre>
+</div>
+</div>
+
+<div class="tab-content" id="qwen-logic" style="padding-top:0;">
+<div class="code-block" style="margin:0;">
+<div class="code-block-header">
+<div class="code-block-lang">
+<span class="lang-dot" style="background:#89b4fa;"></span>
+Tarefa de Raciocínio Lógico
+</div>
+<button class="copy-btn" onclick="copyCode(this)">📋 Copiar
+<span class="copy-tooltip">Clique para copiar</span>
+</button>
+</div>
+<pre><code><span class="token-comment">// Prompt:</span>
+<span class="token-string">"Três amigos — Ana, Bruno e Carla — sentam em
+uma fileira de 3 cadeiras. Ana não senta no meio.
+Bruno senta ao lado de Carla. Quem senta no meio?"</span>
+
+<span class="token-comment">// Raciocínio do Qwen (Chain-of-Thought):</span>
+<span class="token-string">"Vamos analisar passo a passo:
+1. 3 cadeiras: [1] [2] [3]
+2. Ana não senta no meio → Ana está em [1] ou [3]
+3. Bruno senta ao lado de Carla → eles estão juntos
+4. Se Bruno e Carla estão juntos, eles ocupam [1][2] ou [2][3]
+5. Ana não pode estar no meio ([2]), então:
+   - Se Ana em [1] → Bruno e Carla em [2][3]
+   - Se Ana em [3] → Bruno e Carla em [1][2]
+6. Em ambos os casos, Bruno ou Carla está no meio.
+   Como Bruno está ao lado de Carla, quem está no meio
+   depende da ordem. Mas a pergunta pede quem senta no meio.
+   
+Resposta: Bruno ou Carla senta no meio (dependendo da ordem)."</span></code></pre>
+</div>
+</div>
+
+<div class="tab-content" id="qwen-agent" style="padding-top:0;">
+<div class="code-block" style="margin:0;">
+<div class="code-block-header">
+<div class="code-block-lang">
+<span class="lang-dot" style="background:#f5c2e7;"></span>
+Tarefa de Agente
+</div>
+<button class="copy-btn" onclick="copyCode(this)">📋 Copiar
+<span class="copy-tooltip">Clique para copiar</span>
+</button>
+</div>
+<pre><code><span class="token-comment">// Prompt ao Agente Qwen:</span>
+<span class="token-string">"Pesquise as últimas 5 notícias sobre IA no Brasil
+e crie um resumo executivo de 200 palavras."</span>
+
+<span class="token-comment">// O Qwen como agente executa:</span>
+<span class="token-keyword">[TOOL]</span> web_search(<span class="token-string">"notícias IA Brasil 2025"</span>)
+<span class="token-keyword">[RESULT]</span> 15 resultados encontrados...
+<span class="token-keyword">[TOOL]</span> read_urls([top5_urls])
+<span class="token-keyword">[RESULT]</span> Conteúdo extraído...
+<span class="token-keyword">[THINK]</span> Analisando conteúdo para resumo...
+<span class="token-keyword">[OUTPUT]</span> <span class="token-string">"Resumo Executivo: Inteligência Artificial no Brasil 2025...
+O mercado de IA brasileiro registrou crescimento de 45%
+no último ano, com destaque para..."</span></code></pre>
+</div>
+</div>
+</div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- 2.2 Agentes vs Chatbots -->
+<section class="section" id="sec-2">
+<div class="section-header">
+<div class="section-number">2</div>
+<h2 class="section-title"><small>2.2 Agentes vs Chatbots</small>Compreendendo a diferença fundamental</h2>
+</div>
+
+<div class="card">
+<div class="card-title"><span class="card-icon"></span> A Diferença Crucial</div>
+<p>A diferença entre chatbots e agentes é como a diferença entre um <strong>atendente de loja</strong> e um <strong>gerente que toma decisões</strong>. Ambos lidam com clientes, mas seus papéis são completamente diferentes.</p>
+</div>
+
+<div class="comparison-grid">
+<div class="comparison-card chatbot-card">
+<h4>💬 Chatbot</h4>
+<ul>
+<li><span></span> <strong>Responde perguntas</strong></li>
+<li><span></span> Reage ao input do usuário</li>
+<li><span></span> Fluxo linear de conversa</li>
+<li><span></span> Sem memória de longo prazo</li>
+<li><span></span> Ferramentas limitadas ou nenhuma</li>
+<li><span></span> Não toma decisões autônomas</li>
+<li><span></span> <em>Ex: Assistente virtual de e-commerce</em></li>
+</ul>
+</div>
+<div class="comparison-card agent-card">
+<h4>🤖 Agente de IA</h4>
+<ul>
+<li><span></span> <strong>Executa processos</strong></li>
+<li><span></span> Tem uma "missão" definida</li>
+<li><span></span> Planeja e toma decisões</li>
+<li><span></span> Memória de contexto persistente</li>
+<li><span></span> Múltiplas ferramentas à disposição</li>
+<li><span></span> Autonomia para decidir os passos</li>
+<li><span></span> <em>Ex: Agente que pesquisa, analisa e reporta</em></li>
+</ul>
+</div>
+</div>
+
+<div class="image-hero" style="text-align:center;margin:24px 0;">
+<div style="background:white;border-radius:var(--border-radius-card);overflow:hidden;box-shadow:var(--shadow-elevated);border:2px solid rgba(0,217,255,0.2);display:inline-block;max-width:100%;">
+<img src="https://image.qwenlm.ai/public_source/86b25ad9-e1b6-4641-913f-121aa9370f10/1439bdd1e-fac1-4774-b668-15a6abb86fb1.png" alt="Comparação visual entre Chatbot e AI Agent" style="width:100%;max-width:800px;display:block;">
+</div>
+</div>
+
+<div class="info-box info-success">
+<span class="info-icon">🎯</span>
+<div class="info-content">
+<div class="info-label">Regra de Ouro</div>
+<div class="info-text">Se a tarefa envolve <strong>apenas responder</strong> → Use um <strong>chatbot</strong>. Se a tarefa envolve <strong>executar um processo com múltiplos passos</strong> → Use um <strong>agente</strong>.</div>
+</div>
+</div>
+
+<!-- Interactive: Decision Simulator -->
+<div class="simulator">
+<div class="simulator-title">🧭 Simulador: Chatbot ou Agente?</div>
+<div class="simulator-subtitle">Selecione um cenário e descubra se você precisa de um chatbot ou de um agente.</div>
+
+<div style="display:flex;flex-direction:column;gap:12px;margin-bottom:16px;">
+<button class="tool-option" onclick="evaluateScenario(this, 'chatbot')" style="text-align:left;padding:16px;border-radius:12px;">
+<span></span> <div><strong>Atendimento ao cliente</strong><br><small style="color:var(--text-secondary);">"Quais são os horários de funcionamento?"</small></div>
+</button>
+<button class="tool-option" onclick="evaluateScenario(this, 'agent')" style="text-align:left;padding:16px;border-radius:12px;">
+<span></span> <div><strong>Relatório semanal</strong><br><small style="color:var(--text-secondary);">"Pesquise concorrentes e gere um relatório com gráficos"</small></div>
+</button>
+<button class="tool-option" onclick="evaluateScenario(this, 'chatbot')" style="text-align:left;padding:16px;border-radius:12px;">
+<span></span> <div><strong>FAQ do produto</strong><br><small style="color:var(--text-secondary);">"Como faço para rastrear meu pedido?"</small></div>
+</button>
+<button class="tool-option" onclick="evaluateScenario(this, 'agent')" style="text-align:left;padding:16px;border-radius:12px;">
+<span></span> <div><strong>Automação de marketing</strong><br><small style="color:var(--text-secondary);">"Analise métricas, crie conteúdo e publique nas redes"</small></div>
+</button>
+<button class="tool-option" onclick="evaluateScenario(this, 'agent')" style="text-align:left;padding:16px;border-radius:12px;">
+<span></span> <div><strong>Triagem de candidatos</strong><br><small style="color:var(--text-secondary);">"Analise currículos, compare com a vaga e rankeie"</small></div>
+</button>
+</div>
+
+<div class="simulator-result" id="scenarioResult">
+<div class="result-header" id="scenarioResultHeader">
+<span></span> Resultado
+</div>
+<div class="result-text" id="scenarioResultText"></div>
+</div>
+</div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- 2.3 Criando seu Agente -->
+<section class="section" id="sec-3">
+<div class="section-header">
+<div class="section-number">3</div>
+<h2 class="section-title"><small>2.3 Criando seu Agente</small>Os 3 pilares de um agente de IA</h2>
+</div>
+
+<div class="card">
+<div class="card-title"><span class="card-icon">⚙️</span> Arquitetura de um Agente</div>
+<p>Todo agente de IA bem construído possui <strong>3 componentes fundamentais</strong>. Pense nisso como as 3 pernas de um tripé: remova uma e o agente desaba.</p>
+</div>
+
+<!-- Agent Architecture Diagram -->
+<div class="agent-arch">
+<div class="arch-node central">
+<span class="node-icon">🧠</span>
+<span class="node-title">Agente Qwen AI</span>
+<span class="node-desc">O cérebro que orquestra todo o processo</span>
+</div>
+<div class="arch-node" style="grid-column: 1;">
+<span class="node-icon"></span>
+<span class="node-title">Sistema de Instruções</span>
+<span class="node-desc">Persona persistente e regras de comportamento</span>
+</div>
+<div class="arch-node" style="grid-column: 2;">
+<span class="node-icon">📚</span>
+<span class="node-title">Conhecimentos</span>
+<span class="node-desc">Documentos e dados base para consulta</span>
+</div>
+<div class="arch-node" style="grid-column: 3;">
+<span class="node-icon">🔧</span>
+<span class="node-title">Capacidades</span>
+<span class="node-desc">Ferramentas e habilidades executáveis</span>
+</div>
+</div>
+
+<!-- Tab-based detailed explanation -->
+<div class="tabs-container">
+<div class="tabs-header">
+<button class="tab-btn active" onclick="switchPillarTab(event, 'pillar-instructions')">
+<span></span> Sistema de Instruções
+</button>
+<button class="tab-btn" onclick="switchPillarTab(event, 'pillar-knowledge')">
+<span></span> Conhecimentos
+</button>
+<button class="tab-btn" onclick="switchPillarTab(event, 'pillar-capabilities')">
+<span></span> Capacidades
+</button>
+</div>
+
+<div class="tab-content active" id="pillar-instructions">
+<div class="card">
+<div class="card-title"><span class="card-icon"></span> Sistema de Instruções <span class="badge badge-cyan">Pilar 1</span></div>
+<p>Define a <strong>persona persistente</strong> do agente — quem ele é, como se comporta, quais são seus valores e limites.</p>
+<p style="margin-top:12px;">É o equivalente ao <strong>prompt de sistema</strong>, mas aplicado de forma contínua ao longo de toda a vida do agente.</p>
+</div>
+
+<div class="code-block">
+<div class="code-block-header">
+<div class="code-block-lang">
+<span class="lang-dot" style="background:#a6e3a1;"></span>
+Exemplo de Sistema de Instruções
+</div>
+<button class="copy-btn" onclick="copyCode(this)">📋 Copiar
+<span class="copy-tooltip">Clique para copiar</span>
+</button>
+</div>
+<pre><code><span class="token-string">"Você é um Assistente Jurídico Inteligente especializado
+em direito do trabalho brasileiro.
+
+REGRAS DE COMPORTAMENTO:
+- Sempre cite a legislação aplicável (CLT, CF/88)
+- Mantenha um tom profissional e empático
+- NUNCA dê conselhos que substituam um advogado real
+- Quando não tiver certeza, indique que é necessário
+  consultar um profissional
+- Use linguagem acessível, evitando juridiquês
+  desnecessário
+
+FORMATO DE RESPOSTA:
+1. Análise do caso
+2. Base legal aplicável
+3. Recomendações práticas
+4. Aviso de isenção de responsabilidade"</span></code></pre>
+</div>
+</div>
+
+<div class="tab-content" id="pillar-knowledge">
+<div class="card">
+<div class="card-title"><span class="card-icon">📚</span> Conhecimentos <span class="badge badge-cyan">Pilar 2</span></div>
+<p>São os <strong>documentos e dados base</strong> que o agente pode consultar para fundamentar suas respostas. É a "biblioteca" do agente.</p>
+<p style="margin-top:12px;">Isso é feito através de <span class="highlight">RAG (Retrieval-Augmented Generation)</span> — o agente busca informações relevantes nos seus documentos antes de responder.</p>
+</div>
+
+<div class="code-block">
+<div class="code-block-header">
+<div class="code-block-lang">
+<span class="lang-dot" style="background:#89dceb;"></span>
+Conhecimentos — Exemplos de Upload
+</div>
+<button class="copy-btn" onclick="copyCode(this)">📋 Copiar
+<span class="copy-tooltip">Clique para copiar</span>
+</button>
+</div>
+<pre><code><span class="token-comment">// Documentos que seu agente pode ter:</span>
+
+<span class="token-string">📄 Manual da Empresa (PDF)
+   → Políticas internas, organograma, processos
+
+📄 Legislação Trabalhista Consolidada (PDF)
+   → CLT atualizada, súmulas do TST
+
+📄 Base de Conhecimento do Produto (Markdown)
+   → FAQs, guias de uso, troubleshooting
+
+📄 Dados Históricos (JSON/CSV)
+   → Métricas anteriores, relatórios passados</span></code></pre>
+</div>
+</div>
+
+<div class="tab-content" id="pillar-capabilities">
+<div class="card">
+<div class="card-title"><span class="card-icon">🔧</span> Capacidades <span class="badge badge-cyan">Pilar 3</span></div>
+<p>São as <strong>ferramentas e habilidades executáveis</strong> que o agente pode utilizar para realizar tarefas. É o que transforma um chatbot passivo em um agente ativo.</p>
+</div>
+
+<div class="tool-cards">
+<div class="tool-card">
+<span class="tool-icon">🌐</span>
+<div class="tool-name">Pesquisa Web</div>
+<div class="tool-desc">Busca informações atualizadas na internet em tempo real</div>
+</div>
+<div class="tool-card">
+<span class="tool-icon"></span>
+<div class="tool-name">Análise de Código</div>
+<div class="tool-desc">Lê, escreve e depura código em múltiplas linguagens</div>
+</div>
+<div class="tool-card">
+<span class="tool-icon">📊</span>
+<div class="tool-name">Análise de Dados</div>
+<div class="tool-desc">Processa planilhas, cria gráficos e gera insights</div>
+</div>
+<div class="tool-card">
+<span class="tool-icon">🔌</span>
+<div class="tool-name">APIs Externas</div>
+<div class="tool-desc">Conecta-se a serviços externos via chamadas de API</div>
+</div>
+<div class="tool-card">
+<span class="tool-icon">📧</span>
+<div class="tool-name">E-mail & Comunicação</div>
+<div class="tool-desc">Envia e-mails, mensagens e notificações automáticas</div>
+</div>
+<div class="tool-card">
+<span class="tool-icon">📁</span>
+<div class="tool-name">Leitura de Arquivos</div>
+<div class="tool-desc">Lê e processa PDFs, CSVs, JSONs e outros formatos</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- Flow diagram -->
+<div class="card" style="margin-top:24px;">
+<div class="card-title"><span class="card-icon">🔄</span> Como os 3 pilares trabalham juntos</div>
+<p>Quando você faz uma pergunta ao agente, ele segue este fluxo:</p>
+</div>
+
+<div class="flow-steps">
+<div class="flow-step"><span></span> Input do Usuário</div>
+<span class="flow-arrow">→</span>
+<div class="flow-step"><span></span> Sistema Consulta</div>
+<span class="flow-arrow">→</span>
+<div class="flow-step"><span></span> Busca em Conhecimentos</div>
+<span class="flow-arrow">→</span>
+<div class="flow-step"><span></span> Usa Capacidades</div>
+<span class="flow-arrow">→</span>
+<div class="flow-step"><span></span> Gera Resposta</div>
+</div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- Exercício Prático 2 -->
+<section class="section" id="sec-sim">
+<div class="section-header">
+<div class="section-number">4</div>
+<h2 class="section-title"><small>Exercício Prático 2</small>Construa seu Próprio Agente</h2>
+</div>
+
+<div class="card">
+<div class="card-title"><span class="card-icon">🧪</span> Desafio: Crie um agente do zero</div>
+<p>Seu desafio: construir um agente completo usando os 3 pilares. Escolha um domínio e defina todas as configurações!</p>
+</div>
+
+<div class="challenge-card">
+<div class="challenge-header">
+<span class="challenge-icon"></span>
+<h3>Critérios de Avaliação</h3>
+</div>
+<p style="color:#0bff42;font-size:0.9rem;">Seu agente será avaliado em cada pilar. Tente maximizar sua pontuação!</p>
+<ul class="challenge-criteria">
+<li><span class="criteria-icon"></span> O Sistema de Instruções define uma persona clara com regras</li>
+<li><span class="criteria-icon">📚</span> Os Conhecimentos são relevantes e bem estruturados</li>
+<li><span class="criteria-icon">🔧</span> As Capacidades selecionadas são adequadas à missão</li>
+<li><span class="criteria-icon">⭐</span> Bônus: O agente tem uma missão específica e mensurável</li>
+</ul>
+</div>
+
+<!-- Agent Builder Simulator -->
+<div class="simulator">
+<div class="simulator-title">🛠️ Construtor de Agentes Interativo</div>
+<div class="simulator-subtitle">Preencha cada etapa e clique em "Gerar Agente" para ver a configuração completa do seu agente.</div>
+
+<!-- Stage 1: Persona/Mission -->
+<div class="agent-stage">
+<div class="agent-stage-header">
+<div class="stage-number">1</div>
+<span class="stage-title">🎭 Sistema de Instruções (Persona)</span>
+</div>
+<p class="stage-desc">Defina quem seu agente é, qual é sua missão e como ele deve se comportar.</p>
+
+<div class="simulator-field">
+<label><span class="field-icon">🎯</span> Nome do Agente</label>
+<input type="text" id="agentName" placeholder="Ex: Assistente Jurídico, Analista de Marketing...">
+</div>
+
+<div class="simulator-field">
+<label><span class="field-icon">📜</span> Missão do Agente</label>
+<textarea id="agentMission" placeholder="Ex: Ajudar clientes a entenderem seus direitos trabalhistas de forma acessível..."></textarea>
+</div>
+
+<div class="simulator-field">
+<label><span class="field-icon">📋</span> Regras de Comportamento</label>
+<textarea id="agentRules" placeholder="Ex: Sempre cite a legislação aplicável, mantenha tom profissional, nunca substitua um advogado real..."></textarea>
+</div>
+</div>
+
+<!-- Stage 2: Knowledge -->
+<div class="agent-stage">
+<div class="agent-stage-header">
+<div class="stage-number">2</div>
+<span class="stage-title">📚 Conhecimentos (Base de Dados)</span>
+</div>
+<p class="stage-desc">Quais documentos e informações seu agente terá acesso para fundamentar suas respostas?</p>
+
+<div class="simulator-field">
+<label><span class="field-icon">📄</span> Documentos Base</label>
+<textarea id="agentKnowledge" placeholder="Ex: CLT atualizada, Manual interno da empresa, Base de FAQs do produto, Relatórios mensais..."></textarea>
+</div>
+
+<div class="simulator-field">
+<label><span class="field-icon">📂</span> Formato dos Dados</label>
+<input type="text" id="agentDataFormat" placeholder="Ex: PDF, Markdown, JSON, CSV">
+</div>
+</div>
+
+<!-- Stage 3: Capabilities -->
+<div class="agent-stage">
+<div class="agent-stage-header">
+<div class="stage-number">3</div>
+<span class="stage-title">🔧 Capacidades (Ferramentas)</span>
+</div>
+<p class="stage-desc">Selecione as ferramentas que seu agente terá à disposição para executar suas tarefas.</p>
+
+<div class="tool-selector" id="toolSelector">
+<button class="tool-option" onclick="toggleTool(this)" data-tool="web-search">🌐 Pesquisa Web</button>
+<button class="tool-option" onclick="toggleTool(this)" data-tool="code-analysis">💻 Análise de Código</button>
+<button class="tool-option" onclick="toggleTool(this)" data-tool="data-analysis">📊 Análise de Dados</button>
+<button class="tool-option" onclick="toggleTool(this)" data-tool="api">🔌 APIs Externas</button>
+<button class="tool-option" onclick="toggleTool(this)" data-tool="email">📧 E-mail</button>
+<button class="tool-option" onclick="toggleTool(this)" data-tool="file-read">📁 Leitura de Arquivos</button>
+<button class="tool-option" onclick="toggleTool(this)" data-tool="image-gen">🎨 Geração de Imagens</button>
+<button class="tool-option" onclick="toggleTool(this)" data-tool="scheduler">📅 Agendamento</button>
+</div>
+</div>
+
+<div class="simulator-actions">
+<button class="btn btn-primary" onclick="generateAgent()">
+<span>⚡</span> Gerar Configuração do Agente
+</button>
+<button class="btn btn-secondary" onclick="clearAgent()">
+<span>🔄</span> Limpar
+</button>
+<button class="btn btn-secondary" onclick="loadAgentExample()">
+<span>📋</span> Carregar Exemplo
+</button>
+</div>
+
+<!-- Score -->
+<div id="agentScoreDisplay" style="display:none;margin-top:20px;">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+<span style="font-weight:700;color:var(--text-primary);font-size:0.9rem;">📊 Pontuação do Agente</span>
+<span id="agentScoreValue" style="font-weight:700;color:var(--secondary);font-size:1.1rem;"></span>
+</div>
+<div style="background:#e5e7eb;border-radius:6px;height:10px;overflow:hidden;">
+<div id="agentScoreBar" style="height:100%;width:0%;border-radius:6px;transition:width 0.8s ease;background:linear-gradient(90deg,var(--danger),var(--warning),var(--success));"></div>
+</div>
+</div>
+
+<!-- Generated Agent Config -->
+<div class="simulator-result" id="generatedAgent">
+<div class="result-header">
+<span>✨</span> Configuração do Agente Gerada
+</div>
+<div class="result-text" id="agentOutput"></div>
+<button class="copy-btn" onclick="copyCode(this)" style="margin-top:12px;background:rgba(255,255,255,0.15);color:rgba(255,255,255,0.8);border-color:rgba(255,255,255,0.2);">
+📋 Copiar Configuração
+<span class="copy-tooltip">Clique para copiar</span>
+</button>
+</div>
+</div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- Ferramentas do Agente -->
+<section class="section" id="sec-tools">
+<div class="section-header">
+<div class="section-number">5</div>
+<h2 class="section-title"><small>Aprofundamento</small>Ferramentas Avançadas para Agentes</h2>
+</div>
+
+<div class="card">
+<div class="card-title"><span class="card-icon">🔧</span> Expandindo as capacidades do seu agente</div>
+<p>Agora que você construiu a base, veja como adicionar ferramentas avançadas que transformam seu agente em uma verdadeira máquina de produtividade.</p>
+</div>
+
+<div class="tabs-container">
+<div class="tabs-header">
+<button class="tab-btn active" onclick="switchToolTab(event, 'tool-web')">
+<span>🌐</span> Web Search
+</button>
+<button class="tab-btn" onclick="switchToolTab(event, 'tool-code')">
+<span></span> Code Interpreter
+</button>
+<button class="tool-btn" onclick="switchToolTab(event, 'tool-external')">
+<span>🔌</span> APIs Externas
+</button>
+</div>
+
+<div class="tab-content active" id="tool-web">
+<div class="card">
+<div class="card-title"><span class="card-icon">🌐</span> Web Search — Pesquisa em Tempo Real</div>
+<p>Permite ao agente buscar informações atualizadas na internet, superando a limitação do conhecimento cortado no treino.</p>
+</div>
+<div class="code-block">
+<div class="code-block-header">
+<div class="code-block-lang">
+<span class="lang-dot" style="background:#a6e3a1;"></span>
+Exemplo de Uso: Web Search
+</div>
+<button class="copy-btn" onclick="copyCode(this)">📋 Copiar
+<span class="copy-tooltip">Clique para copiar</span>
+</button>
+</div>
+<pre><code><span class="token-comment">// Configuração da ferramenta no agente:</span>
+<span class="token-keyword">{</span>
+  <span class="token-string">"name"</span>: <span class="token-string">"web_search"</span>,
+  <span class="token-string">"description"</span>: <span class="token-string">"Pesquisa informações na web em tempo real"</span>,
+  <span class="token-string">"parameters"</span>: <span class="token-keyword">{</span>
+    <span class="token-string">"query"</span>: <span class="token-keyword">{</span> <span class="token-string">"type"</span>: <span class="token-string">"string"</span>, <span class="token-string">"required"</span>: <span class="token-variable">true</span> <span class="token-keyword">}</span>,
+    <span class="token-string">"max_results"</span>: <span class="token-keyword">{</span> <span class="token-string">"type"</span>: <span class="token-string">"integer"</span>, <span class="token-string">"default"</span>: <span class="token-number">5</span> <span class="token-keyword">}</span>
+  <span class="token-keyword">}</span>
+<span class="token-keyword">}</span>
+
+<span class="token-comment">// O agente decide AUTONOMAMENTE quando usar:</span>
+<span class="token-variable">Agente</span>: <span class="token-string">"O usuário perguntou sobre notícias recentes.
+Vou usar web_search para encontrar informações atualizadas."</span></code></pre>
+</div>
+</div>
+
+<div class="tab-content" id="tool-code">
+<div class="card">
+<div class="card-title"><span class="card-icon"></span> Code Interpreter — Análise de Código e Dados</div>
+<p>Permite ao agente <strong>executar código Python</strong> para análise de dados, cálculos complexos e geração de visualizações.</p>
+</div>
+<div class="code-block">
+<div class="code-block-header">
+<div class="code-block-lang">
+<span class="lang-dot" style="background:#89b4fa;"></span>
+Exemplo: Agente com Code Interpreter
+</div>
+<button class="copy-btn" onclick="copyCode(this)">📋 Copiar
+<span class="copy-tooltip">Clique para copiar</span>
+</button>
+</div>
+<pre><code><span class="token-comment">// Usuário: "Analise este arquivo CSV de vendas"</span>
+
+<span class="token-variable">Agente</span>: <span class="token-string">"Vou usar o code_interpreter para analisar os dados."</span>
+
+<span class="token-keyword">[EXECUTA CÓDIGO]</span>
+<span class="token-keyword">import</span> pandas <span class="token-keyword">as</span> pd
+<span class="token-keyword">import</span> matplotlib.pyplot <span class="token-keyword">as</span> plt
+
+<span class="token-variable">df</span> = pd.<span class="token-function">read_csv</span>(<span class="token-string">'vendas_2025.csv'</span>)
+<span class="token-function">print</span>(df.<span class="token-function">describe</span>())
+
+<span class="token-comment"># Gera gráfico de vendas mensais</span>
+plt.<span class="token-function">bar</span>(df[<span class="token-string">'mes'</span>], df[<span class="token-string">'total'</span>])
+plt.<span class="token-function">savefig</span>(<span class="token-string">'grafico_vendas.png'</span>)
+
+<span class="token-variable">Agente</span>: <span class="token-string">"Análise completa! As vendas cresceram 23% no Q1.
+Aqui está o gráfico e os insights principais..."</span></code></pre>
+</div>
+</div>
+
+<div class="tab-content" id="tool-external">
+<div class="card">
+<div class="card-title"><span class="card-icon">🔌</span> APIs Externas — Integração com Serviços</div>
+<p>Permite ao agente <strong>conectar-se com qualquer serviço externo</strong> via REST APIs, transformando-o em um hub de automação.</p>
+</div>
+<div class="code-block">
+<div class="code-block-header">
+<div class="code-block-lang">
+<span class="lang-dot" style="background:#f5c2e7;"></span>
+Exemplo: Integração com API Externa
+</div>
+<button class="copy-btn" onclick="copyCode(this)">📋 Copiar
+<span class="copy-tooltip">Clique para copiar</span>
+</button>
+</div>
+<pre><code><span class="token-comment">// Configuração de API externa no agente:</span>
+<span class="token-keyword">{</span>
+  <span class="token-string">"name"</span>: <span class="token-string">"send_slack_message"</span>,
+  <span class="token-string">"description"</span>: <span class="token-string">"Envia mensagem para canal do Slack"</span>,
+  <span class="token-string">"endpoint"</span>: <span class="token-string">"POST https://api.slack.com/api/chat.postMessage"</span>,
+  <span class="token-string">"headers"</span>: <span class="token-keyword">{</span>
+    <span class="token-string">"Authorization"</span>: <span class="token-string">"Bearer xoxb-..."</span>
+  <span class="token-keyword">}</span>,
+  <span class="token-string">"body"</span>: <span class="token-keyword">{</span>
+    <span class="token-string">"channel"</span>: <span class="token-string">"#relatorios"</span>,
+    <span class="token-string">"text"</span>: <span class="token-string">"{message}"</span>
+  <span class="token-keyword">}</span>
+<span class="token-keyword">}</span>
+
+<span class="token-comment">// O agente usa quando detecta necessidade:</span>
+<span class="token-variable">Agente</span>: <span class="token-string">"Relatório gerado. Vou notificar o time no Slack."</span>
+<span class="token-keyword">[TOOL CALL]</span> send_slack_message(<span class="token-string">"Relatório semanal pronto!"</span>)
+<span class="token-keyword">[SUCCESS]</span> Mensagem enviada para #relatorios</code></pre>
+</div>
+</div>
+</div>
+
+<!-- Agent Maturity Model -->
+<div class="card" style="margin-top:24px;">
+<div class="card-title"><span class="card-icon">📈</span> Modelo de Maturidade de Agentes</div>
+<p>Nem todo agente começa complexo. Siga esta progressão para evoluir gradualmente:</p>
+</div>
+
+<div class="table-wrapper">
+<table>
+<thead>
+<tr>
+<th>Nível</th>
+<th>Capacidade</th>
+<th>Exemplo</th>
+<th>Complexidade</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>🟢 Nível 1</td>
+<td>Chatbot com Persona</td>
+<td>FAQ com tom definido</td>
+<td><span class="badge badge-success">Baixa</span></td>
+</tr>
+<tr>
+<td>🟡 Nível 2</td>
+<td>+ Conhecimentos (RAG)</td>
+<td>Busca em documentos</td>
+<td><span class="badge badge-warning">Média</span></td>
+</tr>
+<tr>
+<td>🟠 Nível 3</td>
+<td>+ 1 Ferramenta</td>
+<td>Pesquisa web simples</td>
+<td><span class="badge badge-warning">Média</span></td>
+</tr>
+<tr>
+<td>🔴 Nível 4</td>
+<td>+ Múltiplas Ferramentas</td>
+<td>Pesquisa + Código + Email</td>
+<td><span class="badge badge-danger">Alta</span></td>
+</tr>
+<tr>
+<td>🟣 Nível 5</td>
+<td>Multi-agente</td>
+<td>Equipe de agentes cooperando</td>
+<td><span class="badge badge-primary">Expert</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="info-box info-warning">
+<span class="info-icon">⚠️</span>
+<div class="info-content">
+<div class="info-label">Boas Práticas</div>
+<div class="info-text">Comece pelo <strong>Nível 1 ou 2</strong> e vá adicionando complexidade gradualmente. Teste cada ferramenta individualmente antes de combiná-las. Um agente simples que funciona é melhor que um complexo que falha.</div>
+</div>
+</div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- Resumo Final -->
+<section class="section" id="sec-summary">
+<div class="section-header">
+<div class="section-number">6</div>
+<h2 class="section-title"><small>Resumo Final</small>Recapitulando o Módulo 2</h2>
+</div>
+
+<div class="summary-card">
+<h3>✅ O que aprendemos hoje</h3>
+<ul class="summary-list">
+<li><span class="check">✓</span> O <strong>Qwen AI</strong> é um modelo open-source poderoso, superando muitos modelos pagos</li>
+<li><span class="check">✓</span> <strong>Chatbots</strong> respondem perguntas; <strong>Agentes</strong> executam processos com autonomia</li>
+<li><span class="check">✓</span> Todo agente precisa de 3 pilares: <strong>Instruções, Conhecimentos e Capacidades</strong></li>
+<li><span class="check">✓</span> O <strong>Sistema de Instruções</strong> define a persona persistente do agente</li>
+<li><span class="check">✓</span> Os <strong>Conhecimentos</strong> são a base de dados (RAG) que fundamenta as respostas</li>
+<li><span class="check">✓</span> As <strong>Capacidades</strong> são ferramentas que o agente usa para executar tarefas</li>
+<li><span class="check">✓</span> Evolua gradualmente do Nível 1 ao Nível 5 de maturidade</li>
+</ul>
+</div>
+
+<div class="card">
+<div class="card-title"><span class="card-icon">💎</span> Takeaways Principais</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px;margin-top:16px;">
+<div style="background:rgba(0,217,255,0.06);padding:16px;border-radius:12px;border-left:4px solid var(--secondary);">
+<p style="font-weight:700;color:var(--text-primary);font-size:0.9rem;">🎯 Regra de Ouro</p>
+<p style="font-size:0.85rem;color:var(--text-secondary);margin-top:4px;">Chatbot = responde. Agente = executa. Escolha o certo para o problema certo.</p>
+</div>
+<div style="background:rgba(16,185,129,0.06);padding:16px;border-radius:12px;border-left:4px solid var(--success);">
+<p style="font-weight:700;color:var(--text-primary);font-size:0.9rem;">📐 3 Pilares</p>
+<p style="font-size:0.85rem;color:var(--text-secondary);margin-top:4px;">Instruções + Conhecimentos + Capacidades = Agente Completo.</p>
+</div>
+<div style="background:rgba(245,158,11,0.06);padding:16px;border-radius:12px;border-left:4px solid var(--warning);">
+<p style="font-weight:700;color:var(--text-primary);font-size:0.9rem;">🔧 Ferramentas São Poder</p>
+<p style="font-size:0.85rem;color:var(--text-secondary);margin-top:4px;">Adicione ferramentas gradualmente. Teste cada uma antes de combinar.</p>
+</div>
+<div style="background:rgba(108,99,255,0.06);padding:16px;border-radius:12px;border-left:4px solid var(--primary);">
+<p style="font-weight:700;color:var(--text-primary);font-size:0.9rem;">🏢 Qwen é Gratuito</p>
+<p style="font-size:0.85rem;color:var(--text-secondary);margin-top:4px;">Open-source e potente. Use sem custos de licença para soluções profissionais.</p>
+</div>
+</div>
+</div>
+
+<!-- Rating -->
+<div class="rating-card">
+<div class="card-title"><span class="card-icon">⭐</span> Avalie este módulo</div>
+<p style="color:rgba(255,255,255,0.5);font-size:0.9rem;">Como você avalia o conteúdo deste módulo?</p>
+<div class="stars-container" id="starsContainer">
+<span class="star" onclick="rateModule(1)">★</span>
+<span class="star" onclick="rateModule(2)">★</span>
+<span class="star" onclick="rateModule(3)">★</span>
+<span class="star" onclick="rateModule(4)">★</span>
+<span class="star" onclick="rateModule(5)">★</span>
+</div>
+<p id="ratingFeedback" style="color:var(--secondary);font-size:0.85rem;font-weight:600;margin-top:4px;"></p>
+</div>
+
+<!-- Next Module -->
+<div class="next-module">
+<div class="next-icon">️</div>
+<div class="next-info">
+<h4>Próximo Módulo: Automação com Agentes Multi-Modal</h4>
+<p>No Módulo 3, vamos explorar como criar agentes que combinam texto, imagens e dados para automações complexas.</p>
+</div>
+</div>
+
+<!-- Certificate Preview -->
+<div class="card" style="margin-top:24px;background:linear-gradient(135deg,#fef3c7,#fde68a);border:2px solid #f59e0b;">
+<div class="card-title" style="color:#92400e;"><span class="card-icon">🏆</span> Progresso do Curso</div>
+<div style="display:flex;align-items:center;gap:16px;margin-top:12px;">
+<div style="flex:1;">
+<div style="background:rgba(0,0,0,0.1);border-radius:8px;height:12px;overflow:hidden;">
+<div style="height:100%;width:40%;background:linear-gradient(90deg,#f59e0b,#d97706);border-radius:8px;"></div>
+</div>
+<p style="color:#92400e;font-size:0.8rem;margin-top:6px;">40% do curso concluído (2 de 5 módulos)</p>
+</div>
+</div>
+</div>
+</section>
+
+</div>
+</main>
+
+<footer class="footer">
+<div class="footer-content">
+<div class="footer-left">
+<p><strong>IA na Prática</strong> — Curso de Inteligência Artificial</p>
+<p>© 2025 Prof. Vitório Netto · Todos os direitos reservados</p>
+</div>
+<div class="footer-right">
+<a href="#intro">Voltar ao topo</a>
+<a href="#">Suporte</a>
+<a href="#">Certificado</a>
+</div>
+</div>
+</footer>
+
+<script>
+// Progress Bar
+window.addEventListener('scroll', function() {
+const scrollTop = window.scrollY;
+const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+const scrollPercent = (scrollTop / docHeight) * 100;
+
+document.getElementById('progressBar').style.width = scrollPercent + '%';
+document.getElementById('sidebarProgress').style.width = scrollPercent + '%';
+document.getElementById('progressPercent').textContent = Math.round(scrollPercent) + '% concluído';
+
+updateActiveSection();
+});
+
+// Active Section Tracking
+function updateActiveSection() {
+const sections = document.querySelectorAll('.section, .hero');
+const navLinks = document.querySelectorAll('.sidebar-nav a');
+let currentId = '';
+
+sections.forEach(function(section) {
+const rect = section.getBoundingClientRect();
+if (rect.top <= 150) {
+currentId = section.id;
+}
+});
+
+navLinks.forEach(function(link) {
+link.classList.remove('active');
+const href = link.getAttribute('href').replace('#', '');
+if (href === currentId) {
+link.classList.add('active');
+}
+});
+}
+
+// Scroll Animations
+const observer = new IntersectionObserver(function(entries) {
+entries.forEach(function(entry) {
+if (entry.isIntersecting) {
+entry.target.classList.add('visible');
+}
+});
+}, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+document.querySelectorAll('.section').forEach(function(section) {
+observer.observe(section);
+});
+
+// Sidebar Toggle
+document.getElementById('menuToggle').addEventListener('click', function() {
+document.getElementById('sidebar').classList.toggle('open');
+document.getElementById('sidebarOverlay').classList.toggle('open');
+});
+
+document.getElementById('sidebarOverlay').addEventListener('click', function() {
+document.getElementById('sidebar').classList.remove('open');
+document.getElementById('sidebarOverlay').classList.remove('open');
+});
+
+document.querySelectorAll('.sidebar-nav a').forEach(function(link) {
+link.addEventListener('click', function() {
+document.getElementById('sidebar').classList.remove('open');
+document.getElementById('sidebarOverlay').classList.remove('open');
+});
+});
+
+// Qwen Tabs
+function switchQwenTab(event, tabId) {
+const header = event.target.closest('.tabs-header');
+const parent = header.parentElement;
+
+parent.querySelectorAll('.tab-btn').forEach(function(btn) {
+btn.classList.remove('active');
+});
+parent.querySelectorAll('.tab-content').forEach(function(content) {
+content.classList.remove('active');
+});
+
+event.target.classList.add('active');
+document.getElementById(tabId).classList.add('active');
+}
+
+// Pillar Tabs
+function switchPillarTab(event, tabId) {
+const header = event.target.closest('.tabs-header');
+const parent = header.parentElement;
+
+parent.querySelectorAll('.tab-btn').forEach(function(btn) {
+btn.classList.remove('active');
+});
+parent.querySelectorAll('.tab-content').forEach(function(content) {
+content.classList.remove('active');
+});
+
+event.target.classList.add('active');
+document.getElementById(tabId).classList.add('active');
+}
+
+// Tool Tabs
+function switchToolTab(event, tabId) {
+const header = event.target.closest('.tabs-header');
+const parent = header.parentElement;
+
+parent.querySelectorAll('.tab-btn').forEach(function(btn) {
+btn.classList.remove('active');
+});
+parent.querySelectorAll('.tab-content').forEach(function(content) {
+content.classList.remove('active');
+});
+
+event.target.classList.add('active');
+document.getElementById(tabId).classList.add('active');
+}
+
+// Copy Code
+function copyCode(button) {
+const codeBlock = button.closest('.code-block') || button.closest('.simulator-result');
+let codeText = '';
+
+if (codeBlock) {
+const pre = codeBlock.querySelector('pre') || codeBlock.querySelector('.result-text');
+if (pre) {
+codeText = pre.textContent;
+}
+}
+
+navigator.clipboard.writeText(codeText).then(function() {
+button.classList.add('copied');
+const tooltip = button.querySelector('.copy-tooltip');
+if (tooltip) {
+tooltip.classList.add('show');
+tooltip.textContent = '✓ Copiado!';
+}
+button.innerHTML = '✓ Copiado! <span class="copy-tooltip show">✓ Copiado!</span>';
+
+setTimeout(function() {
+button.classList.remove('copied');
+button.innerHTML = '📋 Copiar <span class="copy-tooltip">Clique para copiar</span>';
+}, 2000);
+}).catch(function() {
+const textarea = document.createElement('textarea');
+textarea.value = codeText;
+document.body.appendChild(textarea);
+textarea.select();
+document.execCommand('copy');
+document.body.removeChild(textarea);
+
+button.classList.add('copied');
+setTimeout(function() {
+button.classList.remove('copied');
+button.innerHTML = '📋 Copiar <span class="copy-tooltip">Clique para copiar</span>';
+}, 2000);
+});
+}
+
+// Hint Toggle
+function toggleHint(button) {
+const content = button.nextElementSibling;
+button.classList.toggle('open');
+content.classList.toggle('open');
+}
+
+// Checklist Toggle
+function toggleChecklist(item) {
+item.classList.toggle('checked');
+}
+
+// Scenario Evaluator
+function evaluateScenario(element, type) {
+const resultDiv = document.getElementById('scenarioResult');
+const resultHeader = document.getElementById('scenarioResultHeader');
+const resultText = document.getElementById('scenarioResultText');
+
+// Remove previous selection
+document.querySelectorAll('#sec-2 .tool-option').forEach(function(btn) {
+btn.style.borderColor = 'rgba(255,255,255,0.15)';
+btn.style.background = 'rgba(255,255,255,0.08)';
+});
+
+element.style.borderColor = type === 'chatbot' ? '#EF4444' : '#10B981';
+element.style.background = type === 'chatbot' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(16, 185, 129, 0.1)';
+
+const scenarioText = element.querySelector('strong').textContent;
+
+if (type === 'chatbot') {
+resultHeader.innerHTML = '<span>💬</span> Chatbot Recomendado';
+resultHeader.style.color = '#EF4444';
+resultText.innerHTML = '<strong>' + scenarioText + '</strong>\n\n🎯 <strong>Por que Chatbot?</strong>\nEsta tarefa envolve apenas responder perguntas pré-definidas ou buscar informações simples. Um chatbot é suficiente e mais eficiente.\n\n✅ <strong>Configuração recomendada:</strong>\n- Sistema de instruções básico\n- Base de FAQs\n- Nenhuma ferramenta externa necessária';
+} else {
+resultHeader.innerHTML = '<span>🤖</span> Agente Recomendado';
+resultHeader.style.color = '#10B981';
+resultText.innerHTML = '<strong>' + scenarioText + '</strong>\n\n🎯 <strong>Por que Agente?</strong>\nEsta tarefa requer múltiplos passos, análise e possivelmente ações externas. Um agente com ferramentas é essencial.\n\n✅ <strong>Configuração recomendada:</strong>\n- Sistema de instruções detalhado\n- Conhecimentos específicos do domínio\n- Ferramentas: Web Search, Análise de Dados, E-mail';
+}
+
+resultDiv.classList.add('visible');
+}
+
+// Tool Selector Toggle
+function toggleTool(element) {
+element.classList.toggle('selected');
+}
+
+// Agent Generator
+function generateAgent() {
+const name = document.getElementById('agentName').value.trim();
+const mission = document.getElementById('agentMission').value.trim();
+const rules = document.getElementById('agentRules').value.trim();
+const knowledge = document.getElementById('agentKnowledge').value.trim();
+const dataFormat = document.getElementById('agentDataFormat').value.trim();
+
+const selectedTools = [];
+document.querySelectorAll('#toolSelector .tool-option.selected').forEach(function(tool) {
+selectedTools.push(tool.getAttribute('data-tool'));
+});
+
+if (!name && !mission && !rules && !knowledge) {
+alert('Preencha pelo menos o nome e a missão do agente!');
+return;
+}
+
+let config = '';
+let score = 0;
+let maxScore = 5;
+
+config += '═══════════════════════════════════════════\n';
+config += '  CONFIGURAÇÃO DO AGENTE: ' + (name || 'Agente Sem Nome') + '\n';
+config += '═══════════════════════════════════════════\n\n';
+
+config += '📋 SISTEMA DE INSTRUÇÕES\n';
+config += '────────────────────────────\n';
+if (name) {
+config += '• Nome: ' + name + '\n';
+score += 0.5;
+}
+if (mission) {
+config += '• Missão: ' + mission + '\n';
+score += 1;
+}
+if (rules) {
+config += '• Regras: ' + rules + '\n';
+score += 1;
+}
+
+config += '\n📚 CONHECIMENTOS\n';
+config += '────────────────────────────\n';
+if (knowledge) {
+config += '• Documentos: ' + knowledge + '\n';
+score += 1;
+}
+if (dataFormat) {
+config += '• Formato: ' + dataFormat + '\n';
+score += 0.5;
+}
+
+config += '\n🔧 CAPACIDADES\n';
+config += '────────────────────────────\n';
+if (selectedTools.length > 0) {
+const toolNames = {
+'web-search': '🌐 Pesquisa Web',
+'code-analysis': '💻 Análise de Código',
+'data-analysis': '📊 Análise de Dados',
+'api': '🔌 APIs Externas',
+'email': '📧 E-mail',
+'file-read': '📁 Leitura de Arquivos',
+'image-gen': '🎨 Geração de Imagens',
+'scheduler': '📅 Agendamento'
+};
+selectedTools.forEach(function(tool) {
+config += '• ' + (toolNames[tool] || tool) + '\n';
+});
+score += Math.min(1, selectedTools.length * 0.5);
+} else {
+config += '• Nenhuma ferramenta selecionada\n';
+}
+
+config += '\n═══════════════════════════════════════════\n';
+config += '  Agente pronto para deploy! 🚀\n';
+config += '═══════════════════════════════════════════';
+
+// Show score
+const scoreDisplay = document.getElementById('agentScoreDisplay');
+const scoreValue = document.getElementById('agentScoreValue');
+const scoreBar = document.getElementById('agentScoreBar');
+scoreDisplay.style.display = 'block';
+scoreValue.textContent = Math.round(score) + '/' + maxScore + ' pilares';
+scoreBar.style.width = (score / maxScore * 100) + '%';
+
+// Show generated config
+const resultDiv = document.getElementById('generatedAgent');
+const outputDiv = document.getElementById('agentOutput');
+outputDiv.textContent = config;
+resultDiv.classList.add('visible');
+}
+
+function clearAgent() {
+document.getElementById('agentName').value = '';
+document.getElementById('agentMission').value = '';
+document.getElementById('agentRules').value = '';
+document.getElementById('agentKnowledge').value = '';
+document.getElementById('agentDataFormat').value = '';
+
+document.querySelectorAll('#toolSelector .tool-option').forEach(function(tool) {
+tool.classList.remove('selected');
+});
+
+document.getElementById('agentScoreDisplay').style.display = 'none';
+document.getElementById('generatedAgent').classList.remove('visible');
+}
+
+function loadAgentExample() {
+document.getElementById('agentName').value = 'JurisBot — Assistente Jurídico';
+document.getElementById('agentMission').value = 'Ajudar clientes a entenderem seus direitos trabalhistas de forma acessível e precisa, fornecendo orientação baseada na legislação brasileira atualizada.';
+document.getElementById('agentRules').value = '1. Sempre cite a legislação aplicável (CLT, CF/88, súmulas do TST)\n2. Mantenha um tom profissional e empático\n3. NUNCA substitua o conselho de um advogado\n4. Quando não tiver certeza, indique a necessidade de consulta profissional\n5. Use linguagem acessível, sem juridiquês desnecessário';
+document.getElementById('agentKnowledge').value = 'CLT atualizada 2025, Manual interno de políticas da empresa, Base de FAQs jurídico (500+ perguntas), Relatórios mensais de jurisprudência';
+document.getElementById('agentDataFormat').value = 'PDF, Markdown, JSON';
+
+// Select tools
+document.querySelectorAll('#toolSelector .tool-option').forEach(function(tool) {
+tool.classList.remove('selected');
+});
+document.querySelector('[data-tool="web-search"]').classList.add('selected');
+document.querySelector('[data-tool="file-read"]').classList.add('selected');
+document.querySelector('[data-tool="email"]').classList.add('selected');
+
+generateAgent();
+}
+
+// Star Rating
+let currentRating = 0;
+
+function rateModule(rating) {
+currentRating = rating;
+const stars = document.querySelectorAll('.star');
+const feedback = document.getElementById('ratingFeedback');
+
+stars.forEach(function(star, index) {
+if (index < rating) {
+star.classList.add('active');
+} else {
+star.classList.remove('active');
+}
+});
+
+const messages = [
+'',
+'😕 Precisa melhorar',
+'😐 Razoável',
+'🙂 Bom',
+'😊 Muito bom!',
+'🤩 Excelente! Obrigado!'
+];
+
+feedback.textContent = messages[rating];
+}
+
+// Init
+document.addEventListener('DOMContentLoaded', function() {
+updateActiveSection();
+});
+</script>
+</body>
+</html>
+

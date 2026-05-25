@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula Interativa: SQL Intermediário</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.19/400.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.19/600.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.19/700.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/fira-code@5.0.19/400.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/fira-code@5.0.19/500.css">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --info: #0ea5e9;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg-gradient-start: #0f172a;
+            --bg-gradient-end: #1e1b4b;
+            --card-bg: #ffffff;
+            --text-dark: #1e293b;
+            --text-light: #f8fafc;
+            --border-light: #e2e8f0;
+            --border-dark: #0f172a;
+            --code-bg: #1e1e2e;
+            --radius-lg: 16px;
+            --radius-md: 8px;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-hover: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+            color: var(--text-dark);
+            min-height: 100vh;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        #progress-bar {
+            position: fixed; top: 0; left: 0; height: 4px; background: var(--success);
+            width: 0%; z-index: 1000; transition: width 0.2s;
+        }
+
+        .container {
+            max-width: 1280px; margin: 0 auto; padding: 20px;
+            display: grid; grid-template-columns: 260px 1fr; gap: 30px;
+        }
+
+        #sidebar {
+            position: sticky; top: 20px; height: fit-content;
+            background: var(--card-bg); border-radius: var(--radius-lg);
+            padding: 20px; box-shadow: var(--shadow);
+            border: 1px solid var(--border-light);
+        }
+        #sidebar ul { list-style: none; }
+        #sidebar li { margin-bottom: 8px; }
+        #sidebar a {
+            display: block; padding: 10px 12px; text-decoration: none;
+            color: var(--text-dark); border-radius: var(--radius-md);
+            font-weight: 500; transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+        #sidebar a:hover, #sidebar a.active {
+            background: var(--primary); color: var(--text-light);
+            border-color: var(--primary-dark);
+        }
+
+        main { display: flex; flex-direction: column; gap: 30px; }
+        header {
+            background: var(--card-bg); border-radius: var(--radius-lg);
+            padding: 30px; box-shadow: var(--shadow); border: 1px solid var(--border-light);
+            text-align: center; position: relative; overflow: hidden;
+        }
+        header h1 { font-size: 2.5rem; color: var(--primary-dark); margin-bottom: 8px; }
+        header p { color: #64748b; font-size: 1.1rem; }
+        .hero-img {
+            max-width: 100%; height: auto; border-radius: var(--radius-md);
+            margin-top: 20px; box-shadow: var(--shadow);
+        }
+
+        .card {
+            background: var(--card-bg); border-radius: var(--radius-lg);
+            padding: 25px; box-shadow: var(--shadow); border: 1px solid var(--border-light);
+            transition: transform 0.3s, box-shadow 0.3s; opacity: 0; transform: translateY(20px);
+        }
+        .card.visible { opacity: 1; transform: translateY(0); }
+        .card:hover { box-shadow: var(--shadow-hover); transform: translateY(-3px); }
+
+        .section-title { font-size: 1.5rem; margin-bottom: 15px; color: var(--primary-dark); border-bottom: 2px solid var(--border-light); padding-bottom: 8px; }
+        
+        .badge {
+            display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem;
+            font-weight: 700; text-transform: uppercase; margin-right: 8px; border: 1px solid;
+        }
+        .badge.info { background: #e0f2fe; color: #0284c7; border-color: #bae6fd; }
+        .badge.success { background: #dcfce7; color: #15803d; border-color: #bbf7d0; }
+        .badge.warning { background: #fef3c7; color: #b45309; border-color: #fde047; }
+        .badge.danger { background: #fee2e2; color: #b91c1c; border-color: #fca5a5; }
+
+        .tabs { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
+        .tab-btn {
+            padding: 8px 16px; border: 1px solid var(--border-light); background: #f8fafc;
+            border-radius: var(--radius-md); cursor: pointer; font-weight: 500; transition: 0.2s;
+            border: 1px solid transparent; color: var(--text-dark);
+        }
+        .tab-btn.active { background: var(--primary); color: var(--text-light); border-color: var(--primary-dark); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s; }
+
+        .code-block {
+            position: relative; background: var(--code-bg); border-radius: var(--radius-md);
+            padding: 20px; margin: 15px 0; overflow-x: auto;
+            border-left: 4px solid var(--primary); font-family: 'Fira Code', monospace;
+            color: #e2e8f0; line-height: 1.7;
+        }
+        .code-block .copy-btn {
+            position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2); color: #cbd5e1; padding: 5px 10px;
+            border-radius: 6px; cursor: pointer; font-size: 0.8rem; transition: 0.2s;
+        }
+        .code-block .copy-btn:hover { background: rgba(255,255,255,0.2); }
+        .sql-keyword { color: #c678dd; font-weight: 500; }
+        .sql-func { color: #61afef; }
+        .sql-string { color: #98c379; }
+        .sql-comment { color: #5c6370; font-style: italic; }
+        .sql-number { color: #d19a66; }
+
+        .info-box {
+            padding: 15px; border-radius: var(--radius-md); margin: 15px 0;
+            border-left: 4px solid; font-size: 0.95rem;
+        }
+        .info-box.success { background: #f0fdf4; border-color: var(--success); color: #166534; border: 1px solid #bbf7d0; color: #14532d; }
+        .info-box.warning { background: #fefce8; border-color: var(--warning); color: #713f12; border: 1px solid #fde047; }
+        .info-box.info { background: #eff6ff; border-color: var(--info); color: #1e3a8a; border: 1px solid #bfdbfe; }
+        
+        .info-box.dark { background: rgba(0,0,0,0.2); border: 1px solid #334155; color: #e2e8f0; }
+
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; background: #f8fafc; border-radius: var(--radius-md); overflow: hidden; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--border-light); }
+        th { background: var(--primary); color: white; font-weight: 600; }
+        tr:last-child td { border-bottom: none; }
+
+        .collapsible {
+            background: #f8fafc; border: 1px solid var(--border-light); border-radius: var(--radius-md);
+            margin-bottom: 10px; overflow: hidden;
+        }
+        .collapsible-header {
+            padding: 12px 15px; cursor: pointer; font-weight: 600; display: flex; justify-content: space-between; align-items: center;
+            transition: 0.2s; border: 1px solid transparent; color: var(--text-dark);
+        }
+        .collapsible-header:hover { background: #e2e8f0; }
+        .collapsible-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; padding: 0 15px; background: #f1f5f9; }
+        .collapsible.open .collapsible-content { max-height: 300px; padding: 15px; }
+
+        .simulator {
+            background: #0f172a; color: #e2e8f0; border-radius: var(--radius-lg);
+            padding: 20px; border: 1px solid #334155; font-family: 'Fira Code', monospace;
+        }
+        .sim-controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; }
+        .sim-btn {
+            background: var(--primary); color: white; border: none; padding: 8px 14px;
+            border-radius: 6px; cursor: pointer; font-family: 'Inter', sans-serif; font-weight: 500;
+            border: 1px solid var(--primary-dark); transition: 0.2s;
+        }
+        .sim-btn:hover { background: var(--info); border-color: var(--info); }
+        .sim-output {
+            background: #1e293b; border-radius: 8px; padding: 15px; min-height: 150px;
+            border: 1px dashed #475569; white-space: pre-wrap; font-size: 0.9rem;
+        }
+        .sim-cursor { display: inline-block; width: 8px; height: 15px; background: var(--success); animation: blink 1s infinite; vertical-align: middle; }
+
+        footer {
+            background: var(--card-bg); border-radius: var(--radius-lg); padding: 20px;
+            margin-top: 30px; text-align: center; border: 1px solid var(--border-light);
+            box-shadow: var(--shadow); color: #64748b;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+        @media (max-width: 900px) {
+            .container { grid-template-columns: 1fr; }
+            #sidebar { position: relative; top: 0; margin-bottom: 20px; }
+            .tabs { flex-direction: column; }
+        }
+        @media (max-width: 600px) {
+            header h1 { font-size: 1.8rem; }
+            .code-block { padding: 15px 10px; font-size: 0.85rem; }
+        }
+    </style>
+</head>
+<body>
+    <div id="progress-bar"></div>
+    <div class="container">
+        <nav id="sidebar">
+            <ul>
+                <li><a href="#intro">📖 Introdução</a></li>
+                <li><a href="#filtros">🔍 Filtros Avançados</a></li>
+                <li><a href="#joins">🔗 Joins Avançados</a></li>
+                <li><a href="#agrupamento">📊 Agrupamento</a></li>
+                <li><a href="#views">👁️ Views e Views</a></li>
+                <li><a href="#triggers">⚡ Triggers e Backup</a></li>
+                <li><a href="#simulador">💻 Simulador</a></li>
+                <li><a href="#desafio">🎯 Desafio</a></li>
+                <li><a href="#resumo">📝 Resumo</a></li>
+            </ul>
+        </nav>
+
+        <main>
+            <header>
+                <h1>SQL Intermediário</h1>
+                <p>Domine Joins, Views, Triggers e Subconsultas</p>
+                <img src="https://image.qwenlm.ai/public_source/a8961436-6797-4a76-9e69-a1ab119597f5/1d2035e11-29ec-4744-9a9b-b95c60cbd2d4.png" alt="Conceitos avançados de SQL" class="hero-img">
+            </header>
+
+            <section id="intro" class="card">
+                <h2 class="section-title">Introdução</h2>
+                <span class="badge info">Intermediário</span> <span class="badge success">Prático</span>
+                <p style="margin-top: 10px;">Nesta aula, elevamos o nível de complexidade dos comandos SQL. Focaremos em manipulação avançada de dados, criação de estruturas de backup, automação via triggers e consultas que cruzam múltiplas tabelas com eficiência. O objetivo é preparar você para cenários reais de desenvolvimento e administração de bancos de dados.</p>
+                <div class="info-box info">
+                    <strong> Pré-requisito:</strong> Conhecimento básico de CREATE, INSERT, SELECT e WHERE.
+                </div>
+            </section>
+
+            <section id="filtros" class="card">
+                <h2 class="section-title">1. Filtros e Subconsultas</h2>
+                <p>O SQL permite buscas flexíveis e aninhamento de consultas para encontrar dados específicos. O operador <code>LIKE</code> facilita buscas parciais, enquanto subconsultas permitem filtrar resultados baseados em outra query.</p>
+                
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="tab-like">LIKE e Padrões</button>
+                    <button class="tab-btn" data-tab="tab-subquery">Subconsultas</button>
+                </div>
+
+                <div id="tab-like" class="tab-content active">
+                    <div class="code-block">
+                        <button class="copy-btn">📋 Copiar</button>
+                        <code class="language-sql">-- Busca nomes que começam com 'João'
+SELECT * FROM Pessoa WHERE nome_pessoa LIKE 'João%';
+
+-- Busca e-mails que contenham 'example'
+SELECT email FROM contatos WHERE email LIKE '%example%';</code>
+                    </div>
+                    <div class="info-box warning">
+                        <strong>⚠️ Performance:</strong> O operador <code>LIKE</code> com <code>%</code> no início da string pode causar lentidão em tabelas muito grandes, pois impede o uso de índices. Use com cautela em produção.
+                    </div>
+                </div>
+
+                <div id="tab-subquery" class="tab-content">
+                    <div class="code-block">
+                        <button class="copy-btn">📋 Copiar</button>
+                        <code class="language-sql">-- Seleciona nomes de pessoas que moram no bairro 'Tropical ville'
+SELECT nome_pessoa
+FROM Pessoa
+WHERE idpessoa IN (
+  SELECT idpessoa FROM Endereco WHERE bairro = 'Tropical ville'
+);</code>
+                    </div>
+                    <p>A subconsulta interna retorna uma lista de IDs válidos, e a consulta externa filtra apenas as pessoas cujos IDs estão nessa lista.</p>
+                </div>
+            </section>
+
+            <section id="joins" class="card">
+                <h2 class="section-title">2. Joins Avançados</h2>
+                <p>Os JOINs são a espinha dorsal dos bancos relacionais. Entender a diferença entre INNER, LEFT e RIGHT é crucial para não perder dados ou gerar duplicatas.</p>
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="tab-inner">INNER JOIN</button>
+                    <button class="tab-btn" data-tab="tab-left">LEFT JOIN</button>
+                    <button class="tab-btn" data-tab="tab-right">RIGHT JOIN</button>
+                </div>
+
+                <div id="tab-inner" class="tab-content active">
+                    <div class="code-block">
+                        <button class="copy-btn">📋 Copiar</button>
+                        <code class="language-sql">-- Retorna apenas pessoas que possuem endereço cadastrado
+SELECT P.nome_pessoa, E.rua
+FROM Pessoa P
+INNER JOIN Endereco E ON P.idpessoa = E.idpessoa;</code>
+                    </div>
+                    <p>Registros que não têm correspondência na outra tabela são excluídos do resultado.</p>
+                </div>
+
+                <div id="tab-left" class="tab-content">
+                    <div class="code-block">
+                        <button class="copy-btn"> Copiar</button>
+                        <code class="language-sql">-- Retorna todas as pessoas, mesmo as sem endereço
+SELECT P.nome_pessoa, E.rua
+FROM Pessoa P
+LEFT JOIN Endereco E ON P.idpessoa = E.idpessoa;</code>
+                    </div>
+                    <p>Útil para identificar "gaps" nos dados, como clientes sem endereço cadastrado.</p>
+                </div>
+
+                <div id="tab-right" class="tab-content">
+                    <div class="code-block">
+                        <button class="copy-btn">📋 Copiar</button>
+                        <code class="language-sql">-- Retorna todos os endereços, mesmo os sem pessoa vinculada
+SELECT P.nome_pessoa, E.rua
+FROM Pessoa P
+RIGHT JOIN Endereco E ON P.idpessoa = E.idpessoa;</code>
+                    </div>
+                    <p>O inverso do LEFT JOIN: prioriza a tabela da direita.</p>
+                </div>
+            </section>
+
+            <section id="agrupamento" class="card">
+                <h2 class="section-title">3. Agrupamento e Filtragem Agregada</h2>
+                <p>Utilizamos <code>GROUP BY</code> para consolidar dados e <code>HAVING</code> para filtrar esses grupos após a agregação (diferente do WHERE, que filtra linhas individuais).</p>
+                <div class="code-block">
+                    <button class="copy-btn">📋 Copiar</button>
+                    <code class="language-sql">-- Conta total de contatos por pessoa
+SELECT P.idpessoa, P.nome_pessoa, COUNT(C.idcontato) as total_contatos
+FROM Pessoa P
+LEFT JOIN Contatos C ON P.idpessoa = C.idpessoa
+GROUP BY P.idpessoa, P.nome_pessoa;
+
+-- Filtra apenas pessoas com mais de 1 endereço
+SELECT idpessoa, COUNT(*) as total_enderecos
+FROM Endereco
+GROUP BY idpessoa
+HAVING COUNT(*) > 1;</code>
+                </div>
+                <div class="info-box success">
+                    <strong>✅ Dica:</strong> Sempre inclua no <code>GROUP BY</code> todas as colunas que aparecem no <code>SELECT</code> e não são funções de agregação.
+                </div>
+            </section>
+
+            <section id="views" class="card">
+                <h2 class="section-title">4. Views e Estruturas</h2>
+                <p>Views simplificam consultas complexas e podem servir como camadas de segurança. Além disso, o <code>ALTER TABLE</code> permite modificar estruturas existentes.</p>
+                <div class="code-block">
+                    <button class="copy-btn">📋 Copiar</button>
+                    <code class="language-sql">-- Cria uma view para facilitar a leitura da lista telefônica
+CREATE VIEW Tele_lista_view AS
+SELECT pessoa.idpessoa, endereco.idendereco, contatos.idcontato
+FROM pessoa
+JOIN endereco ON pessoa.idpessoa = endereco.idpessoa
+JOIN contatos ON pessoa.idpessoa = contatos.idpessoa;
+
+-- Consulta a view como se fosse uma tabela
+SELECT * FROM Tele_lista_view;
+
+-- Adiciona coluna sobrenome na tabela Pessoa
+ALTER TABLE Pessoa ADD COLUMN sobrenome VARCHAR(255);</code>
+                </div>
+            </section>
+
+            <section id="triggers" class="card">
+                <h2 class="section-title">5. Triggers e Automação</h2>
+                <p>Triggers são blocos de código que executam automaticamente antes ou depois de eventos (INSERT, UPDATE, DELETE). São ótimos para logs e integridade.</p>
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="tab-backup">Trigger de Backup</button>
+                    <button class="tab-btn" data-tab="tab-protection">Proteção de Exclusão</button>
+                </div>
+
+                <div id="tab-backup" class="tab-content active">
+                    <div class="code-block">
+                        <button class="copy-btn">📋 Copiar</button>
+                        <code class="language-sql">-- Antes de deletar, salva os dados na tabela de backup
+CREATE TRIGGER backup_pessoa BEFORE DELETE ON Pessoa
+FOR EACH ROW
+BEGIN
+  INSERT INTO Pessoa_backup VALUES (OLD.idpessoa, OLD.nome_pessoa, OLD.cpf, OLD.nascimento);
+END;</code>
+                    </div>
+                </div>
+
+                <div id="tab-protection" class="tab-content">
+                    <div class="code-block">
+                        <button class="copy-btn">📋 Copiar</button>
+                        <code class="language-sql">-- Impede a exclusão de registros da tabela Pessoa
+CREATE TRIGGER alerta_exclusao BEFORE DELETE ON Pessoa
+FOR EACH ROW
+BEGIN
+  SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Não é possível excluir dados da tabela Pessoa';
+END;</code>
+                    </div>
+                </div>
+            </section>
+
+            <section id="simulador" class="card">
+                <h2 class="section-title">💻 Simulador Interativo</h2>
+                <p>Teste comandos intermediários e veja o resultado esperado.</p>
+                <div class="simulator">
+                    <div class="sim-controls">
+                        <button class="sim-btn" onclick="runSim('join')">INNER JOIN</button>
+                        <button class="sim-btn" onclick="runSim('having')">GROUP BY + HAVING</button>
+                        <button class="sim-btn" onclick="runSim('like')">LIKE Filter</button>
+                        <button class="sim-btn" onclick="runSim('view')">USE VIEW</button>
+                        <button class="sim-btn" onclick="runSim('alter')">ALTER TABLE</button>
+                        <button class="sim-btn" onclick="runSim('clear')">Limpar</button>
+                    </div>
+                    <div class="sim-output" id="simOutput">
+                        <span style="color: #64748b;">// Aguardando comando... Clique nos botões acima para simular a execução.</span>
+                    </div>
+                </div>
+            </section>
+
+            <section id="desafio" class="card">
+                <h2 class="section-title">🎯 Desafio Prático</h2>
+                <span class="badge danger">Avaliativo</span>
+                <p>Desenvolva um script SQL que:</p>
+                <ul style="margin: 15px 20px 0;">
+                    <li>Crie um banco `gestao_vendas`.</li>
+                    <li>Tabelas: `Vendedores` (id, nome) e `Vendas` (id, id_vendedor, valor).</li>
+                    <li>Insira 5 vendedores e 8 vendas.</li>
+                    <li>Crie uma VIEW que mostre o nome do vendedor e o total vendido por ele.</li>
+                    <li>Use um SELECT com HAVING para listar apenas vendedores que venderam mais de R$ 1000,00 no total.</li>
+                    <li>Crie um TRIGGER que impeça a exclusão de um vendedor se ele tiver vendas registradas.</li>
+                </ul>
+                <div class="info-box success dark">
+                    <strong>✅ Critérios:</strong> Uso correto de JOIN, GROUP BY, HAVING, VIEW e TRIGGER. Sintaxe limpa.
+                </div>
+            </section>
+
+            <section id="resumo" class="card">
+                <h2 class="section-title">📝 Resumo Final</h2>
+                <p>Parabéns! Você explorou o nível intermediário do SQL. Revisamos:</p>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
+                    <div style="padding: 15px; background: #f8fafc; border-radius: 8px; border-left: 4px solid var(--primary);">
+                        <strong>Joins</strong><br>INNER, LEFT, RIGHT para unir dados
+                    </div>
+                    <div style="padding: 15px; background: #f8fafc; border-radius: 8px; border-left: 4px solid var(--info);">
+                        <strong>Agregações</strong><br>GROUP BY e HAVING para análise
+                    </div>
+                    <div style="padding: 15px; background: #f8fafc; border-radius: 8px; border-left: 4px solid var(--success);">
+                        <strong>Views</strong><br>Abstração de consultas complexas
+                    </div>
+                    <div style="padding: 15px; background: #f8fafc; border-radius: 8px; border-left: 4px solid var(--warning);">
+                        <strong>Triggers</strong><br>Automação e integridade de dados
+                    </div>
+                </div>
+                <div class="info-box info" style="margin-top: 15px;">
+                    <strong>🚀 Próximos Passos:</strong> Estude Stored Procedures, Funções Personalizadas e Otimização de Queries (EXPLAIN).
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <footer>
+        <p>© 2024 Curso Interativo SQL. Baseado em padrões ANSI SQL e scripts reais.</p>
+    </footer>
+
+    <script>
+        // Progress Bar & Scroll Spy
+        const progressBar = document.getElementById('progress-bar');
+        const sections = document.querySelectorAll('section');
+        const navLinks = document.querySelectorAll('#sidebar a');
+
+        window.addEventListener('scroll', () => {
+            const scrollTop = document.documentElement.scrollTop;
+            const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const progress = (scrollTop / scrollHeight) * 100;
+            progressBar.style.width = progress + '%';
+
+            // Active link
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop - 100;
+                if (scrollTop >= sectionTop) current = '#' + section.getAttribute('id');
+            });
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === current) link.classList.add('active');
+            });
+        });
+
+        // Intersection Observer for Animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.card').forEach(card => observer.observe(card));
+
+        // Tabs Logic
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const parent = btn.closest('.tabs');
+                const tabId = btn.dataset.tab;
+                const container = parent.parentElement;
+
+                parent.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                container.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+
+        // Collapsible Logic
+        document.querySelectorAll('.collapsible-header').forEach(header => {
+            header.addEventListener('click', () => {
+                const parent = header.parentElement;
+                parent.classList.toggle('open');
+                header.querySelector('span').textContent = parent.classList.contains('open') ? '▲' : '▼';
+            });
+        });
+
+        // Copy Code Logic
+        document.querySelectorAll('.copy-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const code = btn.parentElement.querySelector('code').innerText;
+                navigator.clipboard.writeText(code).then(() => {
+                    const original = btn.textContent;
+                    btn.textContent = '✅ Copiado!';
+                    setTimeout(() => btn.textContent = original, 2000);
+                });
+            });
+        });
+
+        // SQL Syntax Highlighter (Basic)
+        function highlightSQL(sql) {
+            const keywords = /\b(CREATE|DATABASE|IF|NOT|EXISTS|USE|TABLE|PRIMARY|KEY|INT|VARCHAR|CHAR|DATE|FOREIGN|REFERENCES|INSERT|INTO|VALUES|SELECT|FROM|WHERE|JOIN|LEFT|RIGHT|ON|GROUP|BY|COUNT|AS|ALTER|DROP|INDEX|CHANGE|SET|UPDATE|VIEW|AND|OR|NULL|USING|BTREE|INNER|HAVING|LIKE|TRIGGER|BEFORE|DELETE|BEGIN|END|SIGNAL|SQLSTATE|FOR|EACH|ROW|OLD|ADD|COLUMN|CALL|FUNCTION|PROCEDURE)\b/gi;
+            const funcs = /\b(COUNT|MAX|MIN|AVG|SUM|CONCAT|SUBSTRING)\b/gi;
+            
+            let highlighted = sql
+                .replace(/--.*$/gm, '<span class="sql-comment">$&</span>')
+                .replace(/'[^']*'/g, '<span class="sql-string">$&</span>')
+                .replace(/`[^`]*`/g, '<span class="sql-string">$&</span>')
+                .replace(/\b(\d+)\b/g, '<span class="sql-number">$1</span>');
+                
+            highlighted = highlighted.replace(keywords, '<span class="sql-keyword">$1</span>');
+            highlighted = highlighted.replace(funcs, '<span class="sql-func">$1</span>');
+            return highlighted;
+        }
+
+        document.querySelectorAll('.language-sql').forEach(el => {
+            el.innerHTML = highlightSQL(el.innerText);
+        });
+
+        // Simulator Logic
+        function runSim(type) {
+            const output = document.getElementById('simOutput');
+            const cursor = '<span class="sim-cursor"></span>';
+            
+            const responses = {
+                join: `> EXECUTANDO: SELECT P.nome, E.rua FROM Pessoa P INNER JOIN Endereco E...
++--------------+-------------+
+| nome_pessoa  | rua         |
++--------------+-------------+
+| João Paulo   | Rua 1       |
+| João Paulo   | Rua 55      |
+| Paulo André  | Rua 4       |
++--------------+-------------+
+3 rows in set (0.004 sec) ${cursor}`,
+                having: `> EXECUTANDO: SELECT idpessoa, COUNT(*) FROM Endereco GROUP BY idpessoa HAVING COUNT(*) > 1...
++----------+------------------+
+| idpessoa | total_enderecos  |
++----------+------------------+
+|        1 |                2 |
++----------+------------------+
+1 row in set (0.002 sec) ${cursor}`,
+                like: `> EXECUTANDO: SELECT * FROM Pessoa WHERE nome_pessoa LIKE 'João%'...
++----------+--------------+-------------+------------+
+| idpessoa | nome_pessoa  | cpf         | nascimento |
++----------+--------------+-------------+------------+
+|        1 | João Paulo   | 12345678911 | 2000-12-08 |
++----------+--------------+-------------+------------+
+1 row in set (0.001 sec) ${cursor}`,
+                view: `> EXECUTANDO: SELECT * FROM Tele_lista_view...
++----------+------------+------------+
+| idpessoa | idendereco | idcontato  |
++----------+------------+------------+
+|        1 |          1 |          1 |
+|        2 |          3 |          2 |
+|        2 |          3 |          3 |
++----------+------------+------------+
+3 rows in set (0.003 sec) ${cursor}`,
+                alter: `> EXECUTANDO: ALTER TABLE Pessoa ADD COLUMN sobrenome VARCHAR(255)...
+✅ Coluna 'sobrenome' adicionada com sucesso.
+   Status: OK (0.015 sec) ${cursor}`,
+                clear: ``
+            };
+
+            if (type === 'clear') {
+                output.innerHTML = `<span style="color: #64748b;">// Aguardando comando... Clique nos botões acima para simular a execução.</span>`;
+                return;
+            }
+            
+            output.innerHTML = responses[type];
+        }
+    </script>
+</body>
+</html>
+

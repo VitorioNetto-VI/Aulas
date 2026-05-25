@@ -1,0 +1,2521 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IA na Prática - Módulo 4: Análise Documental e NotebookLM</title>
+<link href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/400.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/600.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/700.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@fontsource/fira-code@5.1.0/400.css" rel="stylesheet">
+<style>
+:root {
+--primary: #6C63FF;
+--primary-dark: #5A52D5;
+--primary-light: #8B85FF;
+--secondary: #00D9FF;
+--success: #10B981;
+--success-light: #D1FAE5;
+--success-dark: #065F46;
+--warning: #F59E0B;
+--warning-light: #FEF3C7;
+--warning-dark: #92400E;
+--danger: #EF4444;
+--danger-light: #FEE2E2;
+--danger-dark: #991B1B;
+--info: #3B82F6;
+--info-light: #DBEAFE;
+--info-dark: #1E40AF;
+--bg-gradient-start: #1a1040;
+--bg-gradient-mid: #2d1b69;
+--bg-gradient-end: #1e3a5f;
+--card-bg: #FFFFFF;
+--text-primary: #1F2937;
+--text-secondary: #4B5563;
+--text-light: #9CA3AF;
+--code-bg: #1e1e2e;
+--sidebar-width: 280px;
+--header-height: 60px;
+--border-radius-card: 16px;
+--border-radius-element: 8px;
+--shadow-card: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+--shadow-card-hover: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+--shadow-elevated: 0 25px 50px -12px rgba(0,0,0,0.25);
+--transition-fast: 0.2s ease;
+--transition-normal: 0.3s ease;
+--transition-slow: 0.5s ease;
+}
+
+* {
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+html {
+scroll-behavior: smooth;
+scroll-padding-top: var(--header-height);
+}
+
+body {
+font-family: 'Inter', sans-serif;
+background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-mid) 50%, var(--bg-gradient-end) 100%);
+color: var(--text-primary);
+line-height: 1.7;
+min-height: 100vh;
+}
+
+.progress-bar {
+position: fixed;
+top: 0;
+left: 0;
+width: 0%;
+height: 4px;
+background: linear-gradient(90deg, var(--primary), var(--secondary), var(--primary-light));
+z-index: 10000;
+transition: width 0.1s linear;
+border-radius: 0 2px 2px 0;
+box-shadow: 0 0 10px rgba(108, 99, 255, 0.5);
+}
+
+.header {
+position: fixed;
+top: 4px;
+left: 0;
+right: 0;
+height: var(--header-height);
+background: rgba(26, 16, 64, 0.98);
+backdrop-filter: blur(20px);
+-webkit-backdrop-filter: blur(20px);
+z-index: 9999;
+display: flex;
+align-items: center;
+justify-content: space-between;
+padding: 0 24px;
+border-bottom: 1px solid rgba(108, 99, 255, 0.2);
+}
+
+.header-logo {
+display: flex;
+align-items: center;
+gap: 12px;
+color: white;
+font-weight: 700;
+font-size: 1.1rem;
+}
+
+.header-logo .logo-icon {
+width: 36px;
+height: 36px;
+background: linear-gradient(135deg, var(--primary), var(--secondary));
+border-radius: 10px;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 1.2rem;
+}
+
+.header-nav {
+display: flex;
+align-items: center;
+gap: 16px;
+}
+
+.header-nav .badge-timer {
+background: rgba(108, 99, 255, 0.2);
+color: var(--primary-light);
+padding: 6px 14px;
+border-radius: 20px;
+font-size: 0.85rem;
+font-weight: 600;
+display: flex;
+align-items: center;
+gap: 6px;
+}
+
+.header-nav .badge-level {
+background: rgba(0, 217, 255, 0.2);
+color: var(--secondary);
+padding: 6px 14px;
+border-radius: 20px;
+font-size: 0.85rem;
+font-weight: 600;
+}
+
+.menu-toggle {
+display: none;
+background: none;
+border: none;
+color: white;
+font-size: 1.5rem;
+cursor: pointer;
+padding: 8px;
+}
+
+.sidebar {
+position: fixed;
+top: calc(var(--header-height) + 4px);
+left: 0;
+width: var(--sidebar-width);
+height: calc(100vh - var(--header-height) - 4px);
+background: rgba(26, 16, 64, 0.95);
+backdrop-filter: blur(10px);
+-webkit-backdrop-filter: blur(10px);
+z-index: 9998;
+overflow-y: auto;
+padding: 24px 16px;
+border-right: 1px solid rgba(108, 99, 255, 0.15);
+transition: transform var(--transition-normal);
+}
+
+.sidebar::-webkit-scrollbar {
+width: 4px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+background: rgba(108, 99, 255, 0.3);
+border-radius: 2px;
+}
+
+.sidebar-title {
+color: var(--text-light);
+font-size: 0.7rem;
+text-transform: uppercase;
+letter-spacing: 2px;
+font-weight: 700;
+margin-bottom: 16px;
+padding-left: 12px;
+}
+
+.sidebar-nav {
+list-style: none;
+}
+
+.sidebar-nav li {
+margin-bottom: 2px;
+}
+
+.sidebar-nav a {
+display: flex;
+align-items: center;
+gap: 10px;
+padding: 10px 12px;
+color: rgba(255,255,255,0.7);
+text-decoration: none;
+border-radius: var(--border-radius-element);
+font-size: 0.9rem;
+transition: all var(--transition-fast);
+position: relative;
+}
+
+.sidebar-nav a:hover,
+.sidebar-nav a.active {
+color: white;
+background: rgba(108, 99, 255, 0.2);
+}
+
+.sidebar-nav a.active::before {
+content: '';
+position: absolute;
+left: 0;
+top: 50%;
+transform: translateY(-50%);
+width: 3px;
+height: 60%;
+background: var(--primary);
+border-radius: 0 3px 3px 0;
+}
+
+.sidebar-nav a .nav-icon {
+font-size: 1.1rem;
+width: 24px;
+text-align: center;
+flex-shrink: 0;
+}
+
+.sidebar-nav a .nav-section-num {
+background: rgba(108, 99, 255, 0.15);
+color: var(--primary-light);
+font-size: 0.7rem;
+font-weight: 700;
+padding: 2px 8px;
+border-radius: 10px;
+margin-left: auto;
+}
+
+.main-content {
+margin-left: var(--sidebar-width);
+padding-top: calc(var(--header-height) + 4px);
+min-height: 100vh;
+}
+
+.content-wrapper {
+max-width: 900px;
+margin: 0 auto;
+padding: 40px 48px 80px;
+}
+
+.hero {
+text-align: center;
+padding: 60px 0 40px;
+}
+
+.hero-badge {
+display: inline-flex;
+align-items: center;
+gap: 8px;
+background: rgba(0, 217, 255, 0.15);
+border: 1px solid rgba(0, 217, 255, 0.3);
+color: var(--secondary);
+padding: 8px 20px;
+border-radius: 30px;
+font-size: 0.85rem;
+font-weight: 600;
+margin-bottom: 24px;
+}
+
+.hero h1 {
+font-size: 2.8rem;
+font-weight: 700;
+color: white;
+margin-bottom: 12px;
+line-height: 1.2;
+}
+
+.hero h1 span {
+background: linear-gradient(135deg, var(--secondary), var(--primary-light));
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+background-clip: text;
+}
+
+.hero-subtitle {
+font-size: 1.15rem;
+color: rgba(255,255,255,0.8);
+max-width: 600px;
+margin: 0 auto 32px;
+line-height: 1.6;
+}
+
+.hero-image {
+max-width: 800px;
+width: 100%;
+margin: 0 auto 40px;
+border-radius: var(--border-radius-card);
+overflow: hidden;
+box-shadow: var(--shadow-elevated);
+border: 2px solid rgba(0, 217, 255, 0.2);
+background: #1e1e2e;
+}
+
+.hero-image img {
+width: 100%;
+display: block;
+}
+
+.hero-meta {
+display: flex;
+justify-content: center;
+gap: 24px;
+flex-wrap: wrap;
+}
+
+.hero-meta-item {
+display: flex;
+align-items: center;
+gap: 8px;
+color: rgba(255,255,255,0.8);
+font-size: 0.9rem;
+}
+
+.hero-meta-item span:first-child {
+font-size: 1.1rem;
+}
+
+.section {
+margin-bottom: 56px;
+opacity: 0;
+transform: translateY(30px);
+transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.section.visible {
+opacity: 1;
+transform: translateY(0);
+}
+
+.section-header {
+display: flex;
+align-items: center;
+gap: 16px;
+margin-bottom: 28px;
+}
+
+.section-number {
+width: 48px;
+height: 48px;
+background: linear-gradient(135deg, var(--secondary), #00a8cc);
+color: white;
+border-radius: 14px;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 1.2rem;
+font-weight: 700;
+flex-shrink: 0;
+box-shadow: 0 4px 15px rgba(0, 217, 255, 0.4);
+}
+
+.section-title {
+font-size: 1.8rem;
+font-weight: 700;
+color: white;
+line-height: 1.3;
+}
+
+.section-title small {
+display: block;
+font-size: 0.75rem;
+color: var(--secondary);
+font-weight: 600;
+text-transform: uppercase;
+letter-spacing: 1.5px;
+margin-bottom: 4px;
+}
+
+.card {
+background: var(--card-bg);
+border-radius: var(--border-radius-card);
+padding: 28px 32px;
+margin-bottom: 20px;
+box-shadow: var(--shadow-card);
+transition: all var(--transition-normal);
+border: 1px solid rgba(0,0,0,0.05);
+}
+
+.card:hover {
+box-shadow: var(--shadow-card-hover);
+transform: translateY(-2px);
+}
+
+.card-title {
+font-size: 1.15rem;
+font-weight: 700;
+color: var(--text-primary);
+margin-bottom: 12px;
+display: flex;
+align-items: center;
+gap: 10px;
+}
+
+.card-title .card-icon {
+font-size: 1.3rem;
+}
+
+.card p {
+color: var(--text-secondary);
+line-height: 1.8;
+}
+
+.card p + p {
+margin-top: 12px;
+}
+
+.info-box {
+border-radius: var(--border-radius-element);
+padding: 20px 24px;
+margin: 20px 0;
+display: flex;
+gap: 14px;
+align-items: flex-start;
+border-left: 4px solid;
+}
+
+.info-box .info-icon {
+font-size: 1.3rem;
+flex-shrink: 0;
+margin-top: 2px;
+}
+
+.info-box .info-content {
+flex: 1;
+}
+
+.info-box .info-label {
+font-weight: 700;
+font-size: 0.85rem;
+text-transform: uppercase;
+letter-spacing: 1px;
+margin-bottom: 4px;
+}
+
+.info-box .info-text {
+font-size: 0.95rem;
+line-height: 1.7;
+}
+
+.info-box.info-success {
+background: var(--success-light);
+border-color: var(--success);
+color: var(--success-dark);
+}
+
+.info-box.info-warning {
+background: var(--warning-light);
+border-color: var(--warning);
+color: var(--warning-dark);
+}
+
+.info-box.info-danger {
+background: var(--danger-light);
+border-color: var(--danger);
+color: var(--danger-dark);
+}
+
+.info-box.info-info {
+background: var(--info-light);
+border-color: var(--info);
+color: var(--info-dark);
+}
+
+.code-block {
+background: var(--code-bg);
+border-radius: var(--border-radius-card);
+margin: 20px 0;
+overflow: hidden;
+box-shadow: var(--shadow-card);
+border: 1px solid rgba(0, 217, 255, 0.15);
+}
+
+.code-block-header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 12px 20px;
+background: rgba(0, 217, 255, 0.1);
+border-bottom: 1px solid rgba(0, 217, 255, 0.1);
+}
+
+.code-block-lang {
+display: flex;
+align-items: center;
+gap: 8px;
+color: var(--secondary);
+font-size: 0.8rem;
+font-weight: 600;
+text-transform: uppercase;
+letter-spacing: 1px;
+}
+
+.code-block-lang .lang-dot {
+width: 8px;
+height: 8px;
+border-radius: 50%;
+}
+
+.copy-btn {
+background: rgba(255,255,255,0.1);
+border: 1px solid rgba(255,255,255,0.15);
+color: rgba(255,255,255,0.6);
+padding: 6px 14px;
+border-radius: 6px;
+cursor: pointer;
+font-size: 0.8rem;
+font-family: 'Inter', sans-serif;
+font-weight: 600;
+display: flex;
+align-items: center;
+gap: 6px;
+transition: all var(--transition-fast);
+position: relative;
+}
+
+.copy-btn:hover {
+background: rgba(0, 217, 255, 0.3);
+color: white;
+border-color: rgba(0, 217, 255, 0.5);
+}
+
+.copy-btn.copied {
+background: rgba(16, 185, 129, 0.3);
+color: var(--success);
+border-color: rgba(16, 185, 129, 0.5);
+}
+
+.copy-btn .copy-tooltip {
+position: absolute;
+bottom: calc(100% + 8px);
+right: 0;
+background: var(--text-primary);
+color: white;
+padding: 4px 10px;
+border-radius: 4px;
+font-size: 0.7rem;
+white-space: nowrap;
+opacity: 0;
+pointer-events: none;
+transition: opacity var(--transition-fast);
+}
+
+.copy-btn .copy-tooltip.show {
+opacity: 1;
+}
+
+.code-block pre {
+padding: 20px;
+overflow-x: auto;
+font-family: 'Fira Code', monospace;
+font-size: 0.9rem;
+line-height: 1.7;
+color: #cdd6f4;
+}
+
+.code-block code {
+font-family: 'Fira Code', monospace;
+}
+
+.token-keyword { color: #cba6f7; }
+.token-string { color: #a6e3a1; }
+.token-comment { color: #6c7086; font-style: italic; }
+.token-function { color: #89b4fa; }
+.token-operator { color: #f38ba8; }
+.token-number { color: #fab387; }
+.token-type { color: #89dceb; }
+.token-variable { color: #f5c2e7; }
+
+.tabs-container {
+margin: 24px 0;
+}
+
+.tabs-header {
+display: flex;
+gap: 4px;
+background: rgba(0,0,0,0.05);
+padding: 4px;
+border-radius: 12px;
+margin-bottom: 0;
+overflow-x: auto;
+}
+
+.tab-btn {
+padding: 10px 20px;
+background: transparent;
+border: none;
+border-radius: 8px;
+cursor: pointer;
+font-family: 'Inter', sans-serif;
+font-size: 0.9rem;
+font-weight: 600;
+color: var(--text-secondary);
+transition: all var(--transition-fast);
+white-space: nowrap;
+display: flex;
+align-items: center;
+gap: 6px;
+}
+
+.tab-btn:hover {
+color: var(--text-primary);
+background: rgba(0, 217, 255, 0.1);
+}
+
+.tab-btn.active {
+background: white;
+color: var(--secondary);
+box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.tab-content {
+display: none;
+padding: 24px 0;
+}
+
+.tab-content.active {
+display: block;
+animation: fadeInTab 0.3s ease;
+}
+
+@keyframes fadeInTab {
+from { opacity: 0; transform: translateY(8px); }
+to { opacity: 1; transform: translateY(0); }
+}
+
+.table-wrapper {
+overflow-x: auto;
+margin: 20px 0;
+border-radius: var(--border-radius-card);
+box-shadow: var(--shadow-card);
+}
+
+table {
+width: 100%;
+border-collapse: collapse;
+background: white;
+}
+
+thead th {
+background: linear-gradient(135deg, var(--secondary), #00a8cc);
+color: white;
+padding: 14px 20px;
+text-align: left;
+font-size: 0.85rem;
+font-weight: 700;
+text-transform: uppercase;
+letter-spacing: 0.5px;
+}
+
+tbody td {
+padding: 14px 20px;
+border-bottom: 1px solid #f0f0f0;
+font-size: 0.9rem;
+color: var(--text-secondary);
+}
+
+tbody tr:hover {
+background: rgba(0, 217, 255, 0.04);
+}
+
+tbody tr:last-child td {
+border-bottom: none;
+}
+
+tbody td:first-child {
+font-weight: 600;
+color: var(--text-primary);
+}
+
+.badge {
+display: inline-flex;
+align-items: center;
+gap: 4px;
+padding: 3px 10px;
+border-radius: 12px;
+font-size: 0.75rem;
+font-weight: 700;
+text-transform: uppercase;
+letter-spacing: 0.5px;
+}
+
+.badge-primary { background: rgba(108, 99, 255, 0.15); color: var(--primary); }
+.badge-success { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+.badge-warning { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+.badge-danger { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
+.badge-info { background: rgba(0, 217, 255, 0.15); color: var(--secondary); }
+.badge-beta { background: rgba(168, 85, 247, 0.2); color: #A855F7; }
+
+.hint-toggle {
+background: none;
+border: none;
+width: 100%;
+text-align: left;
+padding: 16px 20px;
+display: flex;
+align-items: center;
+gap: 12px;
+cursor: pointer;
+font-family: 'Inter', sans-serif;
+font-size: 0.95rem;
+font-weight: 600;
+color: #25ff00;
+border-radius: var(--border-radius-element);
+transition: all var(--transition-fast);
+}
+
+.hint-toggle:hover {
+background: rgba(0, 217, 255, 0.05);
+}
+
+.hint-toggle .hint-arrow {
+transition: transform var(--transition-fast);
+font-size: 0.8rem;
+color: var(--text-light);
+margin-left: auto;
+}
+
+.hint-toggle.open .hint-arrow {
+transform: rotate(180deg);
+}
+
+.hint-content {
+max-height: 0;
+overflow: hidden;
+transition: max-height 0.4s ease, padding 0.3s ease;
+padding: 0 20px;
+}
+
+.hint-content.open {
+max-height: 500px;
+padding: 0 20px 16px;
+}
+
+.hint-content p {
+color: #ffbf00;
+font-size: 0.9rem;
+line-height: 1.7;
+}
+
+.simulator {
+background: white;
+border-radius: var(--border-radius-card);
+padding: 32px;
+margin: 24px 0;
+box-shadow: var(--shadow-card);
+border: 2px solid rgba(0, 217, 255, 0.2);
+}
+
+.simulator-title {
+font-size: 1.2rem;
+font-weight: 700;
+color: var(--text-primary);
+margin-bottom: 8px;
+display: flex;
+align-items: center;
+gap: 10px;
+}
+
+.simulator-subtitle {
+color: var(--text-secondary);
+font-size: 0.9rem;
+margin-bottom: 24px;
+}
+
+.simulator-field {
+margin-bottom: 16px;
+}
+
+.simulator-field label {
+display: block;
+font-size: 0.85rem;
+font-weight: 700;
+color: var(--text-primary);
+margin-bottom: 6px;
+text-transform: uppercase;
+letter-spacing: 0.5px;
+}
+
+.simulator-field .field-icon {
+margin-right: 4px;
+}
+
+.simulator-field input,
+.simulator-field textarea,
+.simulator-field select {
+width: 100%;
+padding: 12px 16px;
+border: 2px solid #e5e7eb;
+border-radius: var(--border-radius-element);
+font-family: 'Inter', sans-serif;
+font-size: 0.9rem;
+color: var(--text-primary);
+transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+background: #f9fafb;
+}
+
+.simulator-field input:focus,
+.simulator-field textarea:focus,
+.simulator-field select:focus {
+outline: none;
+border-color: var(--secondary);
+box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.15);
+background: white;
+}
+
+.simulator-field textarea {
+min-height: 80px;
+resize: vertical;
+}
+
+.simulator-result {
+background: var(--code-bg);
+border-radius: var(--border-radius-element);
+padding: 20px;
+margin-top: 20px;
+display: none;
+animation: fadeInTab 0.3s ease;
+}
+
+.simulator-result.visible {
+display: block;
+}
+
+.simulator-result .result-header {
+display: flex;
+align-items: center;
+gap: 8px;
+color: var(--secondary);
+font-size: 0.85rem;
+font-weight: 700;
+margin-bottom: 12px;
+text-transform: uppercase;
+letter-spacing: 1px;
+}
+
+.simulator-result .result-text {
+color: #cdd6f4;
+font-size: 0.95rem;
+line-height: 1.7;
+white-space: pre-wrap;
+}
+
+.simulator-actions {
+display: flex;
+gap: 12px;
+margin-top: 20px;
+}
+
+.btn {
+padding: 12px 28px;
+border: none;
+border-radius: var(--border-radius-element);
+cursor: pointer;
+font-family: 'Inter', sans-serif;
+font-size: 0.95rem;
+font-weight: 700;
+display: flex;
+align-items: center;
+gap: 8px;
+transition: all var(--transition-fast);
+}
+
+.btn-primary {
+background: linear-gradient(135deg, var(--secondary), #00a8cc);
+color: white;
+box-shadow: 0 4px 15px rgba(0, 217, 255, 0.4);
+}
+
+.btn-primary:hover {
+transform: translateY(-2px);
+box-shadow: 0 6px 20px rgba(0, 217, 255, 0.5);
+}
+
+.btn-secondary {
+background: rgba(0, 217, 255, 0.1);
+color: var(--secondary);
+}
+
+.btn-secondary:hover {
+background: rgba(0, 217, 255, 0.2);
+}
+
+.challenge-card {
+background: linear-gradient(135deg, rgb(60 81 31 / 73%), rgba(0, 217, 255, 0.05));
+border: 2px solid rgba(0, 217, 255, 0.2);
+border-radius: var(--border-radius-card);
+padding: 32px;
+margin: 24px 0;
+}
+
+.challenge-header {
+display: flex;
+align-items: center;
+gap: 12px;
+margin-bottom: 16px;
+}
+
+.challenge-header .challenge-icon {
+font-size: 2rem;
+}
+
+.challenge-header h3 {
+font-size: 1.3rem;
+font-weight: 700;
+color: #00f1f3;
+}
+
+.challenge-criteria {
+list-style: none;
+margin: 16px 0;
+}
+
+.challenge-criteria li {
+padding: 8px 0;
+display: flex;
+align-items: flex-start;
+gap: 10px;
+color: #0bff42;
+font-size: 0.9rem;
+}
+
+.challenge-criteria li .criteria-icon {
+flex-shrink: 0;
+margin-top: 2px;
+}
+
+.summary-card {
+background: linear-gradient(135deg, var(--secondary), #00a8cc);
+border-radius: var(--border-radius-card);
+padding: 32px;
+color: white;
+margin: 24px 0;
+}
+
+.summary-card h3 {
+font-size: 1.3rem;
+font-weight: 700;
+margin-bottom: 16px;
+display: flex;
+align-items: center;
+gap: 10px;
+}
+
+.summary-list {
+list-style: none;
+}
+
+.summary-list li {
+padding: 10px 0;
+display: flex;
+align-items: flex-start;
+gap: 10px;
+font-size: 0.95rem;
+color: rgba(255,255,255,0.9);
+border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.summary-list li:last-child {
+border-bottom: none;
+}
+
+.summary-list li .check {
+flex-shrink: 0;
+margin-top: 2px;
+}
+
+.next-module {
+background: linear-gradient(135deg, rgba(0, 217, 255, 0.1), rgba(108, 99, 255, 0.1));
+border: 2px solid rgba(0, 217, 255, 0.3);
+border-radius: var(--border-radius-card);
+padding: 28px 32px;
+margin: 24px 0;
+display: flex;
+align-items: center;
+gap: 20px;
+transition: all var(--transition-normal);
+}
+
+.next-module:hover {
+transform: translateY(-2px);
+box-shadow: var(--shadow-card-hover);
+}
+
+.next-module .next-icon {
+width: 56px;
+height: 56px;
+background: linear-gradient(135deg, var(--primary), #7c3aed);
+border-radius: 14px;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 1.5rem;
+flex-shrink: 0;
+}
+
+.next-module .next-info h4 {
+color: var(--text-primary);
+font-size: 1.1rem;
+font-weight: 700;
+margin-bottom: 4px;
+}
+
+.next-module .next-info p {
+color: var(--text-secondary);
+font-size: 0.9rem;
+}
+
+.footer {
+margin-left: var(--sidebar-width);
+background: rgba(15, 10, 30, 0.95);
+backdrop-filter: blur(10px);
+-webkit-backdrop-filter: blur(10px);
+border-top: 1px solid rgba(0, 217, 255, 0.15);
+padding: 32px 48px;
+}
+
+.footer-content {
+max-width: 900px;
+margin: 0 auto;
+display: flex;
+justify-content: space-between;
+align-items: center;
+flex-wrap: wrap;
+gap: 16px;
+}
+
+.footer-left p {
+color: rgba(255,255,255,0.5);
+font-size: 0.85rem;
+}
+
+.footer-left p strong {
+color: rgba(255,255,255,0.8);
+}
+
+.footer-right {
+display: flex;
+gap: 20px;
+}
+
+.footer-right a {
+color: rgba(255,255,255,0.4);
+text-decoration: none;
+font-size: 0.85rem;
+transition: color var(--transition-fast);
+}
+
+.footer-right a:hover {
+color: var(--secondary);
+}
+
+@media (max-width: 768px) {
+.menu-toggle {
+display: block;
+}
+
+.sidebar {
+transform: translateX(-100%);
+z-index: 10001;
+}
+
+.sidebar.open {
+transform: translateX(0);
+}
+
+.sidebar-overlay {
+display: none;
+position: fixed;
+inset: 0;
+background: rgba(0,0,0,0.5);
+z-index: 10000;
+}
+
+.sidebar-overlay.open {
+display: block;
+}
+
+.main-content {
+margin-left: 0;
+}
+
+.content-wrapper {
+padding: 24px 20px 60px;
+}
+
+.footer {
+margin-left: 0;
+padding: 24px 20px;
+}
+
+.hero h1 {
+font-size: 1.8rem;
+}
+
+.hero-subtitle {
+font-size: 1rem;
+}
+
+.section-title {
+font-size: 1.4rem;
+}
+
+.card {
+padding: 20px 24px;
+}
+
+.simulator {
+padding: 20px;
+}
+
+.challenge-card {
+padding: 20px;
+}
+
+.footer-content {
+flex-direction: column;
+text-align: center;
+}
+
+.tabs-header {
+overflow-x: auto;
+}
+
+.tab-btn {
+padding: 8px 14px;
+font-size: 0.8rem;
+}
+
+.next-module {
+flex-direction: column;
+text-align: center;
+}
+}
+
+@media (max-width: 480px) {
+.hero h1 {
+font-size: 1.5rem;
+}
+
+.hero-meta {
+flex-direction: column;
+align-items: center;
+}
+
+.section-header {
+flex-direction: column;
+align-items: flex-start;
+gap: 12px;
+}
+
+.simulator-actions {
+flex-direction: column;
+}
+
+.btn {
+justify-content: center;
+width: 100%;
+}
+}
+
+::-webkit-scrollbar {
+width: 8px;
+}
+
+::-webkit-scrollbar-track {
+background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+background: rgba(0, 217, 255, 0.3);
+border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+background: rgba(0, 217, 255, 0.5);
+}
+
+@keyframes pulse {
+0%, 100% { opacity: 1; }
+50% { opacity: 0.6; }
+}
+
+.animate-pulse {
+animation: pulse 2s infinite;
+}
+
+p code,
+li code,
+.info-text code {
+background: rgba(0, 217, 255, 0.1);
+color: var(--secondary);
+padding: 2px 8px;
+border-radius: 4px;
+font-family: 'Fira Code', monospace;
+font-size: 0.85em;
+}
+
+strong {
+color: #b700ff;
+}
+
+.section-divider {
+height: 1px;
+background: linear-gradient(90deg, transparent, rgba(0, 217, 255, 0.3), transparent);
+margin: 48px 0;
+}
+
+.highlight {
+background: linear-gradient(135deg, rgba(0, 217, 255, 0.15), rgba(108, 99, 255, 0.1));
+padding: 2px 6px;
+border-radius: 4px;
+font-weight: 600;
+}
+
+.checklist-item {
+display: flex;
+align-items: center;
+gap: 12px;
+padding: 12px 16px;
+border-radius: var(--border-radius-element);
+cursor: pointer;
+transition: all var(--transition-fast);
+margin-bottom: 8px;
+background: rgba(255,255,255,0.05);
+border: 1px solid transparent;
+}
+
+.checklist-item:hover {
+background: rgba(0, 217, 255, 0.1);
+border-color: rgba(0, 217, 255, 0.2);
+}
+
+.checklist-item.checked {
+background: rgba(16, 185, 129, 0.1);
+border-color: rgba(16, 185, 129, 0.3);
+}
+
+.checklist-checkbox {
+width: 22px;
+height: 22px;
+border: 2px solid rgba(255,255,255,0.3);
+border-radius: 6px;
+display: flex;
+align-items: center;
+justify-content: center;
+flex-shrink: 0;
+transition: all var(--transition-fast);
+font-size: 0.7rem;
+color: transparent;
+}
+
+.checklist-item.checked .checklist-checkbox {
+background: var(--success);
+border-color: var(--success);
+color: white;
+}
+
+.checklist-text {
+color: rgba(255,255,255,0.7);
+font-size: 0.9rem;
+}
+
+.checklist-item.checked .checklist-text {
+color: rgba(255,255,255,0.9);
+text-decoration: line-through;
+}
+
+.stars-container {
+display: flex;
+gap: 4px;
+margin: 12px 0;
+}
+
+.star {
+font-size: 1.8rem;
+cursor: pointer;
+transition: all var(--transition-fast);
+color: rgba(255,255,255,0.2);
+}
+
+.star:hover,
+.star.active {
+color: var(--warning);
+transform: scale(1.2);
+}
+
+.progress-steps {
+display: flex;
+justify-content: space-between;
+margin: 32px 0 16px;
+position: relative;
+}
+
+.progress-steps::before {
+content: '';
+position: absolute;
+top: 20px;
+left: 40px;
+right: 40px;
+height: 3px;
+background: rgba(255,255,255,0.1);
+border-radius: 2px;
+}
+
+.progress-step {
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 8px;
+z-index: 1;
+}
+
+.step-circle {
+width: 40px;
+height: 40px;
+border-radius: 50%;
+background: rgba(255,255,255,0.1);
+border: 3px solid rgba(255,255,255,0.2);
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 0.85rem;
+font-weight: 700;
+color: rgba(255,255,255,0.5);
+transition: all var(--transition-fast);
+}
+
+.step-circle.active {
+background: var(--secondary);
+border-color: var(--secondary);
+color: white;
+box-shadow: 0 0 15px rgba(0, 217, 255, 0.5);
+}
+
+.step-circle.completed {
+background: var(--success);
+border-color: var(--success);
+color: white;
+}
+
+.step-label {
+font-size: 0.75rem;
+color: rgba(255,255,255,0.4);
+font-weight: 600;
+text-align: center;
+}
+
+.step-circle.active + .step-label,
+.step-circle.completed + .step-label {
+color: rgba(255,255,255,0.8);
+}
+
+.rating-card {
+background: rgba(26, 16, 64, 0.6);
+border: 1px solid rgba(0, 217, 255, 0.2);
+border-radius: var(--border-radius-card);
+padding: 28px;
+margin-top: 24px;
+}
+
+.rating-card .card-title {
+color: white;
+}
+
+/* Studio Grid */
+.studio-grid {
+display: grid;
+grid-template-columns: repeat(3, 1fr);
+gap: 12px;
+margin: 20px 0;
+}
+
+.studio-card {
+background: rgba(255,255,255,0.06);
+border: 1px solid rgba(255,255,255,0.1);
+border-radius: 12px;
+padding: 16px;
+cursor: pointer;
+transition: all var(--transition-fast);
+position: relative;
+}
+
+.studio-card:hover {
+background: rgba(0, 217, 255, 0.1);
+border-color: rgba(0, 217, 255, 0.3);
+transform: translateY(-2px);
+}
+
+.studio-card .studio-icon {
+font-size: 1.3rem;
+margin-bottom: 6px;
+display: block;
+}
+
+.studio-card .studio-name {
+color: rgba(255,255,255,0.8);
+font-size: 0.85rem;
+font-weight: 600;
+display: flex;
+align-items: center;
+justify-content: space-between;
+}
+
+.studio-card .studio-name .arrow {
+color: rgba(255,255,255,0.3);
+font-size: 0.9rem;
+}
+
+.studio-card .studio-badge {
+position: absolute;
+top: -6px;
+right: 10px;
+background: #A855F7;
+color: white;
+font-size: 0.6rem;
+font-weight: 700;
+padding: 2px 8px;
+border-radius: 4px;
+text-transform: uppercase;
+letter-spacing: 0.5px;
+}
+
+.studio-card.selected {
+background: rgba(0, 217, 255, 0.15);
+border-color: var(--secondary);
+box-shadow: 0 0 15px rgba(0, 217, 255, 0.2);
+}
+
+.studio-card.selected .studio-name {
+color: white;
+}
+
+/* Source counter */
+.source-counter {
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 24px;
+margin: 20px 0;
+}
+
+.counter-item {
+text-align: center;
+}
+
+.counter-number {
+font-size: 2.5rem;
+font-weight: 700;
+color: var(--secondary);
+line-height: 1;
+}
+
+.counter-label {
+font-size: 0.8rem;
+color: rgba(255,255,255,0.5);
+margin-top: 4px;
+}
+
+.counter-divider {
+width: 1px;
+height: 50px;
+background: rgba(255,255,255,0.1);
+}
+
+/* Flow diagram */
+.flow-container {
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 12px;
+flex-wrap: wrap;
+margin: 24px 0;
+}
+
+.flow-item {
+background: rgba(255,255,255,0.06);
+border: 1px solid rgba(255,255,255,0.15);
+border-radius: 12px;
+padding: 16px 20px;
+text-align: center;
+min-width: 140px;
+transition: all var(--transition-fast);
+}
+
+.flow-item:hover {
+background: rgba(0, 217, 255, 0.1);
+border-color: rgba(0, 217, 255, 0.3);
+}
+
+.flow-item .flow-icon {
+font-size: 2rem;
+margin-bottom: 8px;
+display: block;
+}
+
+.flow-item .flow-label {
+color: rgba(255,255,255,0.8);
+font-size: 0.85rem;
+font-weight: 600;
+}
+
+.flow-item .flow-sub {
+color: rgba(255,255,255,0.4);
+font-size: 0.75rem;
+margin-top: 2px;
+}
+
+.flow-arrow {
+color: var(--secondary);
+font-size: 1.5rem;
+flex-shrink: 0;
+}
+
+@media (max-width: 600px) {
+.studio-grid {
+grid-template-columns: repeat(2, 1fr);
+}
+.flow-container {
+flex-direction: column;
+}
+.flow-arrow {
+transform: rotate(90deg);
+}
+}
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<header class="header">
+<div class="header-logo">
+<div class="logo-icon">🤖</div>
+<span>IA na Prática</span>
+</div>
+<div class="header-nav">
+<div class="badge-timer">🕒 Módulo 4 · 120 min</div>
+<div class="badge-level">Intermediário</div>
+<button class="menu-toggle" id="menuToggle" aria-label="Abrir menu">☰</button>
+</div>
+</header>
+
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<nav class="sidebar" id="sidebar">
+<p class="sidebar-title">Navegação</p>
+<ul class="sidebar-nav">
+<li><a href="#intro" class="active"><span class="nav-icon">📋</span>Introdução</a></li>
+<li><a href="#sec-1"><span class="nav-icon">🧠</span>4.1 NotebookLM<span class="nav-section-num">01</span></a></li>
+<li><a href="#sec-2"><span class="nav-icon">📚</span>Fontes e Upload<span class="nav-section-num">02</span></a></li>
+<li><a href="#sec-3"><span class="nav-icon">🎙️</span>Audio Overview<span class="nav-section-num">03</span></a></li>
+<li><a href="#sec-studio"><span class="nav-icon"></span>Estúdio<span class="nav-section-num">04</span></a></li>
+<li><a href="#sec-sim"><span class="nav-icon">🧪</span>Exercício Prático 4<span class="nav-section-num">05</span></a></li>
+<li><a href="#sec-summary"><span class="nav-icon">📝</span>Resumo Final<span class="nav-section-num">06</span></a></li>
+</ul>
+
+<p class="sidebar-title" style="margin-top:24px;">Progresso</p>
+<div style="padding: 0 12px;">
+<div style="background:rgba(255,255,255,0.1);border-radius:6px;height:6px;overflow:hidden;margin-bottom:8px;">
+<div id="sidebarProgress" style="height:100%;width:0%;background:linear-gradient(90deg,var(--secondary),var(--primary));border-radius:6px;transition:width 0.3s ease;"></div>
+</div>
+<p id="progressPercent" style="color:rgba(255,255,255,0.5);font-size:0.75rem;">0% concluído</p>
+</div>
+</nav>
+
+<main class="main-content">
+<div class="content-wrapper">
+
+<section class="hero" id="intro">
+<div class="hero-badge">🎓 Módulo 4 de 5 · Curso Completo</div>
+<h1>Análise Documental e <span>NotebookLM</span></h1>
+<p class="hero-subtitle">Transforme documentos, vídeos e PDFs em resumos inteligentes, podcasts gerados por IA e conteúdo estruturado. Descubra o poder do "cérebro digital" privado do Google.</p>
+
+<div class="hero-image">
+<img src="https://i.ytimg.com/vi/VJg37fVPy9I/maxresdefault.jpg" alt="Interface do NotebookLM mostrando upload de fontes, painel de resumo e opções do Estúdio com Audio Overview, Mapa Mental e Apresentação" loading="eager">
+</div>
+
+<div class="hero-meta">
+<div class="hero-meta-item"><span>👨</span> Prof. Vitório Netto</div>
+<div class="hero-meta-item"><span>⏱️</span> 120 minutos</div>
+<div class="hero-meta-item"><span>📊</span> Nível Intermediário</div>
+<div class="hero-meta-item"><span>🎯</span> 3 Objetivos de Aprendizagem</div>
+</div>
+</section>
+
+<div class="section-divider"></div>
+
+<section class="section" id="intro-content">
+<div class="section-header">
+<div class="section-number">📋</div>
+<h2 class="section-title"><small>Introdução</small>Objetivos de Aprendizagem</h2>
+</div>
+
+<div class="card">
+<div class="card-title"><span class="card-icon">🎯</span> O que você vai aprender neste módulo</div>
+<p>Neste módulo, você vai dominar o NotebookLM do Google e aprender a transformar qualquer conteúdo — vídeos, PDFs, documentos — em material digerível e reutilizável.</p>
+
+<div style="margin-top:20px;">
+<div class="checklist-item" onclick="toggleChecklist(this)">
+<div class="checklist-checkbox">✓</div>
+<span class="checklist-text">Criar um "cérebro digital" privado com até 50 fontes no NotebookLM</span>
+</div>
+<div class="checklist-item" onclick="toggleChecklist(this)">
+<div class="checklist-checkbox">✓</div>
+<span class="checklist-text">Utilizar o Audio Overview para gerar podcasts de resumo automaticamente</span>
+</div>
+<div class="checklist-item" onclick="toggleChecklist(this)">
+<div class="checklist-checkbox">✓</div>
+<span class="checklist-text">Dominar o fluxo de trabalho: YouTube → NotebookLM → Estúdio</span>
+</div>
+<div class="checklist-item" onclick="toggleChecklist(this)">
+<div class="checklist-checkbox">✓</div>
+<span class="checklist-text">Explorar o Estúdio: Resumo, Apresentação, Mapa Mental, Teste e mais</span>
+</div>
+</div>
+</div>
+
+<div class="card" style="background:rgba(26,16,64,0.6);border-color:rgba(0,217,255,0.2);color:white;">
+<div class="card-title" style="color:white;"><span class="card-icon">🗺️</span> Estrutura do Módulo</div>
+<div class="progress-steps">
+<div class="progress-step">
+<div class="step-circle active">1</div>
+<span class="step-label">NotebookLM</span>
+</div>
+<div class="progress-step">
+<div class="step-circle">2</div>
+<span class="step-label">Fontes</span>
+</div>
+<div class="progress-step">
+<div class="step-circle">3</div>
+<span class="step-label">Audio</span>
+</div>
+<div class="progress-step">
+<div class="step-circle">4</div>
+<span class="step-label">Estúdio</span>
+</div>
+<div class="progress-step">
+<div class="step-circle">5</div>
+<span class="step-label">Prática</span>
+</div>
+</div>
+</div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- 4.1 NotebookLM -->
+<section class="section" id="sec-1">
+<div class="section-header">
+<div class="section-number">1</div>
+<h2 class="section-title"><small>4.1 NotebookLM</small>O cérebro digital privado do Google</h2>
+</div>
+
+<div class="card">
+<div class="card-title"><span class="card-icon">🧠</span> O Que é o NotebookLM?</div>
+<p>O NotebookLM é uma ferramenta do Google que cria um <strong>"cérebro digital" privado</strong>. Você alimenta ele com suas fontes — PDFs, Google Docs, links, textos colados — e ele se torna um especialista no seu material, capaz de responder perguntas, criar resumos e gerar conteúdo novo baseado exclusivamente no que você forneceu.</p>
+<p>O mais importante: <span class="highlight">seus dados são privados</span>. O modelo não treina com seu conteúdo e suas fontes ficam isoladas no seu notebook.</p>
+</div>
+
+<div class="info-box info-info">
+<span class="info-icon">💡</span>
+<div class="info-content">
+<div class="info-label">Dica de Ouro</div>
+<div class="info-text">O NotebookLM é <strong>100% gratuito</strong> e não tem limite de uso (apenas limite de fontes por notebook: 50). É a ferramenta perfeita para estudantes, pesquisadores e profissionais que lidam com muitos documentos.</div>
+</div>
+</div>
+
+<!-- Source Counter -->
+<div class="card" style="background:rgba(26,16,64,0.6);border-color:rgba(0,217,255,0.2);">
+<div class="source-counter">
+<div class="counter-item">
+<div class="counter-number" id="sourceCount">50</div>
+<div class="counter-label">Fontes por Notebook</div>
+</div>
+<div class="counter-divider"></div>
+<div class="counter-item">
+<div class="counter-number">5</div>
+<div class="counter-label">Tipos de Fonte</div>
+</div>
+<div class="counter-divider"></div>
+<div class="counter-item">
+<div class="counter-number">∞</div>
+<div class="counter-label">Notebooks por Conta</div>
+</div>
+</div>
+</div>
+
+<!-- Source Types Tabs -->
+<div class="tabs-container">
+<div class="tabs-header">
+<button class="tab-btn active" onclick="switchSourceTab(event, 'source-pdf')">
+<span>📄</span> PDFs
+</button>
+<button class="tab-btn" onclick="switchSourceTab(event, 'source-doc')">
+<span>📝</span> Google Docs
+</button>
+<button class="tab-btn" onclick="switchSourceTab(event, 'source-link')">
+<span>🔗</span> Links
+</button>
+<button class="tab-btn" onclick="switchSourceTab(event, 'source-text')">
+<span>✍️</span> Texto Colado
+</button>
+<button class="tab-btn" onclick="switchSourceTab(event, 'source-youtube')">
+<span>▶️</span> YouTube
+</button>
+</div>
+
+<div class="tab-content active" id="source-pdf">
+<div class="card">
+<div class="card-title"><span class="card-icon">📄</span> PDFs <span class="badge badge-success">Mais Usado</span></div>
+<p>Upload de arquivos PDF diretamente do seu computador. Ideal para artigos, livros, relatórios e documentos técnicos.</p>
+<p style="margin-top:12px;"><strong>Dica:</strong> O NotebookLM indexa o texto do PDF automaticamente. PDFs escaneados (imagens) podem não funcionar bem — prefira PDFs com texto selecionável.</p>
+</div>
+</div>
+
+<div class="tab-content" id="source-doc">
+<div class="card">
+<div class="card-title"><span class="card-icon">📝</span> Google Docs <span class="badge badge-info">Nativo</span></div>
+<p>Conecte diretamente seus Google Docs. Perfeito para quem já mantém documentos no ecossistema Google.</p>
+</div>
+</div>
+
+<div class="tab-content" id="source-link">
+<div class="card">
+<div class="card-title"><span class="card-icon">🔗</span> Links da Web</div>
+<p>Cole URLs de artigos, páginas e sites. O NotebookLM extrai o conteúdo automaticamente.</p>
+</div>
+</div>
+
+<div class="tab-content" id="source-text">
+<div class="card">
+<div class="card-title"><span class="card-icon">✍️</span> Texto Colado</div>
+<p>Cole texto diretamente na caixa de entrada. Útil para trechos curtos ou conteúdo copiado de fontes não digitais.</p>
+</div>
+</div>
+
+<div class="tab-content" id="source-youtube">
+<div class="card">
+<div class="card-title"><span class="card-icon">▶️</span> YouTube</div>
+<p>Cole links de vídeos do YouTube. O NotebookLM transcreve o áudio e usa o conteúdo como fonte. Funciona com vídeos em qualquer idioma!</p>
+<p style="margin-top:12px;"><strong>Ideal para:</strong> Transformar vídeos longos em resumos textuais e áudio podcasts.</p>
+</div>
+</div>
+</div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- 4.2 Audio Overview -->
+<section class="section" id="sec-3">
+<div class="section-header">
+<div class="section-number">3</div>
+<h2 class="section-title"><small>Audio Overview</small>Podcasts gerados automaticamente</h2>
+</div>
+
+<div class="card">
+<div class="card-title"><span class="card-icon">🎙️</span> A Revolução do Audio Overview</div>
+<p>O <strong>Audio Overview</strong> é o recurso mais impressionante do NotebookLM. Ele gera uma <strong>conversa em áudio no estilo podcast</strong> resumindo todo o seu material de estudo.</p>
+<p>Dois narradores (um homem e uma mulher) discutem os pontos principais das suas fontes como se fossem hosts de um podcast. Você pode ouvir enquanto faz outras atividades — lavar louça, dirigir, exercitar-se.</p>
+</div>
+
+<div class="info-box info-success">
+<span class="info-icon">🎧</span>
+<div class="info-content">
+<div class="info-label">Por que isso é revolucionário?</div>
+<div class="info-text">Imagine estudar 50 páginas de material jurídico ouvindo uma conversa de 10 minutos no caminho para o trabalho. O Audio Overview transforma horas de leitura em minutos de aprendizado passivo.</div>
+</div>
+</div>
+
+<div class="code-block">
+<div class="code-block-header">
+<div class="code-block-lang">
+<span class="lang-dot" style="background:#a6e3a1;"></span>
+Exemplo: Prompt para Personalizar o Áudio
+</div>
+<button class="copy-btn" onclick="copyCode(this)">📋 Copiar
+<span class="copy-tooltip">Clique para copiar</span>
+</button>
+</div>
+<pre><code><span class="token-comment">// Prompt para direcionar o Audio Overview:</span>
+
+<span class="token-string">"Foque nos seguintes tópicos ao criar o resumo:
+1. Conceitos de Engenharia de Prompt
+2. Framework C.T.F.R.
+3. Técnicas avançadas como Few-Shot
+4. Exemplos práticos de uso
+
+Ignore detalhes sobre configuração técnica
+e mantenha o tom acessível para iniciantes."</span>
+
+<span class="token-comment">// O Audio Overview irá:</span>
+<span class="token-comment">// 1. Gerar uma conversa de ~10 minutos</span>
+<span class="token-comment">// 2. Focar nos tópicos solicitados</span>
+<span class="token-comment">// 3. Usar tom acessível e didático</span>
+<span class="token-comment">// 4. Incluir exemplos mencionados</span></code></pre>
+</div>
+
+<div class="table-wrapper">
+<table>
+<thead>
+<tr>
+<th>Característica</th>
+<th>Audio Overview</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Duração típica</td>
+<td>5-15 minutos (depende das fontes)</td>
+</tr>
+<tr>
+<td>Narradores</td>
+<td>2 vozes (masculina + feminina)</td>
+</tr>
+<tr>
+<td>Idiomas</td>
+<td>Inglês, Espanhol, Português, etc.</td>
+</tr>
+<tr>
+<td>Personalização</td>
+<td>Via prompt de direção</td>
+</tr>
+<tr>
+<td>Download</td>
+<td>MP3 disponível para offline</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- Estúdio Section -->
+<section class="section" id="sec-studio">
+<div class="section-header">
+<div class="section-number">4</div>
+<h2 class="section-title"><small>Estúdio</small>Transforme suas fontes em múltiplos formatos</h2>
+</div>
+
+<div class="card">
+<div class="card-title"><span class="card-icon"></span> O Painel do Estúdio</div>
+<p>O <strong>Estúdio</strong> é o painel central do NotebookLM onde você transforma suas fontes em diversos formatos de saída. Cada ferramenta serve um propósito diferente na sua rotina de estudo ou trabalho.</p>
+</div>
+
+<!-- Studio Mockup -->
+<div class="card" style="background:rgba(26,16,64,0.6);border-color:rgba(0,217,255,0.2);">
+<div class="card-title" style="color:white;"><span class="card-icon"></span> Estúdio — Visão Geral</div>
+<p style="color:rgba(255,255,255,0.6);font-size:0.9rem;">Clique nos cards para explorar cada ferramenta:</p>
+
+<div class="studio-grid" id="studioGrid">
+<div class="studio-card" onclick="selectStudioTool(this, 'resumo')" data-tool="resumo">
+<span class="studio-icon">📝</span>
+<span class="studio-name">Resumo em Texto <span class="arrow">›</span></span>
+</div>
+<div class="studio-card" onclick="selectStudioTool(this, 'apresentacao')" data-tool="apresentacao">
+<span class="studio-badge">BETA</span>
+<span class="studio-icon">📊</span>
+<span class="studio-name">Apresentação <span class="arrow">›</span></span>
+</div>
+<div class="studio-card" onclick="selectStudioTool(this, 'resumo2')" data-tool="resumo2">
+<span class="studio-icon">📋</span>
+<span class="studio-name">Resumo em Tabela <span class="arrow">›</span></span>
+</div>
+<div class="studio-card" onclick="selectStudioTool(this, 'mapa')" data-tool="mapa">
+<span class="studio-icon"></span>
+<span class="studio-name">Mapa Mental <span class="arrow">›</span></span>
+</div>
+<div class="studio-card" onclick="selectStudioTool(this, 'relatorio')" data-tool="relatorio">
+<span class="studio-icon">📑</span>
+<span class="studio-name">Relatórios <span class="arrow">›</span></span>
+</div>
+<div class="studio-card" onclick="selectStudioTool(this, 'cartoes')" data-tool="cartoes">
+<span class="studio-icon">🃏</span>
+<span class="studio-name">Cartões de Estudo <span class="arrow">›</span></span>
+</div>
+<div class="studio-card" onclick="selectStudioTool(this, 'teste')" data-tool="teste">
+<span class="studio-icon">✅</span>
+<span class="studio-name">Teste / Quiz <span class="arrow">›</span></span>
+</div>
+<div class="studio-card" onclick="selectStudioTool(this, 'infografico')" data-tool="infografico">
+<span class="studio-badge">BETA</span>
+<span class="studio-icon">📈</span>
+<span class="studio-name">Infográfico <span class="arrow">›</span></span>
+</div>
+<div class="studio-card" onclick="selectStudioTool(this, 'tabela')" data-tool="tabela">
+<span class="studio-icon">📐</span>
+<span class="studio-name">Tabela de Dados <span class="arrow">›</span></span>
+</div>
+</div>
+</div>
+
+<!-- Studio Tool Details -->
+<div id="studioDetails" style="display:none;margin-top:24px;animation:fadeInTab 0.3s ease;">
+<div class="simulator">
+<div class="simulator-title" id="studioDetailTitle"></div>
+<div id="studioDetailContent"></div>
+<button class="copy-btn" onclick="copyCode(this)" style="margin-top:12px;background:rgba(255,255,255,0.15);color:rgba(255,255,255,0.8);border-color:rgba(255,255,255,0.2);">
+📋 Copiar Exemplo
+<span class="copy-tooltip">Clique para copiar</span>
+</button>
+</div>
+</div>
+
+<div class="info-box info-warning" style="margin-top:24px;">
+<span class="info-icon">⚠️</span>
+<div class="info-content">
+<div class="info-label">Nota sobre recursos BETA</div>
+<div class="info-text">Os recursos marcados como <strong>BETA</strong> (Apresentação e Infográfico) estão em fase de testes e podem ter limitações. O Google pode alterar ou remover esses recursos a qualquer momento.</div>
+</div>
+</div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- Fluxo de Trabalho -->
+<section class="section" id="sec-workflow">
+<div class="section-header">
+<div class="section-number">️</div>
+<h2 class="section-title"><small>Fluxo de Trabalho</small>Vídeo → NotebookLM → Estúdio</h2>
+</div>
+
+<div class="card">
+<div class="card-title"><span class="card-icon">🔄</span> O Fluxo Completo</div>
+<p>Aprenda o fluxo de trabalho mais eficiente para transformar vídeos em conteúdo estruturado usando o NotebookLM.</p>
+</div>
+
+<div class="flow-container">
+<div class="flow-item">
+<span class="flow-icon">▶️</span>
+<div class="flow-label">Vídeo YouTube</div>
+<div class="flow-sub">Qualquer idioma</div>
+</div>
+<span class="flow-arrow">→</span>
+<div class="flow-item">
+<span class="flow-icon">🧠</span>
+<div class="flow-label">NotebookLM</div>
+<div class="flow-sub">Transcreve e analisa</div>
+</div>
+<span class="flow-arrow">→</span>
+<div class="flow-item">
+<span class="flow-icon">🎙️</span>
+<div class="flow-label">Audio Overview</div>
+<div class="flow-sub">Gera resumo em áudio</div>
+</div>
+<span class="flow-arrow">→</span>
+<div class="flow-item">
+<span class="flow-icon"></span>
+<div class="flow-label">Estúdio</div>
+<div class="flow-sub">Resumo, mapa, teste...</div>
+</div>
+</div>
+
+<div class="card">
+<div class="card-title"><span class="card-icon">📝</span> Passo a Passo Detalhado</div>
+<div style="display:flex;flex-direction:column;gap:16px;margin-top:16px;">
+<div style="display:flex;align-items:center;gap:16px;">
+<div style="width:36px;height:36px;background:var(--secondary);color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">1</div>
+<div style="background:#f9fafb;padding:12px;border-radius:8px;flex:1;border-left:3px solid var(--secondary);">
+<p style="font-weight:600;color:var(--text-primary);margin:0;">Copie o link do vídeo do YouTube</p>
+<p style="font-size:0.85rem;color:var(--text-secondary);margin:4px 0 0;">Pode ser em qualquer idioma — o NotebookLM transcreve automaticamente.</p>
+</div>
+</div>
+<div style="display:flex;align-items:center;gap:16px;">
+<div style="width:36px;height:36px;background:var(--primary);color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">2</div>
+<div style="background:#f9fafb;padding:12px;border-radius:8px;flex:1;border-left:3px solid var(--primary);">
+<p style="font-weight:600;color:var(--text-primary);margin:0;">Cole o link como fonte no NotebookLM</p>
+<p style="font-size:0.85rem;color:var(--text-secondary);margin:4px 0 0;">Crie um novo notebook e adicione o link de YouTube como fonte.</p>
+</div>
+</div>
+<div style="display:flex;align-items:center;gap:16px;">
+<div style="width:36px;height:36px;background:var(--success);color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">3</div>
+<div style="background:#f9fafb;padding:12px;border-radius:8px;flex:1;border-left:3px solid var(--success);">
+<p style="font-weight:600;color:var(--text-primary);margin:0;">Gere o Audio Overview</p>
+<p style="font-size:0.85rem;color:var(--text-secondary);margin:4px 0 0;">Clique em "Audio Overview" para criar o podcast de resumo.</p>
+</div>
+</div>
+<div style="display:flex;align-items:center;gap:16px;">
+<div style="width:36px;height:36px;background:#A855F7;color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">4</div>
+<div style="background:#f9fafb;padding:12px;border-radius:8px;flex:1;border-left:3px solid #A855F7;">
+<p style="font-weight:600;color:var(--text-primary);margin:0;">Use o Estúdio para criar conteúdo</p>
+<p style="font-size:0.85rem;color:var(--text-secondary);margin:4px 0 0;">Gere resumos, mapas mentais, testes e apresentações a partir do conteúdo transcrito.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- Exercício Prático 4 -->
+<section class="section" id="sec-sim">
+<div class="section-header">
+<div class="section-number">5</div>
+<h2 class="section-title"><small>Exercício Prático 4</small>Simulador NotebookLM</h2>
+</div>
+
+<div class="card">
+<div class="card-title"><span class="card-icon">🧪</span> Desafio: Configure seu Notebook Digital</div>
+<p>Simule a configuração de um NotebookLM para um cenário real. Escolha fontes, ative o Audio Overview e selecione ferramentas do Estúdio.</p>
+</div>
+
+<div class="challenge-card">
+<div class="challenge-header">
+<span class="challenge-icon"></span>
+<h3>Critérios de Avaliação</h3>
+</div>
+<p style="color:#0bff42;font-size:0.9rem;">Monte a melhor configuração possível para o cenário proposto.</p>
+<ul class="challenge-criteria">
+<li><span class="criteria-icon"></span> Selecione fontes adequadas ao objetivo</li>
+<li><span class="criteria-icon">🎙️</span> Ative o Audio Overview com prompt de direção</li>
+<li><span class="criteria-icon"></span> Escolha pelo menos 2 ferramentas do Estúdio</li>
+</ul>
+</div>
+
+<!-- NotebookLM Simulator -->
+<div class="simulator">
+<div class="simulator-title">🛠️ Simulador: Monte seu NotebookLM</div>
+<div class="simulator-subtitle">Configure um notebook digital para o cenário abaixo.</div>
+
+<div style="background:#f9fafb;border-radius:12px;padding:20px;margin-bottom:20px;border-left:4px solid var(--secondary);">
+<p style="font-weight:700;color:var(--text-primary);margin-bottom:8px;">📋 Cenário:</p>
+<p id="notebookScenario" style="color:var(--text-secondary);font-size:0.95rem;line-height:1.6;">Você é um estudante de Direito e precisa estudar 5 artigos sobre Direito Digital, assistir a 2 videoaulas no YouTube e organizar tudo para uma prova amanhã.</p>
+</div>
+
+<!-- Step 1: Add Sources -->
+<h4 style="color:var(--text-primary);font-size:0.9rem;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+<span style="width:28px;height:28px;background:var(--secondary);color:white;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:0.8rem;">1</span>
+Adicionar Fontes
+</h4>
+<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px;">
+<button class="tool-option" onclick="addSource(this)" data-source="pdf" style="padding:10px 16px;border-radius:8px;border:2px solid #e5e7eb;background:white;color:var(--text-primary);cursor:pointer;font-family:Inter,sans-serif;font-weight:600;font-size:0.85rem;transition:all 0.2s ease;">📄 Upload PDF</button>
+<button class="tool-option" onclick="addSource(this)" data-source="youtube" style="padding:10px 16px;border-radius:8px;border:2px solid #e5e7eb;background:white;color:var(--text-primary);cursor:pointer;font-family:Inter,sans-serif;font-weight:600;font-size:0.85rem;transition:all 0.2s ease;">▶️ Link YouTube</button>
+<button class="tool-option" onclick="addSource(this)" data-source="link" style="padding:10px 16px;border-radius:8px;border:2px solid #e5e7eb;background:white;color:var(--text-primary);cursor:pointer;font-family:Inter,sans-serif;font-weight:600;font-size:0.85rem;transition:all 0.2s ease;">🔗 Link da Web</button>
+<button class="tool-option" onclick="addSource(this)" data-source="doc" style="padding:10px 16px;border-radius:8px;border:2px solid #e5e7eb;background:white;color:var(--text-primary);cursor:pointer;font-family:Inter,sans-serif;font-weight:600;font-size:0.85rem;transition:all 0.2s ease;">📝 Google Doc</button>
+</div>
+<p style="font-size:0.8rem;color:var(--text-light);margin-bottom:20px;">Fontes selecionadas: <span id="sourceCounter" style="font-weight:700;color:var(--secondary);">0</span> / 50</p>
+
+<!-- Step 2: Audio Overview -->
+<h4 style="color:var(--text-primary);font-size:0.9rem;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+<span style="width:28px;height:28px;background:var(--primary);color:white;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:0.8rem;">2</span>
+Audio Overview
+</h4>
+<div class="simulator-field">
+<label><span class="field-icon">🎙️</span> Prompt de Direção (opcional)</label>
+<textarea id="audioPrompt" placeholder="Ex: Foque nos conceitos de LGPD, ignore detalhes históricos..."></textarea>
+</div>
+
+<!-- Step 3: Studio Tools -->
+<h4 style="color:var(--text-primary);font-size:0.9rem;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+<span style="width:28px;height:28px;background:#A855F7;color:white;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:0.8rem;">3</span>
+Ferramentas do Estúdio
+</h4>
+<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;">
+<button class="tool-option" onclick="selectStudioTool2(this)" style="padding:8px 14px;border-radius:8px;border:2px solid #e5e7eb;background:white;color:var(--text-primary);cursor:pointer;font-family:Inter,sans-serif;font-weight:600;font-size:0.8rem;transition:all 0.2s ease;">📝 Resumo</button>
+<button class="tool-option" onclick="selectStudioTool2(this)" style="padding:8px 14px;border-radius:8px;border:2px solid #e5e7eb;background:white;color:var(--text-primary);cursor:pointer;font-family:Inter,sans-serif;font-weight:600;font-size:0.8rem;transition:all 0.2s ease;">📊 Apresentação <span class="badge badge-beta" style="font-size:0.6rem;padding:1px 4px;">BETA</span></button>
+<button class="tool-option" onclick="selectStudioTool2(this)" style="padding:8px 14px;border-radius:8px;border:2px solid #e5e7eb;background:white;color:var(--text-primary);cursor:pointer;font-family:Inter,sans-serif;font-weight:600;font-size:0.8rem;transition:all 0.2s ease;"> Mapa Mental</button>
+<button class="tool-option" onclick="selectStudioTool2(this)" style="padding:8px 14px;border-radius:8px;border:2px solid #e5e7eb;background:white;color:var(--text-primary);cursor:pointer;font-family:Inter,sans-serif;font-weight:600;font-size:0.8rem;transition:all 0.2s ease;">🃏 Cartões</button>
+<button class="tool-option" onclick="selectStudioTool2(this)" style="padding:8px 14px;border-radius:8px;border:2px solid #e5e7eb;background:white;color:var(--text-primary);cursor:pointer;font-family:Inter,sans-serif;font-weight:600;font-size:0.8rem;transition:all 0.2s ease;">✅ Teste</button>
+<button class="tool-option" onclick="selectStudioTool2(this)" style="padding:8px 14px;border-radius:8px;border:2px solid #e5e7eb;background:white;color:var(--text-primary);cursor:pointer;font-family:Inter,sans-serif;font-weight:600;font-size:0.8rem;transition:all 0.2s ease;">📑 Relatório</button>
+</div>
+
+<div class="simulator-actions">
+<button class="btn btn-primary" onclick="generateNotebook()">
+<span>⚡</span> Gerar Notebook
+</button>
+<button class="btn btn-secondary" onclick="clearNotebook()">
+<span>🔄</span> Limpar
+</button>
+</div>
+
+<div class="simulator-result" id="notebookResult">
+<div class="result-header">
+<span>✨</span> Notebook Gerado
+</div>
+<div class="result-text" id="notebookOutput"></div>
+<button class="copy-btn" onclick="copyCode(this)" style="margin-top:12px;background:rgba(255,255,255,0.15);color:rgba(255,255,255,0.8);border-color:rgba(255,255,255,0.2);">
+📋 Copiar Configuração
+<span class="copy-tooltip">Clique para copiar</span>
+</button>
+</div>
+</div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- Resumo Final -->
+<section class="section" id="sec-summary">
+<div class="section-header">
+<div class="section-number">6</div>
+<h2 class="section-title"><small>Resumo Final</small>Recapitulando o Módulo 4</h2>
+</div>
+
+<div class="summary-card">
+<h3>✅ O que aprendemos hoje</h3>
+<ul class="summary-list">
+<li><span class="check">✓</span> O <strong>NotebookLM</strong> cria um "cérebro digital" privado com até 50 fontes</li>
+<li><span class="check">✓</span> Tipos de fontes: <strong>PDFs, Google Docs, Links, Texto Colado e YouTube</strong></li>
+<li><span class="check">✓</span> O <strong>Audio Overview</strong> gera podcasts de resumo com 2 narradores</li>
+<li><span class="check">✓</span> O <strong>Estúdio</strong> oferece 9 ferramentas: Resumo, Apresentação, Mapa Mental, Relatórios, Cartões, Teste, Infográfico, Tabela e mais</li>
+<li><span class="check">✓</span> O fluxo completo: <strong>Vídeo YouTube → NotebookLM → Audio Overview → Estúdio</strong></li>
+<li><span class="check">✓</span> O NotebookLM é <strong>100% gratuito</strong> e privado</li>
+</ul>
+</div>
+
+<div class="card">
+<div class="card-title"><span class="card-icon">💎</span> Takeaways Principais</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px;margin-top:16px;">
+<div style="background:rgba(0,217,255,0.06);padding:16px;border-radius:12px;border-left:4px solid var(--secondary);">
+<p style="font-weight:700;color:var(--text-primary);font-size:0.9rem;">🧠 Cérebro Digital</p>
+<p style="font-size:0.85rem;color:var(--text-secondary);margin-top:4px;">Alimente com até 50 fontes e tenha um especialista privado em qualquer assunto.</p>
+</div>
+<div style="background:rgba(16,185,129,0.06);padding:16px;border-radius:12px;border-left:4px solid var(--success);">
+<p style="font-weight:700;color:var(--text-primary);font-size:0.9rem;">🎙️ Audio Overview</p>
+<p style="font-size:0.85rem;color:var(--text-secondary);margin-top:4px;">Transforme horas de leitura em 10 minutos de podcast gerado por IA.</p>
+</div>
+<div style="background:rgba(168,85,247,0.06);padding:16px;border-radius:12px;border-left:4px solid #A855F7;">
+<p style="font-weight:700;color:var(--text-primary);font-size:0.9rem;"> Estúdio = Produtividade</p>
+<p style="font-size:0.85rem;color:var(--text-secondary);margin-top:4px;">De uma única fonte, gere resumos, testes, mapas mentais e apresentações.</p>
+</div>
+</div>
+</div>
+
+<!-- Rating -->
+<div class="rating-card">
+<div class="card-title"><span class="card-icon">⭐</span> Avalie este módulo</div>
+<p style="color:rgba(255,255,255,0.5);font-size:0.9rem;">Como você avalia o conteúdo deste módulo?</p>
+<div class="stars-container" id="starsContainer">
+<span class="star" onclick="rateModule(1)">★</span>
+<span class="star" onclick="rateModule(2)">★</span>
+<span class="star" onclick="rateModule(3)">★</span>
+<span class="star" onclick="rateModule(4)">★</span>
+<span class="star" onclick="rateModule(5)">★</span>
+</div>
+<p id="ratingFeedback" style="color:var(--secondary);font-size:0.85rem;font-weight:600;margin-top:4px;"></p>
+</div>
+
+<!-- Next Module -->
+<div class="next-module">
+<div class="next-icon">️</div>
+<div class="next-info">
+<h4>Próximo Módulo: Projeto Final Integrado</h4>
+<p>No Módulo 5, vamos integrar todas as ferramentas aprendidas em um projeto prático completo.</p>
+</div>
+</div>
+
+<!-- Certificate Preview -->
+<div class="card" style="margin-top:24px;background:linear-gradient(135deg,#fef3c7,#fde68a);border:2px solid #f59e0b;">
+<div class="card-title" style="color:#92400e;"><span class="card-icon">🏆</span> Progresso do Curso</div>
+<div style="display:flex;align-items:center;gap:16px;margin-top:12px;">
+<div style="flex:1;">
+<div style="background:rgba(0,0,0,0.1);border-radius:8px;height:12px;overflow:hidden;">
+<div style="height:100%;width:80%;background:linear-gradient(90deg,#f59e0b,#d97706);border-radius:8px;"></div>
+</div>
+<p style="color:#92400e;font-size:0.8rem;margin-top:6px;">80% do curso concluído (4 de 5 módulos)</p>
+</div>
+</div>
+</div>
+</section>
+
+</div>
+</main>
+
+<footer class="footer">
+<div class="footer-content">
+<div class="footer-left">
+<p><strong>IA na Prática</strong> — Curso de Inteligência Artificial</p>
+<p>© 2025 Prof. Vitório Netto · Todos os direitos reservados</p>
+</div>
+<div class="footer-right">
+<a href="#intro">Voltar ao topo</a>
+<a href="#">Suporte</a>
+<a href="#">Certificado</a>
+</div>
+</div>
+</footer>
+
+<script>
+// Progress Bar
+window.addEventListener('scroll', function() {
+const scrollTop = window.scrollY;
+const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+const scrollPercent = (scrollTop / docHeight) * 100;
+
+document.getElementById('progressBar').style.width = scrollPercent + '%';
+document.getElementById('sidebarProgress').style.width = scrollPercent + '%';
+document.getElementById('progressPercent').textContent = Math.round(scrollPercent) + '% concluído';
+
+updateActiveSection();
+});
+
+// Active Section Tracking
+function updateActiveSection() {
+const sections = document.querySelectorAll('.section, .hero');
+const navLinks = document.querySelectorAll('.sidebar-nav a');
+let currentId = '';
+
+sections.forEach(function(section) {
+const rect = section.getBoundingClientRect();
+if (rect.top <= 150) {
+currentId = section.id;
+}
+});
+
+navLinks.forEach(function(link) {
+link.classList.remove('active');
+const href = link.getAttribute('href').replace('#', '');
+if (href === currentId) {
+link.classList.add('active');
+}
+});
+}
+
+// Scroll Animations
+const observer = new IntersectionObserver(function(entries) {
+entries.forEach(function(entry) {
+if (entry.isIntersecting) {
+entry.target.classList.add('visible');
+}
+});
+}, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+document.querySelectorAll('.section').forEach(function(section) {
+observer.observe(section);
+});
+
+// Sidebar Toggle
+document.getElementById('menuToggle').addEventListener('click', function() {
+document.getElementById('sidebar').classList.toggle('open');
+document.getElementById('sidebarOverlay').classList.toggle('open');
+});
+
+document.getElementById('sidebarOverlay').addEventListener('click', function() {
+document.getElementById('sidebar').classList.remove('open');
+document.getElementById('sidebarOverlay').classList.remove('open');
+});
+
+document.querySelectorAll('.sidebar-nav a').forEach(function(link) {
+link.addEventListener('click', function() {
+document.getElementById('sidebar').classList.remove('open');
+document.getElementById('sidebarOverlay').classList.remove('open');
+});
+});
+
+// Source Tabs
+function switchSourceTab(event, tabId) {
+const header = event.target.closest('.tabs-header');
+const parent = header.parentElement;
+
+parent.querySelectorAll('.tab-btn').forEach(function(btn) {
+btn.classList.remove('active');
+});
+parent.querySelectorAll('.tab-content').forEach(function(content) {
+content.classList.remove('active');
+});
+
+event.target.classList.add('active');
+document.getElementById(tabId).classList.add('active');
+}
+
+// Copy Code
+function copyCode(button) {
+const codeBlock = button.closest('.code-block') || button.closest('.simulator');
+let codeText = '';
+
+if (codeBlock) {
+const pre = codeBlock.querySelector('pre') || codeBlock.querySelector('.result-text');
+if (pre) {
+codeText = pre.textContent;
+}
+}
+
+navigator.clipboard.writeText(codeText).then(function() {
+button.classList.add('copied');
+const tooltip = button.querySelector('.copy-tooltip');
+if (tooltip) {
+tooltip.classList.add('show');
+tooltip.textContent = '✓ Copiado!';
+}
+button.innerHTML = '✓ Copiado! <span class="copy-tooltip show">✓ Copiado!</span>';
+
+setTimeout(function() {
+button.classList.remove('copied');
+button.innerHTML = '📋 Copiar Exemplo <span class="copy-tooltip">Clique para copiar</span>';
+}, 2000);
+}).catch(function() {
+const textarea = document.createElement('textarea');
+textarea.value = codeText;
+document.body.appendChild(textarea);
+textarea.select();
+document.execCommand('copy');
+document.body.removeChild(textarea);
+
+button.classList.add('copied');
+setTimeout(function() {
+button.classList.remove('copied');
+button.innerHTML = '📋 Copiar Exemplo <span class="copy-tooltip">Clique para copiar</span>';
+}, 2000);
+});
+}
+
+// Checklist Toggle
+function toggleChecklist(item) {
+item.classList.toggle('checked');
+}
+
+// Studio Tool Selection
+const studioToolDetails = {
+resumo: {
+title: '📝 Resumo em Texto',
+content: 'Gera um resumo estruturado de todo o conteúdo das suas fontes. Inclui pontos principais, conceitos-chave e conclusões.'
+},
+apresentacao: {
+title: '📊 Apresentação (BETA)',
+content: 'Cria slides automáticos baseados no seu material. Ideal para preparar apresentações de aula ou reuniões rapidamente.'
+},
+resumo2: {
+title: '📋 Resumo em Tabela',
+content: 'Organiza o conteúdo em formato de tabela comparativa. Perfeito para comparar diferentes fontes ou conceitos.'
+},
+mapa: {
+title: ' Mapa Mental',
+content: 'Gera um mapa mental visual conectando os principais conceitos e sub-tópicos das suas fontes.'
+},
+relatorio: {
+title: '📑 Relatórios',
+content: 'Cria relatórios detalhados e estruturados. Útil para documentação profissional ou acadêmica.'
+},
+cartoes: {
+title: '🃏 Cartões de Estudo',
+content: 'Gera flashcards de pergunta e resposta para revisão ativa. Perfeito para estudar para provas.'
+},
+teste: {
+title: '✅ Teste / Quiz',
+content: 'Cria um quiz com perguntas de múltipla escolha baseado nas suas fontes. Ótimo para auto-avaliação.'
+},
+infografico: {
+title: '📈 Infográfico (BETA)',
+content: 'Gera infográficos visuais com dados e conceitos principais. Ideal para compartilhar em redes sociais ou apresentações.'
+},
+tabela: {
+title: '📐 Tabela de Dados',
+content: 'Extrai e organiza dados estruturados das suas fontes em formato de tabela.'
+}
+};
+
+function selectStudioTool(element, tool) {
+document.querySelectorAll('.studio-card').forEach(function(card) {
+card.classList.remove('selected');
+});
+element.classList.add('selected');
+
+const details = studioToolDetails[tool];
+if (details) {
+document.getElementById('studioDetailTitle').textContent = details.title;
+document.getElementById('studioDetailContent').innerHTML = '<p style="color:var(--text-secondary);line-height:1.7;">' + details.content + '</p>';
+document.getElementById('studioDetails').style.display = 'block';
+}
+}
+
+// Hint Toggle
+function toggleHint(button) {
+const content = button.nextElementSibling;
+button.classList.toggle('open');
+content.classList.toggle('open');
+}
+
+// NotebookLM Simulator
+let selectedSources = [];
+let selectedStudioTools = [];
+
+function addSource(element) {
+const source = element.getAttribute('data-source');
+if (!selectedSources.includes(source)) {
+selectedSources.push(source);
+element.style.borderColor = 'var(--secondary)';
+element.style.background = 'rgba(0, 217, 255, 0.1)';
+element.style.color = 'var(--secondary)';
+} else {
+selectedSources = selectedSources.filter(function(s) { return s !== source; });
+element.style.borderColor = '#e5e7eb';
+element.style.background = 'white';
+element.style.color = 'var(--text-primary)';
+}
+document.getElementById('sourceCounter').textContent = selectedSources.length;
+}
+
+function selectStudioTool2(element) {
+if (element.classList.contains('selected')) {
+element.classList.remove('selected');
+element.style.borderColor = '#e5e7eb';
+element.style.background = 'white';
+element.style.color = 'var(--text-primary)';
+selectedStudioTools = selectedStudioTools.filter(function(t) { return t !== element.textContent.trim(); });
+} else {
+element.classList.add('selected');
+element.style.borderColor = 'var(--secondary)';
+element.style.background = 'rgba(0, 217, 255, 0.1)';
+element.style.color = 'var(--secondary)';
+selectedStudioTools.push(element.textContent.trim());
+}
+}
+
+function generateNotebook() {
+if (selectedSources.length === 0) {
+alert('Selecione pelo menos uma fonte!');
+return;
+}
+
+const audioPrompt = document.getElementById('audioPrompt').value.trim();
+const resultDiv = document.getElementById('notebookResult');
+const outputDiv = document.getElementById('notebookOutput');
+
+let output = '📋 CONFIGURAÇÃO DO NOTEBOOKLM\n';
+output += '═══════════════════════════════════════\n\n';
+
+output += '📚 FONTES SELECIONADAS (' + selectedSources.length + '):\n';
+const sourceNames = {
+'pdf': '📄 PDFs',
+'youtube': '▶️ Links YouTube',
+'link': '🔗 Links da Web',
+'doc': '📝 Google Docs'
+};
+selectedSources.forEach(function(source) {
+output += '  • ' + (sourceNames[source] || source) + '\n';
+});
+
+output += '\n🎙️ AUDIO OVERVIEW:\n';
+if (audioPrompt) {
+output += '  Prompt de Direção: "' + audioPrompt + '"\n';
+} else {
+output += '  Padrão (sem direção específica)\n';
+}
+
+output += '\n🎨 ESTÚDIO - FERRAMENTAS SELECIONADAS:\n';
+if (selectedStudioTools.length > 0) {
+selectedStudioTools.forEach(function(tool) {
+output += '  • ' + tool + '\n';
+});
+} else {
+output += '  Nenhuma ferramenta selecionada\n';
+}
+
+output += '\n═══════════════════════════════════════\n';
+output += '  Notebook pronto para uso! 🚀\n';
+output += '═══════════════════════════════════════';
+
+outputDiv.textContent = output;
+resultDiv.classList.add('visible');
+resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function clearNotebook() {
+selectedSources = [];
+selectedStudioTools = [];
+document.getElementById('audioPrompt').value = '';
+document.getElementById('sourceCounter').textContent = '0';
+
+document.querySelectorAll('.simulator .tool-option').forEach(function(btn) {
+btn.classList.remove('selected');
+btn.style.borderColor = '#e5e7eb';
+btn.style.background = 'white';
+btn.style.color = 'var(--text-primary)';
+});
+
+document.getElementById('notebookResult').classList.remove('visible');
+}
+
+// Star Rating
+let currentRating = 0;
+
+function rateModule(rating) {
+currentRating = rating;
+const stars = document.querySelectorAll('.star');
+const feedback = document.getElementById('ratingFeedback');
+
+stars.forEach(function(star, index) {
+if (index < rating) {
+star.classList.add('active');
+} else {
+star.classList.remove('active');
+}
+});
+
+const messages = [
+'',
+'😕 Precisa melhorar',
+'😐 Razoável',
+'🙂 Bom',
+'😊 Muito bom!',
+'🤩 Excelente! Obrigado!'
+];
+
+feedback.textContent = messages[rating];
+}
+
+// Init
+document.addEventListener('DOMContentLoaded', function() {
+updateActiveSection();
+});
+</script>
+</body>
+</html>
+

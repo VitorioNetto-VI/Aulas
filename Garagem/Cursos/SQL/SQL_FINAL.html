@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula Final: SQL Avançado, Window Functions & Segurança</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.19/400.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.19/600.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.19/700.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/fira-code@5.0.19/400.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/fira-code@5.0.19/500.css">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --info: #0ea5e9;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg-gradient-start: #0f172a;
+            --bg-gradient-end: #1e1b4b;
+            --card-bg: #ffffff;
+            --text-dark: #1e293b;
+            --text-light: #f8fafc;
+            --border-light: #e2e8f0;
+            --code-bg: #1e1e2e;
+            --radius-lg: 16px;
+            --radius-md: 8px;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-hover: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+            color: var(--text-dark);
+            min-height: 100vh;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        #progress-bar {
+            position: fixed; top: 0; left: 0; height: 4px; background: var(--success);
+            width: 0%; z-index: 1000; transition: width 0.2s;
+        }
+
+        .container {
+            max-width: 1280px; margin: 0 auto; padding: 20px;
+            display: grid; grid-template-columns: 260px 1fr; gap: 30px;
+        }
+
+        #sidebar {
+            position: sticky; top: 20px; height: fit-content;
+            background: var(--card-bg); border-radius: var(--radius-lg);
+            padding: 20px; box-shadow: var(--shadow);
+            border: 1px solid var(--border-light);
+        }
+        #sidebar ul { list-style: none; }
+        #sidebar li { margin-bottom: 8px; }
+        #sidebar a {
+            display: block; padding: 10px 12px; text-decoration: none;
+            color: var(--text-dark); border-radius: var(--radius-md);
+            font-weight: 500; transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+        #sidebar a:hover, #sidebar a.active {
+            background: var(--primary); color: var(--text-light);
+            border-color: var(--primary-dark);
+        }
+
+        main { display: flex; flex-direction: column; gap: 30px; }
+        header {
+            background: var(--card-bg); border-radius: var(--radius-lg);
+            padding: 30px; box-shadow: var(--shadow); border: 1px solid var(--border-light);
+            text-align: center; position: relative; overflow: hidden;
+        }
+        header h1 { font-size: 2.5rem; color: var(--primary-dark); margin-bottom: 8px; }
+        header p { color: #64748b; font-size: 1.1rem; }
+        .hero-img {
+            max-width: 100%; height: auto; border-radius: var(--radius-md);
+            margin-top: 20px; box-shadow: var(--shadow);
+        }
+
+        .card {
+            background: var(--card-bg); border-radius: var(--radius-lg);
+            padding: 25px; box-shadow: var(--shadow); border: 1px solid var(--border-light);
+            transition: transform 0.3s, box-shadow 0.3s; opacity: 0; transform: translateY(20px);
+        }
+        .card.visible { opacity: 1; transform: translateY(0); }
+        .card:hover { box-shadow: var(--shadow-hover); transform: translateY(-3px); }
+
+        .section-title { font-size: 1.5rem; margin-bottom: 15px; color: var(--primary-dark); border-bottom: 2px solid var(--border-light); padding-bottom: 8px; }
+        
+        .badge {
+            display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem;
+            font-weight: 700; text-transform: uppercase; margin-right: 8px; border: 1px solid;
+        }
+        .badge.info { background: #e0f2fe; color: #0284c7; border-color: #bae6fd; }
+        .badge.success { background: #dcfce7; color: #15803d; border-color: #bbf7d0; }
+        .badge.warning { background: #fef3c7; color: #b45309; border-color: #fde047; }
+        .badge.danger { background: #fee2e2; color: #b91c1c; border-color: #fca5a5; }
+
+        .tabs { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
+        .tab-btn {
+            padding: 8px 16px; border: 1px solid var(--border-light); background: #f8fafc;
+            border-radius: var(--radius-md); cursor: pointer; font-weight: 500; transition: 0.2s;
+            border: 1px solid transparent; color: var(--text-dark);
+        }
+        .tab-btn.active { background: var(--primary); color: var(--text-light); border-color: var(--primary-dark); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s; }
+
+        .code-block {
+            position: relative; background: var(--code-bg); border-radius: var(--radius-md);
+            padding: 20px; margin: 15px 0; overflow-x: auto;
+            border-left: 4px solid var(--primary); font-family: 'Fira Code', monospace;
+            color: #e2e8f0; line-height: 1.7;
+        }
+        .code-block .copy-btn {
+            position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2); color: #cbd5e1; padding: 5px 10px;
+            border-radius: 6px; cursor: pointer; font-size: 0.8rem; transition: 0.2s;
+        }
+        .code-block .copy-btn:hover { background: rgba(255,255,255,0.2); }
+        .sql-keyword { color: #c678dd; font-weight: 500; }
+        .sql-func { color: #61afef; }
+        .sql-string { color: #98c379; }
+        .sql-comment { color: #5c6370; font-style: italic; }
+        .sql-number { color: #d19a66; }
+
+        .info-box {
+            padding: 15px; border-radius: var(--radius-md); margin: 15px 0;
+            border-left: 4px solid; font-size: 0.95rem;
+        }
+        .info-box.success { background: #f0fdf4; border-color: var(--success); color: #14532d; border: 1px solid #bbf7d0; }
+        .info-box.warning { background: #fefce8; border-color: var(--warning); color: #713f12; border: 1px solid #fde047; }
+        .info-box.info { background: #eff6ff; border-color: var(--info); color: #1e3a8a; border: 1px solid #bfdbfe; }
+        .info-box.danger { background: #fee2e2; border-color: var(--danger); color: #991b1b; border: 1px solid #fecaca; }
+        
+        .info-box.dark { background: rgba(0,0,0,0.2); border: 1px solid #334155; color: #e2e8f0; }
+
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; background: #f8fafc; border-radius: var(--radius-md); overflow: hidden; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--border-light); }
+        th { background: var(--primary); color: white; font-weight: 600; }
+        tr:last-child td { border-bottom: none; }
+
+        .collapsible {
+            background: #f8fafc; border: 1px solid var(--border-light); border-radius: var(--radius-md);
+            margin-bottom: 10px; overflow: hidden;
+        }
+        .collapsible-header {
+            padding: 12px 15px; cursor: pointer; font-weight: 600; display: flex; justify-content: space-between; align-items: center;
+            transition: 0.2s; border: 1px solid transparent; color: var(--text-dark);
+        }
+        .collapsible-header:hover { background: #e2e8f0; }
+        .collapsible-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; padding: 0 15px; background: #f1f5f9; }
+        .collapsible.open .collapsible-content { max-height: 400px; padding: 15px; }
+
+        .simulator {
+            background: #0f172a; color: #e2e8f0; border-radius: var(--radius-lg);
+            padding: 20px; border: 1px solid #334155; font-family: 'Fira Code', monospace;
+        }
+        .sim-controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; }
+        .sim-btn {
+            background: var(--primary); color: white; border: none; padding: 8px 14px;
+            border-radius: 6px; cursor: pointer; font-family: 'Inter', sans-serif; font-weight: 500;
+            border: 1px solid var(--primary-dark); transition: 0.2s;
+        }
+        .sim-btn:hover { background: var(--info); border-color: var(--info); }
+        .sim-output {
+            background: #1e293b; border-radius: 8px; padding: 15px; min-height: 200px;
+            border: 1px dashed #475569; white-space: pre-wrap; font-size: 0.9rem;
+        }
+        .sim-cursor { display: inline-block; width: 8px; height: 15px; background: var(--success); animation: blink 1s infinite; vertical-align: middle; }
+
+        footer {
+            background: var(--card-bg); border-radius: var(--radius-lg); padding: 20px;
+            margin-top: 30px; text-align: center; border: 1px solid var(--border-light);
+            box-shadow: var(--shadow); color: #64748b;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+        @media (max-width: 900px) {
+            .container { grid-template-columns: 1fr; }
+            #sidebar { position: relative; top: 0; margin-bottom: 20px; }
+            .tabs { flex-direction: column; }
+        }
+        @media (max-width: 600px) {
+            header h1 { font-size: 1.8rem; }
+            .code-block { padding: 15px 10px; font-size: 0.85rem; }
+        }
+    </style>
+</head>
+<body>
+    <div id="progress-bar"></div>
+    <div class="container">
+        <nav id="sidebar">
+            <ul>
+                <li><a href="#intro">📖 Encerramento</a></li>
+                <li><a href="#windows">📊 Window Functions</a></li>
+                <li><a href="#ctes">🔗 CTEs (WITH)</a></li>
+                <li><a href="#partition">💾 Particionamento</a></li>
+                <li><a href="#security">🛡️ Segurança & Riscos</a></li>
+                <li><a href="#simulador">💻 Simulador</a></li>
+                <li><a href="#desafio">🎯 Desafio Final</a></li>
+                <li><a href="#resumo">📝 Conclusão</a></li>
+            </ul>
+        </nav>
+
+        <main>
+            <header>
+                <h1>Encerramento: SQL de Alto Nível</h1>
+                <p>Window Functions, CTEs, Particionamento e Segurança em Produção</p>
+                <img src="https://image.pollinations.ai/prompt/Advanced%20database%20security%20architecture%20window%20functions%20CTE%20partitioning%20isometric%203D%20illustration%20modern%20tech%20cybersecurity%20shield%20purple%20blue%20gradient%20high%20quality" alt="Arquitetura de Segurança e SQL Avançado" class="hero-img">
+            </header>
+
+            <section id="intro" class="card">
+                <h2 class="section-title">Introdução ao Módulo Final</h2>
+                <span class="badge info">Avançado</span> <span class="badge success">Conclusivo</span>
+                <p style="margin-top: 10px;">Chegamos ao ápice do curso. Aqui, exploraremos ferramentas analíticas que substituem lógicas complexas de aplicação, técnicas de arquitetura para Big Data e, crucialmente, as melhores práticas de segurança ao utilizar lógica embutida no banco. O domínio destes conceitos separa desenvolvedores juniores de arquitetos de dados.</p>
+                <div class="info-box info">
+                    <strong>💡 Objetivo:</strong> Implementar análises temporais e ranking sem `GROUP BY`, organizar tabelas massivas e mitigar riscos críticos de Triggers/Procedures em ambientes corporativos.
+                </div>
+            </section>
+
+            <section id="windows" class="card">
+                <h2 class="section-title">1. Window Functions (Funções de Janela)</h2>
+                <p>Permitem realizar cálculos em um conjunto de linhas relacionadas à linha atual, sem agregá-las em um único resultado. Usam a cláusula <code>OVER()</code>.</p>
+                
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="tab-row">ROW_NUMBER & RANK</button>
+                    <button class="tab-btn" data-tab="tab-lag">LAG & LEAD</button>
+                </div>
+
+                <div id="tab-row" class="tab-content active">
+                    <div class="code-block">
+                        <button class="copy-btn">📋 Copiar</button>
+                        <code class="language-sql">-- Ranking de Vendas por Vendedor
+-- ROW_NUMBER: Número sequencial único por partição
+-- RANK: Mesma posição para empates, pula o próximo
+SELECT 
+  vendedor_id,
+  mes_venda,
+  valor_vendido,
+  ROW_NUMBER() OVER(PARTITION BY vendedor_id ORDER BY valor_vendido DESC) AS row_num,
+  RANK() OVER(PARTITION BY vendedor_id ORDER BY valor_vendido DESC) AS posicao
+FROM Vendas
+WHERE ano = 2023;</code>
+                    </div>
+                    <p>Ideal para paginar resultados ou identificar o "top 1" por categoria.</p>
+                </div>
+
+                <div id="tab-lag" class="tab-content">
+                    <div class="code-block">
+                        <button class="copy-btn">📋 Copiar</button>
+                        <code class="language-sql">-- Análise Temporal: Comparação Mês a Mês
+SELECT 
+  mes,
+  receita,
+  LAG(receita, 1) OVER(ORDER BY mes) AS mes_anterior,
+  ROUND((receita - LAG(receita, 1) OVER(ORDER BY mes)) / LAG(receita, 1) OVER(ORDER BY mes) * 100, 2) AS variacao_pct
+FROM Receita_Mensal;</code>
+                    </div>
+                    <p><code>LAG</code> acessa a linha anterior e <code>LEAD</code> a próxima. Elimina a necessidade de `SELF JOIN`.</p>
+                </div>
+            </section>
+
+            <section id="ctes" class="card">
+                <h2 class="section-title">2. Common Table Expressions (CTEs)</h2>
+                <p>A cláusula <code>WITH</code> cria resultados temporários nomeados que existem apenas durante a execução da query. Melhora drasticamente a legibilidade e manutenção.</p>
+                <div class="code-block">
+                    <button class="copy-btn">📋 Copiar</button>
+                    <code class="language-sql">-- CTE para pré-agregação antes do JOIN principal
+WITH Vendas_Agregadas AS (
+  SELECT 
+    cliente_id,
+    SUM(valor) AS total_gasto,
+    COUNT(pedido_id) AS qtd_pedidos
+  FROM Pedidos
+  WHERE data_criacao >= '2023-01-01'
+  GROUP BY cliente_id
+)
+SELECT 
+  c.nome,
+  c.email,
+  va.total_gasto,
+  va.qtd_pedidos
+FROM Clientes c
+JOIN Vendas_Agregadas va ON c.cliente_id = va.cliente_id
+WHERE va.total_gasto > 5000
+ORDER BY va.total_gasto DESC;</code>
+                </div>
+                <div class="info-box success">
+                    <strong>✅ Vantagem:</strong> O otimizador do banco pode materializar a CTE em memória temporária, reutilizando-a múltiplas vezes na mesma query sem recalcular.
+                </div>
+            </section>
+
+            <section id="partition" class="card">
+                <h2 class="section-title">3. Particionamento de Tabelas (Big Data)</h2>
+                <p>Divide tabelas fisicamente grandes em partes menores (partições) com base em intervalos, listas ou hash. O motor do banco lê apenas a partição relevante, acelerando queries em milhões de linhas.</p>
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="tab-range">Partição por RANGE</button>
+                    <button class="tab-btn" data-tab="tab-hash">Partição por HASH</button>
+                </div>
+
+                <div id="tab-range" class="tab-content active">
+                    <div class="code-block">
+                        <button class="copy-btn">📋 Copiar</button>
+                        <code class="language-sql">-- Partição por Ano (RANGE)
+CREATE TABLE Logs_Acesso (
+  id_log BIGINT,
+  usuario VARCHAR(50),
+  data_hora DATETIME,
+  ip_origem VARCHAR(45)
+)
+PARTITION BY RANGE(YEAR(data_hora)) (
+  PARTITION p2021 VALUES LESS THAN (2022),
+  PARTITION p2022 VALUES LESS THAN (2023),
+  PARTITION p2023 VALUES LESS THAN (2024),
+  PARTITION p2024 VALUES LESS THAN (2025),
+  PARTITION p_futuro VALUES LESS THAN MAXVALUE
+);</code>
+                    </div>
+                    <p>Consultas filtradas por `WHERE YEAR(data_hora) = 2023` escaneiam apenas 1/5 dos dados.</p>
+                </div>
+
+                <div id="tab-hash" class="tab-content">
+                    <div class="code-block">
+                        <button class="copy-btn">📋 Copiar</button>
+                        <code class="language-sql">-- Partição por HASH (Distribuição uniforme)
+CREATE TABLE Sessoes_Usuario (
+  id_sessao CHAR(36) PRIMARY KEY,
+  usuario_id INT,
+  token VARCHAR(255),
+  criado_em TIMESTAMP
+)
+PARTITION BY HASH(usuario_id)
+PARTITIONS 8;</code>
+                    </div>
+                    <p>Ideal para sharding interno quando não há um critério temporal claro.</p>
+                </div>
+            </section>
+
+            <section id="security" class="card">
+                <h2 class="section-title">4. 🛡️ Segurança & Riscos: Triggers e Procedures</h2>
+                <span class="badge danger">Crítico</span>
+                <p>O uso de lógica embutida no banco exige cautela extrema em ambientes de produção. Abaixo, os principais riscos e mitigações:</p>
+                
+                <table>
+                    <thead><tr><th>Risco</th><th>Descrição</th><th>Mitigação</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>Lógica Oculta</strong></td><td>Regras de negócio ficam invisíveis ao código da aplicação.</td><td>Documentação rigorosa e versionamento no repositório (flyway/liquibase).</td></tr>
+                        <tr><td><strong>Dificuldade de Debug</strong></td><td>Erros em cascata são difíceis de rastrear.</td><td>Use `SIGNAL` com mensagens claras e logs em tabela de auditoria.</td></tr>
+                        <tr><td><strong>SQL Injection</strong></td><td>Procedures com SQL dinâmico (`PREPARE/EXECUTE`) são vulneráveis.</td><td>Use parâmetros tipados e evite concatenação de strings em queries dinâmicas.</td></tr>
+                        <tr><td><strong>Escalada de Privilégios</strong></td><td>Triggers podem operar com permissões do `DEFINER`.</td><td>Cuidado com `SQL SECURITY DEFINER`. Prefira `INVOKER` onde possível.</td></tr>
+                        <tr><td><strong>Performance</strong></td><td>Triggers rodam transacionalmente, travando a tabela.</td><td>Evite loops pesados. Use filas assíncronas (RabbitMQ/Kafka) para logs pesados.</td></tr>
+                        <tr><td><strong>Backup/Restore</strong></td><td>Scripts manuais podem perder a ordem de criação.</td><td>Use ferramentas automatizadas. Nunca confie em `mysqldump` manual sem validação.</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="info-box warning">
+                    <strong>⚠️ Regra de Ouro:</strong> Mantenha a lógica de negócio na camada de aplicação sempre que possível. Use Procedures/Triggers apenas para integridade transacional, auditoria imutável ou otimizações extremas de I/O.
+                </div>
+
+                <div class="code-block">
+                    <button class="copy-btn">📋 Copiar</button>
+                    <code class="language-sql">-- Exemplo Seguro: Procedure com Parâmetros Tipados e Auditoria
+DELIMITER //
+CREATE PROCEDURE sp_transferencia_segura(
+  IN p_origem INT, 
+  IN p_destino INT, 
+  IN p_valor DECIMAL(10,2),
+  OUT p_sucesso BOOLEAN
+)
+BEGIN
+  DECLARE v_saldo DECIMAL(10,2);
+  
+  -- Bloco transacional seguro
+  DECLARE EXIT HANDLER FOR SQLEXCEPTION
+  BEGIN
+    ROLLBACK;
+    SET p_sucesso = FALSE;
+    INSERT INTO Audit_Log (acao, status, erro) VALUES ('TRANSFERENCIA', 'FALHA', SQLSTATE);
+  END;
+
+  START TRANSACTION;
+    SELECT saldo INTO v_saldo FROM Contas WHERE id = p_origem FOR UPDATE;
+    
+    IF v_saldo >= p_valor THEN
+      UPDATE Contas SET saldo = saldo - p_valor WHERE id = p_origem;
+      UPDATE Contas SET saldo = saldo + p_valor WHERE id = p_destino;
+      INSERT INTO Transacoes (conta_origem, conta_destino, valor, data) 
+      VALUES (p_origem, p_destino, p_valor, NOW());
+      SET p_sucesso = TRUE;
+    ELSE
+      SET p_sucesso = FALSE;
+    END IF;
+  COMMIT;
+END //
+DELIMITER ;</code>
+                </div>
+            </section>
+
+            <section id="simulador" class="card">
+                <h2 class="section-title">💻 Simulador de Alto Nível</h2>
+                <p>Execute comandos avançados e simule um audit de segurança.</p>
+                <div class="simulator">
+                    <div class="sim-controls">
+                        <button class="sim-btn" onclick="runSim('window')">WINDOW RANK</button>
+                        <button class="sim-btn" onclick="runSim('cte')">CTE WITH</button>
+                        <button class="sim-btn" onclick="runSim('part')">PARTITION</button>
+                        <button class="sim-btn" onclick="runSim('sec')">SECURITY AUDIT</button>
+                        <button class="sim-btn" onclick="runSim('clear')">Limpar</button>
+                    </div>
+                    <div class="sim-output" id="simOutput">
+                        <span style="color: #64748b;">// Ambiente Avançado Pronto. Selecione uma operação.</span>
+                    </div>
+                </div>
+            </section>
+
+            <section id="desafio" class="card">
+                <h2 class="section-title">🎯 Desafio Final de Certificação</h2>
+                <span class="badge danger">Avaliativo</span>
+                <p>Construa um relatório analítico seguro para um sistema de E-commerce:</p>
+                <ul style="margin: 15px 20px 0;">
+                    <li>Use uma <code>CTE</code> para calcular o faturamento diário do último trimestre.</li>
+                    <li>Aplique <code>LAG()</code> na CTE para calcular a variação percentual diária de vendas.</li>
+                    <li>Crie uma <code>PROCEDURE</code> que receba um <code>JSON</code> de pedido, valide estoque, e insira transacionalmente. Inclua tratamento de erro com <code>SIGNAL</code>.</li>
+                    <li>Proponha uma estratégia de particionamento para a tabela de <code>Logs_Auditoria</code> que cresce 10GB/mês.</li>
+                </ul>
+                <div class="info-box success dark">
+                    <strong>✅ Critérios de Aceite:</strong> Legibilidade, performance (EXPLAIN), segurança (parâmetros/transações) e documentação dos riscos mitigados.
+                </div>
+            </section>
+
+            <section id="resumo" class="card">
+                <h2 class="section-title">📝 Conclusão do Curso</h2>
+                <p>Você percorreu desde a criação de tabelas até a arquitetura de dados massivos e segurança corporativa. O SQL moderno vai muito além de <code>SELECT</code> e <code>INSERT</code>: é uma ferramenta de engenharia.</p>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
+                    <div style="padding: 15px; background: #f8fafc; border-radius: 8px; border-left: 4px solid var(--primary);">
+                        <strong>Analítico</strong><br>Window Functions & CTEs para BI e Relatórios
+                    </div>
+                    <div style="padding: 15px; background: #f8fafc; border-radius: 8px; border-left: 4px solid var(--info);">
+                        <strong>Escalabilidade</strong><br>Particionamento & Indexação para Big Data
+                    </div>
+                    <div style="padding: 15px; background: #f8fafc; border-radius: 8px; border-left: 4px solid var(--success);">
+                        <strong>Automação</strong><br>Triggers & Procedures com controle transacional
+                    </div>
+                    <div style="padding: 15px; background: #f8fafc; border-radius: 8px; border-left: 4px solid var(--warning);">
+                        <strong>Segurança</strong><br>Mitigação de Injeção, Auditoria e Least Privilege
+                    </div>
+                </div>
+                <div class="info-box info" style="margin-top: 15px;">
+                    <strong>🚀 Próximos Passos:</strong> Explore NoSQL (MongoDB/Cassandra), Data Lakes, Pipelines ETL (Airflow/dbt) e Bancos em Nuvem (AWS RDS, Google Spanner). O banco de dados é apenas o início da jornada de dados.
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <footer>
+        <p>© 2024 Curso Completo SQL. Do Básico ao Avançado com Foco em Segurança e Performance.</p>
+    </footer>
+
+    <script>
+        // Progress Bar & Scroll Spy
+        const progressBar = document.getElementById('progress-bar');
+        const sections = document.querySelectorAll('section');
+        const navLinks = document.querySelectorAll('#sidebar a');
+
+        window.addEventListener('scroll', () => {
+            const scrollTop = document.documentElement.scrollTop;
+            const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const progress = (scrollTop / scrollHeight) * 100;
+            progressBar.style.width = progress + '%';
+
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop - 100;
+                if (scrollTop >= sectionTop) current = '#' + section.getAttribute('id');
+            });
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === current) link.classList.add('active');
+            });
+        });
+
+        // Intersection Observer for Animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) entry.target.classList.add('visible');
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.card').forEach(card => observer.observe(card));
+
+        // Tabs Logic
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const parent = btn.closest('.tabs');
+                const tabId = btn.dataset.tab;
+                const container = parent.parentElement;
+                parent.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                container.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+
+        // Collapsible Logic
+        document.querySelectorAll('.collapsible-header').forEach(header => {
+            header.addEventListener('click', () => {
+                const parent = header.parentElement;
+                parent.classList.toggle('open');
+                header.querySelector('span').textContent = parent.classList.contains('open') ? '▲' : '▼';
+            });
+        });
+
+        // Copy Code Logic
+        document.querySelectorAll('.copy-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const code = btn.parentElement.querySelector('code').innerText;
+                navigator.clipboard.writeText(code).then(() => {
+                    const original = btn.textContent;
+                    btn.textContent = '✅ Copiado!';
+                    setTimeout(() => btn.textContent = original, 2000);
+                });
+            });
+        });
+
+        // SQL Syntax Highlighter
+        function highlightSQL(sql) {
+            const keywords = /\b(CREATE|DATABASE|IF|NOT|EXISTS|USE|TABLE|PRIMARY|KEY|INT|VARCHAR|CHAR|DATE|FOREIGN|REFERENCES|INSERT|INTO|VALUES|SELECT|FROM|WHERE|JOIN|LEFT|RIGHT|INNER|ON|GROUP|BY|COUNT|AS|ALTER|DROP|INDEX|CHANGE|SET|UPDATE|VIEW|AND|OR|NULL|USING|BTREE|HAVING|LIKE|TRIGGER|BEFORE|DELETE|BEGIN|END|SIGNAL|SQLSTATE|FOR|EACH|ROW|OLD|NEW|ADD|COLUMN|CALL|PROCEDURE|FUNCTION|DETERMINISTIC|RETURNS|DECLARE|DELIMITER|START|TRANSACTION|COMMIT|ROLLBACK|IN|OUT|INOUT|IF|THEN|ELSE|END|IF|CURDATE|TIMESTAMPDIFF|CONCAT|SUBSTRING|UCASE|LCASE|LEFT|EXPLAIN|TYPE|KEY|ROWS|EXTRA|OVER|PARTITION|ORDER|RANK|ROW_NUMBER|LAG|LEAD|WITH|RECURSIVE|UNION|ALL|RANGE|HASH|PARTITIONS|BIGINT|DECIMAL|BOOLEAN|FOR|UPDATE|HANDLER|SQLEXCEPTION|LOG|JSON|VALUES|LESS|THAN|MAXVALUE)\b/gi;
+            const funcs = /\b(COUNT|MAX|MIN|AVG|SUM|LOWER|CURDATE|TIMESTAMPDIFF|CONCAT|SUBSTRING|UCASE|LCASE|ROW_NUMBER|RANK|LAG|LEAD)\b/gi;
+            
+            let highlighted = sql
+                .replace(/--.*$/gm, '<span class="sql-comment">$&</span>')
+                .replace(/'[^']*'/g, '<span class="sql-string">$&</span>')
+                .replace(/`[^`]*`/g, '<span class="sql-string">$&</span>')
+                .replace(/\b(\d+)\b/g, '<span class="sql-number">$1</span>');
+                
+            highlighted = highlighted.replace(keywords, '<span class="sql-keyword">$1</span>');
+            highlighted = highlighted.replace(funcs, '<span class="sql-func">$1</span>');
+            return highlighted;
+        }
+
+        document.querySelectorAll('.language-sql').forEach(el => {
+            el.innerHTML = highlightSQL(el.innerText);
+        });
+
+        // Simulator Logic
+        function runSim(type) {
+            const output = document.getElementById('simOutput');
+            const cursor = '<span class="sim-cursor"></span>';
+            
+            const responses = {
+                window: `> EXECUTANDO: SELECT vendedor_id, mes_venda, valor_vendido, ROW_NUMBER() OVER(...)
++-------------+----------+--------------+---------+---------+
+| vendedor_id | mes_venda| valor_vendido| row_num | posicao |
++-------------+----------+--------------+---------+---------+
+|           1 | 2023-10  |       15000.0|       1 |       1 |
+|           1 | 2023-09  |       12500.0|       2 |       2 |
+|           1 | 2023-08  |       12500.0|       3 |       2 |
++-------------+----------+--------------+---------+---------+
+✅ Window Functions aplicadas sem GROUP BY. Cálculo em tempo real. ${cursor}`,
+                cte: `> EXECUTANDO: WITH Vendas_Agregadas AS (...) SELECT * FROM Vendas_Agregadas...
++-------------+------------+----------+
+| cliente_id  | total_gasto| qtd_pedidos|
++-------------+------------+----------+
+|          42 |    8500.00 |        15 |
+|          17 |    6200.00 |         8 |
+|           9 |    5100.00 |         4 |
++-------------+------------+----------+
+3 rows in set.
+✅ CTE pré-agregada e filtrada. Query legível e otimizada pelo otimizador. ${cursor}`,
+                part: `> EXECUTANDO: CREATE TABLE Logs_Acesso (...) PARTITION BY RANGE(YEAR(data_hora))...
+✅ Tabela criada com 5 partições físicas (p2021, p2022, p2023, p2024, p_futuro).
+📊 EXPLAIN ANALYSE: 'WHERE YEAR(data_hora) = 2023'
+🚀 Partition pruning ativado. Apenas p2023 escaneada.
+📉 Tempo de resposta reduzido de 4.2s para 0.15s. ${cursor}`,
+                sec: `> EXECUTANDO: AUDIT DE SEGURANÇA - PROCEDURE sp_transferencia_segura...
+🔍 ANÁLISE DE RISCO:
+[✅] Parâmetros tipados (INT, DECIMAL) - Injeção bloqueada.
+[✅] FOR UPDATE aplicado - Evita Race Conditions.
+[✅] DECLARE EXIT HANDLER - Rollback automático em falha.
+[✅] Log de auditoria registrado.
+⚠️  ALERTA: Verifique permissões GRANT EXECUTE para usuários da app.
+🛡️ STATUS: SEGURA PARA PRODUÇÃO. ${cursor}`,
+                clear: ``
+            };
+
+            if (type === 'clear') {
+                output.innerHTML = `<span style="color: #64748b;">// Ambiente Avançado Pronto. Selecione uma operação.</span>`;
+                return;
+            }
+            
+            output.innerHTML = responses[type];
+        }
+    </script>
+</body>
+</html>
+

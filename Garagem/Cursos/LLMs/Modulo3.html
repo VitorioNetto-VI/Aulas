@@ -1,0 +1,2573 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IA na Prática - Módulo 3: Perplexity AI - Conectores e Fontes</title>
+<link href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/400.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/600.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/700.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@fontsource/fira-code@5.1.0/400.css" rel="stylesheet">
+<style>
+:root {
+--primary: #6C63FF;
+--primary-dark: #5A52D5;
+--primary-light: #8B85FF;
+--secondary: #00D9FF;
+--success: #10B981;
+--success-light: #D1FAE5;
+--success-dark: #065F46;
+--warning: #F59E0B;
+--warning-light: #FEF3C7;
+--warning-dark: #92400E;
+--danger: #EF4444;
+--danger-light: #FEE2E2;
+--danger-dark: #991B1B;
+--info: #3B82F6;
+--info-light: #DBEAFE;
+--info-dark: #1E40AF;
+--bg-gradient-start: #1a1040;
+--bg-gradient-mid: #2d1b69;
+--bg-gradient-end: #1e3a5f;
+--card-bg: #FFFFFF;
+--text-primary: #1F2937;
+--text-secondary: #4B5563;
+--text-light: #9CA3AF;
+--code-bg: #1e1e2e;
+--sidebar-width: 280px;
+--header-height: 60px;
+--border-radius-card: 16px;
+--border-radius-element: 8px;
+--shadow-card: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+--shadow-card-hover: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+--shadow-elevated: 0 25px 50px -12px rgba(0,0,0,0.25);
+--transition-fast: 0.2s ease;
+--transition-normal: 0.3s ease;
+--transition-slow: 0.5s ease;
+}
+
+* {
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+html {
+scroll-behavior: smooth;
+scroll-padding-top: var(--header-height);
+}
+
+body {
+font-family: 'Inter', sans-serif;
+background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-mid) 50%, var(--bg-gradient-end) 100%);
+color: var(--text-primary);
+line-height: 1.7;
+min-height: 100vh;
+}
+
+.progress-bar {
+position: fixed;
+top: 0;
+left: 0;
+width: 0%;
+height: 4px;
+background: linear-gradient(90deg, var(--primary), var(--secondary), var(--primary-light));
+z-index: 10000;
+transition: width 0.1s linear;
+border-radius: 0 2px 2px 0;
+box-shadow: 0 0 10px rgba(108, 99, 255, 0.5);
+}
+
+.header {
+position: fixed;
+top: 4px;
+left: 0;
+right: 0;
+height: var(--header-height);
+background: rgba(26, 16, 64, 0.98);
+backdrop-filter: blur(20px);
+-webkit-backdrop-filter: blur(20px);
+z-index: 9999;
+display: flex;
+align-items: center;
+justify-content: space-between;
+padding: 0 24px;
+border-bottom: 1px solid rgba(108, 99, 255, 0.2);
+}
+
+.header-logo {
+display: flex;
+align-items: center;
+gap: 12px;
+color: white;
+font-weight: 700;
+font-size: 1.1rem;
+}
+
+.header-logo .logo-icon {
+width: 36px;
+height: 36px;
+background: linear-gradient(135deg, var(--primary), var(--secondary));
+border-radius: 10px;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 1.2rem;
+}
+
+.header-nav {
+display: flex;
+align-items: center;
+gap: 16px;
+}
+
+.header-nav .badge-timer {
+background: rgba(108, 99, 255, 0.2);
+color: var(--primary-light);
+padding: 6px 14px;
+border-radius: 20px;
+font-size: 0.85rem;
+font-weight: 600;
+display: flex;
+align-items: center;
+gap: 6px;
+}
+
+.header-nav .badge-level {
+background: rgba(0, 217, 255, 0.2);
+color: var(--secondary);
+padding: 6px 14px;
+border-radius: 20px;
+font-size: 0.85rem;
+font-weight: 600;
+}
+
+.menu-toggle {
+display: none;
+background: none;
+border: none;
+color: white;
+font-size: 1.5rem;
+cursor: pointer;
+padding: 8px;
+}
+
+.sidebar {
+position: fixed;
+top: calc(var(--header-height) + 4px);
+left: 0;
+width: var(--sidebar-width);
+height: calc(100vh - var(--header-height) - 4px);
+background: rgba(26, 16, 64, 0.95);
+backdrop-filter: blur(10px);
+-webkit-backdrop-filter: blur(10px);
+z-index: 9998;
+overflow-y: auto;
+padding: 24px 16px;
+border-right: 1px solid rgba(108, 99, 255, 0.15);
+transition: transform var(--transition-normal);
+}
+
+.sidebar::-webkit-scrollbar {
+width: 4px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+background: rgba(108, 99, 255, 0.3);
+border-radius: 2px;
+}
+
+.sidebar-title {
+color: var(--text-light);
+font-size: 0.7rem;
+text-transform: uppercase;
+letter-spacing: 2px;
+font-weight: 700;
+margin-bottom: 16px;
+padding-left: 12px;
+}
+
+.sidebar-nav {
+list-style: none;
+}
+
+.sidebar-nav li {
+margin-bottom: 2px;
+}
+
+.sidebar-nav a {
+display: flex;
+align-items: center;
+gap: 10px;
+padding: 10px 12px;
+color: rgba(255,255,255,0.7);
+text-decoration: none;
+border-radius: var(--border-radius-element);
+font-size: 0.9rem;
+transition: all var(--transition-fast);
+position: relative;
+}
+
+.sidebar-nav a:hover,
+.sidebar-nav a.active {
+color: white;
+background: rgba(108, 99, 255, 0.2);
+}
+
+.sidebar-nav a.active::before {
+content: '';
+position: absolute;
+left: 0;
+top: 50%;
+transform: translateY(-50%);
+width: 3px;
+height: 60%;
+background: var(--primary);
+border-radius: 0 3px 3px 0;
+}
+
+.sidebar-nav a .nav-icon {
+font-size: 1.1rem;
+width: 24px;
+text-align: center;
+flex-shrink: 0;
+}
+
+.sidebar-nav a .nav-section-num {
+background: rgba(108, 99, 255, 0.15);
+color: var(--primary-light);
+font-size: 0.7rem;
+font-weight: 700;
+padding: 2px 8px;
+border-radius: 10px;
+margin-left: auto;
+}
+
+.main-content {
+margin-left: var(--sidebar-width);
+padding-top: calc(var(--header-height) + 4px);
+min-height: 100vh;
+}
+
+.content-wrapper {
+max-width: 900px;
+margin: 0 auto;
+padding: 40px 48px 80px;
+}
+
+.hero {
+text-align: center;
+padding: 60px 0 40px;
+}
+
+.hero-badge {
+display: inline-flex;
+align-items: center;
+gap: 8px;
+background: rgba(0, 217, 255, 0.15);
+border: 1px solid rgba(0, 217, 255, 0.3);
+color: var(--secondary);
+padding: 8px 20px;
+border-radius: 30px;
+font-size: 0.85rem;
+font-weight: 600;
+margin-bottom: 24px;
+}
+
+.hero h1 {
+font-size: 2.8rem;
+font-weight: 700;
+color: white;
+margin-bottom: 12px;
+line-height: 1.2;
+}
+
+.hero h1 span {
+background: linear-gradient(135deg, var(--secondary), var(--primary-light));
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+background-clip: text;
+}
+
+.hero-subtitle {
+font-size: 1.15rem;
+color: rgba(255,255,255,0.8);
+max-width: 600px;
+margin: 0 auto 32px;
+line-height: 1.6;
+}
+
+.hero-image {
+max-width: 800px;
+width: 100%;
+margin: 0 auto 40px;
+border-radius: var(--border-radius-card);
+overflow: hidden;
+box-shadow: var(--shadow-elevated);
+border: 2px solid rgba(0, 217, 255, 0.2);
+background: #1e1e2e;
+}
+
+.hero-image img {
+width: 100%;
+display: block;
+}
+
+.hero-meta {
+display: flex;
+justify-content: center;
+gap: 24px;
+flex-wrap: wrap;
+}
+
+.hero-meta-item {
+display: flex;
+align-items: center;
+gap: 8px;
+color: rgba(255,255,255,0.8);
+font-size: 0.9rem;
+}
+
+.hero-meta-item span:first-child {
+font-size: 1.1rem;
+}
+
+.section {
+margin-bottom: 56px;
+opacity: 0;
+transform: translateY(30px);
+transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.section.visible {
+opacity: 1;
+transform: translateY(0);
+}
+
+.section-header {
+display: flex;
+align-items: center;
+gap: 16px;
+margin-bottom: 28px;
+}
+
+.section-number {
+width: 48px;
+height: 48px;
+background: linear-gradient(135deg, var(--secondary), #00a8cc);
+color: white;
+border-radius: 14px;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 1.2rem;
+font-weight: 700;
+flex-shrink: 0;
+box-shadow: 0 4px 15px rgba(0, 217, 255, 0.4);
+}
+
+.section-title {
+font-size: 1.8rem;
+font-weight: 700;
+color: white;
+line-height: 1.3;
+}
+
+.section-title small {
+display: block;
+font-size: 0.75rem;
+color: var(--secondary);
+font-weight: 600;
+text-transform: uppercase;
+letter-spacing: 1.5px;
+margin-bottom: 4px;
+}
+
+.card {
+background: var(--card-bg);
+border-radius: var(--border-radius-card);
+padding: 28px 32px;
+margin-bottom: 20px;
+box-shadow: var(--shadow-card);
+transition: all var(--transition-normal);
+border: 1px solid rgba(0,0,0,0.05);
+}
+
+.card:hover {
+box-shadow: var(--shadow-card-hover);
+transform: translateY(-2px);
+}
+
+.card-title {
+font-size: 1.15rem;
+font-weight: 700;
+color: var(--text-primary);
+margin-bottom: 12px;
+display: flex;
+align-items: center;
+gap: 10px;
+}
+
+.card-title .card-icon {
+font-size: 1.3rem;
+}
+
+.card p {
+color: var(--text-secondary);
+line-height: 1.8;
+}
+
+.card p + p {
+margin-top: 12px;
+}
+
+.info-box {
+border-radius: var(--border-radius-element);
+padding: 20px 24px;
+margin: 20px 0;
+display: flex;
+gap: 14px;
+align-items: flex-start;
+border-left: 4px solid;
+}
+
+.info-box .info-icon {
+font-size: 1.3rem;
+flex-shrink: 0;
+margin-top: 2px;
+}
+
+.info-box .info-content {
+flex: 1;
+}
+
+.info-box .info-label {
+font-weight: 700;
+font-size: 0.85rem;
+text-transform: uppercase;
+letter-spacing: 1px;
+margin-bottom: 4px;
+}
+
+.info-box .info-text {
+font-size: 0.95rem;
+line-height: 1.7;
+}
+
+.info-box.info-success {
+background: var(--success-light);
+border-color: var(--success);
+color: var(--success-dark);
+}
+
+.info-box.info-warning {
+background: var(--warning-light);
+border-color: var(--warning);
+color: var(--warning-dark);
+}
+
+.info-box.info-danger {
+background: var(--danger-light);
+border-color: var(--danger);
+color: var(--danger-dark);
+}
+
+.info-box.info-info {
+background: var(--info-light);
+border-color: var(--info);
+color: var(--info-dark);
+}
+
+.code-block {
+background: var(--code-bg);
+border-radius: var(--border-radius-card);
+margin: 20px 0;
+overflow: hidden;
+box-shadow: var(--shadow-card);
+border: 1px solid rgba(0, 217, 255, 0.15);
+}
+
+.code-block-header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 12px 20px;
+background: rgba(0, 217, 255, 0.1);
+border-bottom: 1px solid rgba(0, 217, 255, 0.1);
+}
+
+.code-block-lang {
+display: flex;
+align-items: center;
+gap: 8px;
+color: var(--secondary);
+font-size: 0.8rem;
+font-weight: 600;
+text-transform: uppercase;
+letter-spacing: 1px;
+}
+
+.code-block-lang .lang-dot {
+width: 8px;
+height: 8px;
+border-radius: 50%;
+}
+
+.copy-btn {
+background: rgba(255,255,255,0.1);
+border: 1px solid rgba(255,255,255,0.15);
+color: rgba(255,255,255,0.6);
+padding: 6px 14px;
+border-radius: 6px;
+cursor: pointer;
+font-size: 0.8rem;
+font-family: 'Inter', sans-serif;
+font-weight: 600;
+display: flex;
+align-items: center;
+gap: 6px;
+transition: all var(--transition-fast);
+position: relative;
+}
+
+.copy-btn:hover {
+background: rgba(0, 217, 255, 0.3);
+color: white;
+border-color: rgba(0, 217, 255, 0.5);
+}
+
+.copy-btn.copied {
+background: rgba(16, 185, 129, 0.3);
+color: var(--success);
+border-color: rgba(16, 185, 129, 0.5);
+}
+
+.copy-btn .copy-tooltip {
+position: absolute;
+bottom: calc(100% + 8px);
+right: 0;
+background: var(--text-primary);
+color: white;
+padding: 4px 10px;
+border-radius: 4px;
+font-size: 0.7rem;
+white-space: nowrap;
+opacity: 0;
+pointer-events: none;
+transition: opacity var(--transition-fast);
+}
+
+.copy-btn .copy-tooltip.show {
+opacity: 1;
+}
+
+.code-block pre {
+padding: 20px;
+overflow-x: auto;
+font-family: 'Fira Code', monospace;
+font-size: 0.9rem;
+line-height: 1.7;
+color: #cdd6f4;
+}
+
+.code-block code {
+font-family: 'Fira Code', monospace;
+}
+
+.token-keyword { color: #cba6f7; }
+.token-string { color: #a6e3a1; }
+.token-comment { color: #6c7086; font-style: italic; }
+.token-function { color: #89b4fa; }
+.token-operator { color: #f38ba8; }
+.token-number { color: #fab387; }
+.token-type { color: #89dceb; }
+.token-variable { color: #f5c2e7; }
+
+.tabs-container {
+margin: 24px 0;
+}
+
+.tabs-header {
+display: flex;
+gap: 4px;
+background: rgba(0,0,0,0.05);
+padding: 4px;
+border-radius: 12px;
+margin-bottom: 0;
+overflow-x: auto;
+}
+
+.tab-btn {
+padding: 10px 20px;
+background: transparent;
+border: none;
+border-radius: 8px;
+cursor: pointer;
+font-family: 'Inter', sans-serif;
+font-size: 0.9rem;
+font-weight: 600;
+color: var(--text-secondary);
+transition: all var(--transition-fast);
+white-space: nowrap;
+display: flex;
+align-items: center;
+gap: 6px;
+}
+
+.tab-btn:hover {
+color: var(--text-primary);
+background: rgba(0, 217, 255, 0.1);
+}
+
+.tab-btn.active {
+background: white;
+color: var(--secondary);
+box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.tab-content {
+display: none;
+padding: 24px 0;
+}
+
+.tab-content.active {
+display: block;
+animation: fadeInTab 0.3s ease;
+}
+
+@keyframes fadeInTab {
+from { opacity: 0; transform: translateY(8px); }
+to { opacity: 1; transform: translateY(0); }
+}
+
+.table-wrapper {
+overflow-x: auto;
+margin: 20px 0;
+border-radius: var(--border-radius-card);
+box-shadow: var(--shadow-card);
+}
+
+table {
+width: 100%;
+border-collapse: collapse;
+background: white;
+}
+
+thead th {
+background: linear-gradient(135deg, var(--secondary), #00a8cc);
+color: white;
+padding: 14px 20px;
+text-align: left;
+font-size: 0.85rem;
+font-weight: 700;
+text-transform: uppercase;
+letter-spacing: 0.5px;
+}
+
+tbody td {
+padding: 14px 20px;
+border-bottom: 1px solid #f0f0f0;
+font-size: 0.9rem;
+color: var(--text-secondary);
+}
+
+tbody tr:hover {
+background: rgba(0, 217, 255, 0.04);
+}
+
+tbody tr:last-child td {
+border-bottom: none;
+}
+
+tbody td:first-child {
+font-weight: 600;
+color: var(--text-primary);
+}
+
+.badge {
+display: inline-flex;
+align-items: center;
+gap: 4px;
+padding: 3px 10px;
+border-radius: 12px;
+font-size: 0.75rem;
+font-weight: 700;
+text-transform: uppercase;
+letter-spacing: 0.5px;
+}
+
+.badge-primary { background: rgba(108, 99, 255, 0.15); color: var(--primary); }
+.badge-success { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+.badge-warning { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+.badge-danger { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
+.badge-info { background: rgba(0, 217, 255, 0.15); color: var(--secondary); }
+.badge-locked { background: rgba(107, 114, 128, 0.2); color: #6B7280; }
+
+.hint-toggle {
+background: none;
+border: none;
+width: 100%;
+text-align: left;
+padding: 16px 20px;
+display: flex;
+align-items: center;
+gap: 12px;
+cursor: pointer;
+font-family: 'Inter', sans-serif;
+font-size: 0.95rem;
+font-weight: 600;
+color: #25ff00;
+border-radius: var(--border-radius-element);
+transition: all var(--transition-fast);
+}
+
+.hint-toggle:hover {
+background: rgba(0, 217, 255, 0.05);
+}
+
+.hint-toggle .hint-arrow {
+transition: transform var(--transition-fast);
+font-size: 0.8rem;
+color: var(--text-light);
+margin-left: auto;
+}
+
+.hint-toggle.open .hint-arrow {
+transform: rotate(180deg);
+}
+
+.hint-content {
+max-height: 0;
+overflow: hidden;
+transition: max-height 0.4s ease, padding 0.3s ease;
+padding: 0 20px;
+}
+
+.hint-content.open {
+max-height: 500px;
+padding: 0 20px 16px;
+}
+
+.hint-content p {
+color: #ffbf00;
+font-size: 0.9rem;
+line-height: 1.7;
+}
+
+.simulator {
+background: white;
+border-radius: var(--border-radius-card);
+padding: 32px;
+margin: 24px 0;
+box-shadow: var(--shadow-card);
+border: 2px solid rgba(0, 217, 255, 0.2);
+}
+
+.simulator-title {
+font-size: 1.2rem;
+font-weight: 700;
+color: var(--text-primary);
+margin-bottom: 8px;
+display: flex;
+align-items: center;
+gap: 10px;
+}
+
+.simulator-subtitle {
+color: var(--text-secondary);
+font-size: 0.9rem;
+margin-bottom: 24px;
+}
+
+.simulator-field {
+margin-bottom: 16px;
+}
+
+.simulator-field label {
+display: block;
+font-size: 0.85rem;
+font-weight: 700;
+color: var(--text-primary);
+margin-bottom: 6px;
+text-transform: uppercase;
+letter-spacing: 0.5px;
+}
+
+.simulator-field .field-icon {
+margin-right: 4px;
+}
+
+.simulator-field input,
+.simulator-field textarea,
+.simulator-field select {
+width: 100%;
+padding: 12px 16px;
+border: 2px solid #e5e7eb;
+border-radius: var(--border-radius-element);
+font-family: 'Inter', sans-serif;
+font-size: 0.9rem;
+color: var(--text-primary);
+transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+background: #f9fafb;
+}
+
+.simulator-field input:focus,
+.simulator-field textarea:focus,
+.simulator-field select:focus {
+outline: none;
+border-color: var(--secondary);
+box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.15);
+background: white;
+}
+
+.simulator-field textarea {
+min-height: 80px;
+resize: vertical;
+}
+
+.simulator-result {
+background: var(--code-bg);
+border-radius: var(--border-radius-element);
+padding: 20px;
+margin-top: 20px;
+display: none;
+animation: fadeInTab 0.3s ease;
+}
+
+.simulator-result.visible {
+display: block;
+}
+
+.simulator-result .result-header {
+display: flex;
+align-items: center;
+gap: 8px;
+color: var(--secondary);
+font-size: 0.85rem;
+font-weight: 700;
+margin-bottom: 12px;
+text-transform: uppercase;
+letter-spacing: 1px;
+}
+
+.simulator-result .result-text {
+color: #cdd6f4;
+font-size: 0.95rem;
+line-height: 1.7;
+white-space: pre-wrap;
+}
+
+.simulator-actions {
+display: flex;
+gap: 12px;
+margin-top: 20px;
+}
+
+.btn {
+padding: 12px 28px;
+border: none;
+border-radius: var(--border-radius-element);
+cursor: pointer;
+font-family: 'Inter', sans-serif;
+font-size: 0.95rem;
+font-weight: 700;
+display: flex;
+align-items: center;
+gap: 8px;
+transition: all var(--transition-fast);
+}
+
+.btn-primary {
+background: linear-gradient(135deg, var(--secondary), #00a8cc);
+color: white;
+box-shadow: 0 4px 15px rgba(0, 217, 255, 0.4);
+}
+
+.btn-primary:hover {
+transform: translateY(-2px);
+box-shadow: 0 6px 20px rgba(0, 217, 255, 0.5);
+}
+
+.btn-secondary {
+background: rgba(0, 217, 255, 0.1);
+color: var(--secondary);
+}
+
+.btn-secondary:hover {
+background: rgba(0, 217, 255, 0.2);
+}
+
+.challenge-card {
+background: linear-gradient(135deg, rgb(60 81 31 / 73%), rgba(0, 217, 255, 0.05));
+border: 2px solid rgba(0, 217, 255, 0.2);
+border-radius: var(--border-radius-card);
+padding: 32px;
+margin: 24px 0;
+}
+
+.challenge-header {
+display: flex;
+align-items: center;
+gap: 12px;
+margin-bottom: 16px;
+}
+
+.challenge-header .challenge-icon {
+font-size: 2rem;
+}
+
+.challenge-header h3 {
+font-size: 1.3rem;
+font-weight: 700;
+color: #00f1f3;
+}
+
+.challenge-criteria {
+list-style: none;
+margin: 16px 0;
+}
+
+.challenge-criteria li {
+padding: 8px 0;
+display: flex;
+align-items: flex-start;
+gap: 10px;
+color: #0bff42;
+font-size: 0.9rem;
+}
+
+.challenge-criteria li .criteria-icon {
+flex-shrink: 0;
+margin-top: 2px;
+}
+
+.summary-card {
+background: linear-gradient(135deg, var(--secondary), #00a8cc);
+border-radius: var(--border-radius-card);
+padding: 32px;
+color: white;
+margin: 24px 0;
+}
+
+.summary-card h3 {
+font-size: 1.3rem;
+font-weight: 700;
+margin-bottom: 16px;
+display: flex;
+align-items: center;
+gap: 10px;
+}
+
+.summary-list {
+list-style: none;
+}
+
+.summary-list li {
+padding: 10px 0;
+display: flex;
+align-items: flex-start;
+gap: 10px;
+font-size: 0.95rem;
+color: rgba(255,255,255,0.9);
+border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.summary-list li:last-child {
+border-bottom: none;
+}
+
+.summary-list li .check {
+flex-shrink: 0;
+margin-top: 2px;
+}
+
+.next-module {
+background: linear-gradient(135deg, rgba(0, 217, 255, 0.1), rgba(108, 99, 255, 0.1));
+border: 2px solid rgba(0, 217, 255, 0.3);
+border-radius: var(--border-radius-card);
+padding: 28px 32px;
+margin: 24px 0;
+display: flex;
+align-items: center;
+gap: 20px;
+transition: all var(--transition-normal);
+}
+
+.next-module:hover {
+transform: translateY(-2px);
+box-shadow: var(--shadow-card-hover);
+}
+
+.next-module .next-icon {
+width: 56px;
+height: 56px;
+background: linear-gradient(135deg, var(--primary), #7c3aed);
+border-radius: 14px;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 1.5rem;
+flex-shrink: 0;
+}
+
+.next-module .next-info h4 {
+color: var(--text-primary);
+font-size: 1.1rem;
+font-weight: 700;
+margin-bottom: 4px;
+}
+
+.next-module .next-info p {
+color: var(--text-secondary);
+font-size: 0.9rem;
+}
+
+.footer {
+margin-left: var(--sidebar-width);
+background: rgba(15, 10, 30, 0.95);
+backdrop-filter: blur(10px);
+-webkit-backdrop-filter: blur(10px);
+border-top: 1px solid rgba(0, 217, 255, 0.15);
+padding: 32px 48px;
+}
+
+.footer-content {
+max-width: 900px;
+margin: 0 auto;
+display: flex;
+justify-content: space-between;
+align-items: center;
+flex-wrap: wrap;
+gap: 16px;
+}
+
+.footer-left p {
+color: rgba(255,255,255,0.5);
+font-size: 0.85rem;
+}
+
+.footer-left p strong {
+color: rgba(255,255,255,0.8);
+}
+
+.footer-right {
+display: flex;
+gap: 20px;
+}
+
+.footer-right a {
+color: rgba(255,255,255,0.4);
+text-decoration: none;
+font-size: 0.85rem;
+transition: color var(--transition-fast);
+}
+
+.footer-right a:hover {
+color: var(--secondary);
+}
+
+@media (max-width: 768px) {
+.menu-toggle {
+display: block;
+}
+
+.sidebar {
+transform: translateX(-100%);
+z-index: 10001;
+}
+
+.sidebar.open {
+transform: translateX(0);
+}
+
+.sidebar-overlay {
+display: none;
+position: fixed;
+inset: 0;
+background: rgba(0,0,0,0.5);
+z-index: 10000;
+}
+
+.sidebar-overlay.open {
+display: block;
+}
+
+.main-content {
+margin-left: 0;
+}
+
+.content-wrapper {
+padding: 24px 20px 60px;
+}
+
+.footer {
+margin-left: 0;
+padding: 24px 20px;
+}
+
+.hero h1 {
+font-size: 1.8rem;
+}
+
+.hero-subtitle {
+font-size: 1rem;
+}
+
+.section-title {
+font-size: 1.4rem;
+}
+
+.card {
+padding: 20px 24px;
+}
+
+.simulator {
+padding: 20px;
+}
+
+.challenge-card {
+padding: 20px;
+}
+
+.footer-content {
+flex-direction: column;
+text-align: center;
+}
+
+.tabs-header {
+overflow-x: auto;
+}
+
+.tab-btn {
+padding: 8px 14px;
+font-size: 0.8rem;
+}
+
+.next-module {
+flex-direction: column;
+text-align: center;
+}
+}
+
+@media (max-width: 480px) {
+.hero h1 {
+font-size: 1.5rem;
+}
+
+.hero-meta {
+flex-direction: column;
+align-items: center;
+}
+
+.section-header {
+flex-direction: column;
+align-items: flex-start;
+gap: 12px;
+}
+
+.simulator-actions {
+flex-direction: column;
+}
+
+.btn {
+justify-content: center;
+width: 100%;
+}
+}
+
+::-webkit-scrollbar {
+width: 8px;
+}
+
+::-webkit-scrollbar-track {
+background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+background: rgba(0, 217, 255, 0.3);
+border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+background: rgba(0, 217, 255, 0.5);
+}
+
+@keyframes pulse {
+0%, 100% { opacity: 1; }
+50% { opacity: 0.6; }
+}
+
+.animate-pulse {
+animation: pulse 2s infinite;
+}
+
+p code,
+li code,
+.info-text code {
+background: rgba(0, 217, 255, 0.1);
+color: var(--secondary);
+padding: 2px 8px;
+border-radius: 4px;
+font-family: 'Fira Code', monospace;
+font-size: 0.85em;
+}
+
+strong {
+color: #b700ff;
+}
+
+.section-divider {
+height: 1px;
+background: linear-gradient(90deg, transparent, rgba(0, 217, 255, 0.3), transparent);
+margin: 48px 0;
+}
+
+.highlight {
+background: linear-gradient(135deg, rgba(0, 217, 255, 0.15), rgba(108, 99, 255, 0.1));
+padding: 2px 6px;
+border-radius: 4px;
+font-weight: 600;
+}
+
+.checklist-item {
+display: flex;
+align-items: center;
+gap: 12px;
+padding: 12px 16px;
+border-radius: var(--border-radius-element);
+cursor: pointer;
+transition: all var(--transition-fast);
+margin-bottom: 8px;
+background: rgba(255,255,255,0.05);
+border: 1px solid transparent;
+}
+
+.checklist-item:hover {
+background: rgba(0, 217, 255, 0.1);
+border-color: rgba(0, 217, 255, 0.2);
+}
+
+.checklist-item.checked {
+background: rgba(16, 185, 129, 0.1);
+border-color: rgba(16, 185, 129, 0.3);
+}
+
+.checklist-checkbox {
+width: 22px;
+height: 22px;
+border: 2px solid rgba(255,255,255,0.3);
+border-radius: 6px;
+display: flex;
+align-items: center;
+justify-content: center;
+flex-shrink: 0;
+transition: all var(--transition-fast);
+font-size: 0.7rem;
+color: transparent;
+}
+
+.checklist-item.checked .checklist-checkbox {
+background: var(--success);
+border-color: var(--success);
+color: white;
+}
+
+.checklist-text {
+color: rgba(255,255,255,0.7);
+font-size: 0.9rem;
+}
+
+.checklist-item.checked .checklist-text {
+color: rgba(255,255,255,0.9);
+text-decoration: line-through;
+}
+
+.stars-container {
+display: flex;
+gap: 4px;
+margin: 12px 0;
+}
+
+.star {
+font-size: 1.8rem;
+cursor: pointer;
+transition: all var(--transition-fast);
+color: rgba(255,255,255,0.2);
+}
+
+.star:hover,
+.star.active {
+color: var(--warning);
+transform: scale(1.2);
+}
+
+.progress-steps {
+display: flex;
+justify-content: space-between;
+margin: 32px 0 16px;
+position: relative;
+}
+
+.progress-steps::before {
+content: '';
+position: absolute;
+top: 20px;
+left: 40px;
+right: 40px;
+height: 3px;
+background: rgba(255,255,255,0.1);
+border-radius: 2px;
+}
+
+.progress-step {
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 8px;
+z-index: 1;
+}
+
+.step-circle {
+width: 40px;
+height: 40px;
+border-radius: 50%;
+background: rgba(255,255,255,0.1);
+border: 3px solid rgba(255,255,255,0.2);
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 0.85rem;
+font-weight: 700;
+color: rgba(255,255,255,0.5);
+transition: all var(--transition-fast);
+}
+
+.step-circle.active {
+background: var(--secondary);
+border-color: var(--secondary);
+color: white;
+box-shadow: 0 0 15px rgba(0, 217, 255, 0.5);
+}
+
+.step-circle.completed {
+background: var(--success);
+border-color: var(--success);
+color: white;
+}
+
+.step-label {
+font-size: 0.75rem;
+color: rgba(255,255,255,0.4);
+font-weight: 600;
+text-align: center;
+}
+
+.step-circle.active + .step-label,
+.step-circle.completed + .step-label {
+color: rgba(255,255,255,0.8);
+}
+
+.rating-card {
+background: rgba(26, 16, 64, 0.6);
+border: 1px solid rgba(0, 217, 255, 0.2);
+border-radius: var(--border-radius-card);
+padding: 28px;
+margin-top: 24px;
+}
+
+.rating-card .card-title {
+color: white;
+}
+
+/* Connector cards */
+.connector-grid {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+gap: 16px;
+margin: 20px 0;
+}
+
+.connector-card {
+background: white;
+border-radius: 12px;
+padding: 20px;
+border: 2px solid #e5e7eb;
+transition: all var(--transition-normal);
+position: relative;
+overflow: hidden;
+}
+
+.connector-card:hover {
+border-color: var(--secondary);
+transform: translateY(-2px);
+box-shadow: var(--shadow-card-hover);
+}
+
+.connector-card .connector-icon {
+font-size: 1.8rem;
+margin-bottom: 8px;
+display: block;
+}
+
+.connector-card .connector-name {
+font-weight: 700;
+color: var(--text-primary);
+font-size: 0.95rem;
+margin-bottom: 4px;
+display: flex;
+align-items: center;
+gap: 8px;
+}
+
+.connector-card .connector-desc {
+font-size: 0.8rem;
+color: var(--text-secondary);
+line-height: 1.5;
+}
+
+.connector-card.locked {
+opacity: 0.6;
+border-color: #e5e7eb;
+}
+
+.connector-card.locked:hover {
+border-color: #e5e7eb;
+transform: none;
+box-shadow: none;
+}
+
+.lock-badge {
+background: rgba(107, 114, 128, 0.15);
+color: #6B7280;
+font-size: 0.65rem;
+padding: 2px 6px;
+border-radius: 4px;
+font-weight: 600;
+}
+
+/* Connector mockup */
+.connector-mockup {
+background: #1e1e2e;
+border-radius: var(--border-radius-card);
+padding: 24px;
+margin: 20px 0;
+border: 1px solid rgba(0, 217, 255, 0.15);
+box-shadow: var(--shadow-elevated);
+}
+
+.mockup-header {
+display: flex;
+align-items: center;
+gap: 8px;
+margin-bottom: 16px;
+padding-bottom: 12px;
+border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.mockup-dot {
+width: 12px;
+height: 12px;
+border-radius: 50%;
+}
+
+.mockup-dot.red { background: #EF4444; }
+.mockup-dot.yellow { background: #F59E0B; }
+.mockup-dot.green { background: #10B981; }
+
+.mockup-title {
+color: rgba(255,255,255,0.6);
+font-size: 0.85rem;
+font-weight: 600;
+margin-left: 8px;
+}
+
+.mockup-connectors {
+display: flex;
+flex-direction: column;
+gap: 8px;
+}
+
+.mockup-connector {
+display: flex;
+align-items: center;
+gap: 12px;
+padding: 10px 14px;
+background: rgba(255,255,255,0.05);
+border-radius: 8px;
+border: 1px solid rgba(255,255,255,0.08);
+cursor: pointer;
+transition: all var(--transition-fast);
+}
+
+.mockup-connector:hover {
+background: rgba(0, 217, 255, 0.1);
+border-color: rgba(0, 217, 255, 0.3);
+}
+
+.mockup-connector .mc-icon {
+font-size: 1.1rem;
+width: 24px;
+text-align: center;
+flex-shrink: 0;
+}
+
+.mockup-connector .mc-name {
+color: rgba(255,255,255,0.8);
+font-size: 0.85rem;
+font-weight: 600;
+flex: 1;
+}
+
+.mockup-connector .mc-toggle {
+width: 36px;
+height: 20px;
+border-radius: 10px;
+position: relative;
+transition: background var(--transition-fast);
+flex-shrink: 0;
+}
+
+.mockup-connector .mc-toggle.active {
+background: var(--secondary);
+}
+
+.mockup-connector .mc-toggle:not(.active) {
+background: rgba(255,255,255,0.15);
+}
+
+.mockup-connector .mc-toggle::after {
+content: '';
+position: absolute;
+top: 2px;
+width: 16px;
+height: 16px;
+border-radius: 50%;
+background: white;
+transition: transform var(--transition-fast);
+}
+
+.mockup-connector .mc-toggle.active::after {
+transform: translateX(16px);
+}
+
+.mockup-connector .mc-toggle:not(.active)::after {
+transform: translateX(2px);
+}
+
+.mockup-connector .mc-external {
+color: rgba(255,255,255,0.3);
+font-size: 0.8rem;
+flex-shrink: 0;
+}
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<header class="header">
+<div class="header-logo">
+<div class="logo-icon">🤖</div>
+<span>IA na Prática</span>
+</div>
+<div class="header-nav">
+<div class="badge-timer">🕒 Módulo 3 · 60 min</div>
+<div class="badge-level">Intermediário</div>
+<button class="menu-toggle" id="menuToggle" aria-label="Abrir menu">☰</button>
+</div>
+</header>
+
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<nav class="sidebar" id="sidebar">
+<p class="sidebar-title">Navegação</p>
+<ul class="sidebar-nav">
+<li><a href="#intro" class="active"><span class="nav-icon">📋</span>Introdução</a></li>
+<li><a href="#sec-1"><span class="nav-icon">🔍</span>3.1 A Revolução da Pesquisa<span class="nav-section-num">01</span></a></li>
+<li><a href="#sec-2"><span class="nav-icon"></span>Conectores e Fontes<span class="nav-section-num">02</span></a></li>
+<li><a href="#sec-3"><span class="nav-icon"></span>Pro Search<span class="nav-section-num">03</span></a></li>
+<li><a href="#sec-sim"><span class="nav-icon">🧪</span>Exercício Prático 3<span class="nav-section-num">04</span></a></li>
+<li><a href="#sec-summary"><span class="nav-icon">📝</span>Resumo Final<span class="nav-section-num">05</span></a></li>
+</ul>
+
+<p class="sidebar-title" style="margin-top:24px;">Progresso</p>
+<div style="padding: 0 12px;">
+<div style="background:rgba(255,255,255,0.1);border-radius:6px;height:6px;overflow:hidden;margin-bottom:8px;">
+<div id="sidebarProgress" style="height:100%;width:0%;background:linear-gradient(90deg,var(--secondary),var(--primary));border-radius:6px;transition:width 0.3s ease;"></div>
+</div>
+<p id="progressPercent" style="color:rgba(255,255,255,0.5);font-size:0.75rem;">0% concluído</p>
+</div>
+</nav>
+
+<main class="main-content">
+<div class="content-wrapper">
+
+<section class="hero" id="intro">
+<div class="hero-badge">🎓 Módulo 3 de 5 · Curso Completo</div>
+<h1>Perplexity AI: <span>Conectores e Fontes</span></h1>
+<p class="hero-subtitle">Domine os conectores integrados do Perplexity para transformar pesquisas genéricas em buscas direcionadas. Descubra como conectar Web, Acadêmico, Gmail, Social e mais — tudo em um só lugar.</p>
+
+<div class="hero-image">
+<img src="https://image.qwenlm.ai/public_source/86b25ad9-e1b6-4641-913f-121aa9370f10/13636498b-3d97-47ae-b677-c44d9fee6346.png" alt="Interface do Perplexity AI mostrando o painel de Conectores e Fontes com Web, Acadêmico, Gmail e Social" loading="eager">
+</div>
+
+<div class="hero-meta">
+<div class="hero-meta-item"><span>👨</span> Prof. Vitório Netto</div>
+<div class="hero-meta-item"><span>⏱️</span> 60 minutos</div>
+<div class="hero-meta-item"><span>📊</span> Nível Intermediário</div>
+<div class="hero-meta-item"><span>🎯</span> 3 Objetivos de Aprendizagem</div>
+</div>
+</section>
+
+<div class="section-divider"></div>
+
+<section class="section" id="intro-content">
+<div class="section-header">
+<div class="section-number">📋</div>
+<h2 class="section-title"><small>Introdução</small>Objetivos de Aprendizagem</h2>
+</div>
+
+<div class="card">
+<div class="card-title"><span class="card-icon">🎯</span> O que você vai aprender neste módulo</div>
+<p>Neste módulo focado em eficiência, você vai dominar os <strong>Conectores e Fontes</strong> do Perplexity AI para eliminar horas de pesquisa irrelevante.</p>
+
+<div style="margin-top:20px;">
+<div class="checklist-item" onclick="toggleChecklist(this)">
+<div class="checklist-checkbox">✓</div>
+<span class="checklist-text">Entender a diferença entre busca tradicional e busca com conectores</span>
+</div>
+<div class="checklist-item" onclick="toggleChecklist(this)">
+<div class="checklist-checkbox">✓</div>
+<span class="checklist-text">Utilizar os conectores Web, Acadêmico, Gmail, Social e mais</span>
+</div>
+<div class="checklist-item" onclick="toggleChecklist(this)">
+<div class="checklist-checkbox">✓</div>
+<span class="checklist-text">Dominar o Pro Search para refinar consultas complexas automaticamente</span>
+</div>
+</div>
+</div>
+
+<div class="card" style="background:rgba(26,16,64,0.6);border-color:rgba(0,217,255,0.2);color:white;">
+<div class="card-title" style="color:white;"><span class="card-icon">🗺️</span> Estrutura do Módulo</div>
+<div class="progress-steps">
+<div class="progress-step">
+<div class="step-circle active">1</div>
+<span class="step-label">Conceito</span>
+</div>
+<div class="progress-step">
+<div class="step-circle">2</div>
+<span class="step-label">Conectores</span>
+</div>
+<div class="progress-step">
+<div class="step-circle">3</div>
+<span class="step-label">Pro Search</span>
+</div>
+<div class="progress-step">
+<div class="step-circle">4</div>
+<span class="step-label">Prática</span>
+</div>
+</div>
+</div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- 3.1 A Revolução da Pesquisa -->
+<section class="section" id="sec-1">
+<div class="section-header">
+<div class="section-number">1</div>
+<h2 class="section-title"><small>3.1 A Revolução da Pesquisa</small>Síntese instantânea com fontes verificadas</h2>
+</div>
+
+<div class="card">
+<div class="card-title"><span class="card-icon">🔍</span> O Fim da "Roleta Russa" de Links</div>
+<p>Diferente do Google, que entrega uma <strong>lista de links</strong> para você clicar, ler e resumir mentalmente, o Perplexity entrega a <strong>resposta sintetizada diretamente</strong>, com citações numéricas ligadas às fontes originais.</p>
+<p>Isso transforma horas de pesquisa em minutos de leitura estratégica.</p>
+</div>
+
+<div class="table-wrapper">
+<table>
+<thead>
+<tr>
+<th>Recurso</th>
+<th>Google Tradicional</th>
+<th>Perplexity AI</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Formato de Resultado</td>
+<td><span class="badge badge-warning">Lista de Links (SEO)</span></td>
+<td><span class="badge badge-success">Texto Sintetizado</span></td>
+</tr>
+<tr>
+<td>Fontes Citadas</td>
+<td><span class="badge badge-warning">Implícitas</span></td>
+<td><span class="badge badge-success">Explícitas (Numéricas)</span></td>
+</tr>
+<tr>
+<td>Conectores</td>
+<td><span class="badge badge-warning">Nenhum</span></td>
+<td><span class="badge badge-success">Web, Gmail, Social...</span></td>
+</tr>
+<tr>
+<td>Intenção da Busca</td>
+<td><span class="badge badge-warning">Palavras-chave</span></td>
+<td><span class="badge badge-success">Conversação Natural</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="info-box info-info">
+<span class="info-icon">💡</span>
+<div class="info-content">
+<div class="info-label">Dica de Ouro</div>
+<div class="info-text">Sempre verifique os <strong>números entre colchetes [1]</strong> no final das frases. Eles indicam a fonte original. Se a fonte for um blog pessoal, desconfie. Se for <em>Harvard Business Review</em> ou um site governamental, confie mais.</div>
+</div>
+</div>
+
+<!-- Interactive: Search Comparison -->
+<div class="simulator">
+<div class="simulator-title">⚖️ Simulador: Google vs Perplexity</div>
+<div class="simulator-subtitle">Selecione uma consulta e veja a diferença no formato da resposta.</div>
+
+<div class="tabs-header" style="margin-bottom:16px;">
+<button class="tab-btn active" onclick="switchSearchTab(event, 'search-google')">
+<span></span> Google
+</button>
+<button class="tab-btn" onclick="switchSearchTab(event, 'search-perplexity')">
+<span></span> Perplexity AI
+</button>
+</div>
+
+<div class="tab-content active" id="search-google" style="padding-top:0;">
+<div class="card" style="margin:0;background:#f9fafb;">
+<div style="display:flex;gap:12px;align-items:start;margin-bottom:16px;">
+<div style="background:#fff;padding:8px;border-radius:50%;box-shadow:0 1px 2px rgba(0,0,0,0.1);"><span></span></div>
+<div>
+<h4 style="color:#1a0dab;font-size:1.1rem;margin-bottom:4px;">Impacto da IA no mercado de trabalho 2024</h4>
+<p style="color:#006621;font-size:0.9rem;">www.forbes.com › ... › Tecnologia</p>
+<p style="color:#545454;font-size:0.85rem;">Um estudo recente do Fórum Econômico Mundial indica que 25% dos empregos sofrerão mudanças...</p>
+</div>
+</div>
+<div style="display:flex;gap:12px;align-items:start;margin-bottom:16px;">
+<div style="background:#fff;padding:8px;border-radius:50%;box-shadow:0 1px 2px rgba(0,0,0,0.1);"><span></span></div>
+<div>
+<h4 style="color:#1a0dab;font-size:1.1rem;margin-bottom:4px;">Relatório de empregos e IA - McKinsey</h4>
+<p style="color:#006621;font-size:0.9rem;">www.mckinsey.com › insights</p>
+<p style="color:#545454;font-size:0.85rem;">A automação generativa pode adicionar trilhões à economia global, mas exige requalificação...</p>
+</div>
+</div>
+<p style="color:var(--text-secondary);font-size:0.9rem;text-align:center;padding:12px;background:#e5e7eb;border-radius:8px;">
+<strong>Resultado:</strong> Você precisa clicar, abrir abas e ler cada um para montar sua conclusão.
+</p>
+</div>
+</div>
+
+<div class="tab-content" id="search-perplexity" style="padding-top:0;">
+<div class="card" style="margin:0;background:#f9fafb;">
+<div style="margin-bottom:16px;">
+<p style="color:var(--text-secondary);font-size:0.9rem;line-height:1.6;">
+O impacto da IA no mercado de trabalho em 2024 é significativo e multifacetado. Segundo o Fórum Econômico Mundial, estima-se que <strong>25% dos empregos</strong> sofrerão mudanças devido à automação [1]. No entanto, a IA também criará novas oportunidades, especialmente em áreas de tecnologia e dados [2].
+<br><br>
+A McKinsey destaca que a IA generativa pode adicionar entre <strong>$2,6 a $4,4 trilhões</strong> anualmente à economia global, impulsionando a produtividade em setores como atendimento ao cliente e engenharia de software [3]. A chave para a adaptação será o investimento contínuo em <strong>requalificação (upskilling)</strong> [4].
+</p>
+<div style="margin-top:16px;padding-top:12px;border-top:1px solid #e5e7eb;">
+<p style="font-size:0.8rem;color:var(--text-secondary);font-weight:600;margin-bottom:4px;">Fontes:</p>
+<div style="display:flex;flex-wrap:wrap;gap:8px;">
+<span style="background:white;padding:4px 8px;border-radius:4px;font-size:0.75rem;border:1px solid #e5e7eb;">[1] WEF Future of Jobs</span>
+<span style="background:white;padding:4px 8px;border-radius:4px;font-size:0.75rem;border:1px solid #e5e7eb;">[2] MIT Tech Review</span>
+<span style="background:white;padding:4px 8px;border-radius:4px;font-size:0.75rem;border:1px solid #e5e7eb;">[3] McKinsey Global Institute</span>
+<span style="background:white;padding:4px 8px;border-radius:4px;font-size:0.75rem;border:1px solid #e5e7eb;">[4] ILO Report</span>
+</div>
+</div>
+</div>
+<p style="color:var(--text-secondary);font-size:0.9rem;text-align:center;padding:12px;background:#e5e7eb;border-radius:8px;">
+<strong>Resultado:</strong> Resumo pronto, com fontes clicáveis.
+</p>
+</div>
+</div>
+</div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- 3.2 Conectores e Fontes -->
+<section class="section" id="sec-2">
+<div class="section-header">
+<div class="section-number">2</div>
+<h2 class="section-title"><small>Conectores e Fontes</small>Conectando a IA ao seu ecossistema digital</h2>
+</div>
+
+<div class="card">
+<div class="card-title"><span class="card-icon"></span> A Nova Interface do Perplexity</div>
+<p>O Perplexity atualizou sua interface para incluir <strong>Conectores e Fontes</strong> — ferramentas integradas que permitem conectar a IA a diferentes bases de dados e serviços. Em vez de "Modo Focus", agora você seleciona exatamente <strong>onde</strong> e <strong>em quê</strong> a IA deve pesquisar.</p>
+</div>
+
+<!-- Connector Mockup -->
+<div class="connector-mockup">
+<div class="mockup-header">
+<div class="mockup-dot red"></div>
+<div class="mockup-dot yellow"></div>
+<div class="mockup-dot green"></div>
+<span class="mockup-title">Conectores e Fontes — Perplexity AI</span>
+</div>
+<div class="mockup-connectors">
+<div class="mockup-connector" onclick="toggleMockupConnector(this)">
+<span class="mc-icon">🌐</span>
+<span class="mc-name">Web</span>
+<div class="mc-toggle active"></div>
+</div>
+<div class="mockup-connector" onclick="toggleMockupConnector(this)">
+<span class="mc-icon"></span>
+<span class="mc-name">Acadêmico</span>
+<div class="mc-toggle"></div>
+</div>
+<div class="mockup-connector" onclick="toggleMockupConnector(this)">
+<span class="mc-icon"></span>
+<span class="mc-name">Gmail com Calendar</span>
+<div class="mc-toggle"></div>
+<span class="mc-external">↗</span>
+</div>
+<div class="mockup-connector" onclick="toggleMockupConnector(this)">
+<span class="mc-icon"></span>
+<span class="mc-name">Social</span>
+<div class="mc-toggle"></div>
+</div>
+<div class="mockup-connector" onclick="toggleMockupConnector(this)">
+<span class="mc-icon"></span>
+<span class="mc-name">Midpage</span>
+<div class="mc-toggle"></div>
+<span class="mc-external">↗</span>
+</div>
+<div class="mockup-connector" onclick="toggleMockupConnector(this)">
+<span class="mc-icon"></span>
+<span class="mc-name">VisualDx</span>
+<div class="mc-toggle"></div>
+<span class="mc-external">↗</span>
+</div>
+<div class="mockup-connector" onclick="toggleMockupConnector(this)">
+<span class="mc-icon"></span>
+<span class="mc-name">Investment Portfolio</span>
+<div class="mc-toggle"></div>
+<span class="mc-external">↗</span>
+</div>
+<div class="mockup-connector" onclick="toggleMockupConnector(this)">
+<span class="mc-icon"></span>
+<span class="mc-name">Outlook</span>
+<div class="mc-toggle"></div>
+<span class="mc-external">↗</span>
+</div>
+</div>
+</div>
+
+<div class="info-box info-success">
+<span class="info-icon"></span>
+<div class="info-content">
+<div class="info-label">Como funciona</div>
+<div class="info-text">Clique nos <strong>toggles (interruptores)</strong> acima para ativar/desativar conectores. O conector <strong>Web</strong> vem ativado por padrão. Os conectores com <span class="badge badge-locked">↗</span> redirecionam para serviços externos.</div>
+</div>
+</div>
+
+<!-- Detailed Connector Tabs -->
+<div class="tabs-container">
+<div class="tabs-header">
+<button class="tab-btn active" onclick="switchConnTab(event, 'conn-web')">
+<span>🌐</span> Web
+</button>
+<button class="tab-btn" onclick="switchConnTab(event, 'conn-academic')">
+<span></span> Acadêmico
+</button>
+<button class="tab-btn" onclick="switchConnTab(event, 'conn-gmail')">
+<span></span> Gmail
+</button>
+<button class="tab-btn" onclick="switchConnTab(event, 'conn-social')">
+<span></span> Social
+</button>
+<button class="tab-btn" onclick="switchConnTab(event, 'conn-more')">
+<span>️</span> Mais
+</button>
+</div>
+
+<div class="tab-content active" id="conn-web">
+<div class="card">
+<div class="card-title"><span class="card-icon">🌐</span> Web <span class="badge badge-success">Padrão</span></div>
+<p>O conector <strong>Web</strong> é a busca genérica do Perplexity. Ele pesquisa na internet aberta, similar ao Google, mas entrega a resposta sintetizada com fontes citadas.</p>
+<p style="margin-top:12px;"><strong>Ideal para:</strong> Perguntas gerais, notícias, definições, comparações de produtos.</p>
+<p style="margin-top:8px;"><strong>Exemplo:</strong> <code>"Quais são as tendências de IA para 2025?"</code></p>
+<div class="code-block">
+<div class="code-block-header">
+<div class="code-block-lang"><span class="lang-dot" style="background:#a6e3a1;"></span>Resultado Esperado</div>
+</div>
+<pre><code><span class="token-string">"As principais tendências de IA para 2025 incluem:
+1. Agentes autônomos com capacidade de planejamento [1]
+2. Modelos multimodais nativos (texto + imagem + vídeo) [2]
+3. IA em edge devices (smartphones, IoT) [3]
+4. Regulamentação global de IA (EU AI Act, EUA) [4]"</span>
+
+<span class="token-comment">// Fontes: TechCrunch, Reuters, Wired, MIT Review</span></code></pre>
+</div>
+</div>
+</div>
+
+<div class="tab-content" id="conn-academic">
+<div class="card">
+<div class="card-title"><span class="card-icon"></span> Acadêmico <span class="badge badge-info">Pesquisa</span></div>
+<p>Restringe a busca a <strong>artigos científicos, papers e publicações acadêmicas</strong>. Elimina blogs de opinião e foca em dados verificáveis.</p>
+<p style="margin-top:12px;"><strong>Ideal para:</strong> Revisões bibliográficas, TCCs, artigos, teses.</p>
+<p style="margin-top:8px;"><strong>Exemplo:</strong> <code>"Eficácia de LLMs em diagnósticos médicos"</code></p>
+<div class="code-block">
+<div class="code-block-header">
+<div class="code-block-lang"><span class="lang-dot" style="background:#89b4fa;"></span>Resultado Esperado</div>
+</div>
+<pre><code><span class="token-string">"Estudos recentes no PubMed indicam que modelos
+de linguagem treinados em dados clínicos alcançam
+acurácia de 85% na detecção de padrões em laudos
+de imagem [1]. No entanto, o viés nos dados de
+treinamento permanece uma preocupação [2]."</span>
+
+<span class="token-comment">// Fontes: PubMed, Nature, The Lancet, arXiv</span></code></pre>
+</div>
+</div>
+</div>
+
+<div class="tab-content" id="conn-gmail">
+<div class="card">
+<div class="card-title"><span class="card-icon"></span> Gmail com Calendar <span class="badge badge-primary">Produtividade</span></div>
+<p>Conecta o Perplexity ao seu <strong>Gmail e Google Calendar</strong>. Permite pesquisar e-mails antigos, resumir conversas e consultar compromissos diretamente.</p>
+<p style="margin-top:12px;"><strong>Ideal para:</strong> "O que eu combinei com o cliente na reunião de segunda?", "Resuma os e-mails sobre o projeto X".</p>
+<p style="margin-top:8px;"><strong>Exemplo:</strong> <code>"Quando é a próxima reunião com a equipe de marketing?"</code></p>
+<div class="code-block">
+<div class="code-block-header">
+<div class="code-block-lang"><span class="lang-dot" style="background:#f5c2e7;"></span>Resultado Esperado</div>
+</div>
+<pre><code><span class="token-string">"Sua próxima reunião com a equipe de marketing
+está agendada para:
+
+📅 Terça-feira, 15 de Abril de 2025
+⏰ 14:00 - 15:00
+📍 Google Meet (link na agenda)
+👥 Participantes: Ana, Bruno, Carla, Você
+
+Você tem 3 e-mails não lidos sobre esse projeto
+no seu Gmail. Deseja que eu os resuma?"</span>
+
+<span class="token-comment">// Fonte: Google Calendar + Gmail do usuário</span></code></pre>
+</div>
+</div>
+</div>
+
+<div class="tab-content" id="conn-social">
+<div class="card">
+<div class="card-title"><span class="card-icon"></span> Social <span class="badge badge-warning">Tendências</span></div>
+<p>Busca em <strong>Reddit, X (Twitter), LinkedIn</strong> e outras redes sociais. Ótimo para saber o que a comunidade está dizendo sobre um produto ou evento em tempo real.</p>
+<p style="margin-top:12px;"><strong>Ideal para:</strong> Opiniões de usuários, tendências, buzz de mercado.</p>
+<p style="margin-top:8px;"><strong>Exemplo:</strong> <code>"Problemas de bateria no novo iPhone 15"</code></p>
+<div class="code-block">
+<div class="code-block-header">
+<div class="code-block-lang"><span class="lang-dot" style="background:#fab387;"></span>Resultado Esperado</div>
+</div>
+<pre><code><span class="token-string">"Usuários no Reddit (r/iPhone15) reportam drenagem
+rápida de bateria após a atualização iOS 17.0.3.
+A maioria dos relatos indica que o problema está
+relacionado ao processo de indexação pós-atualização
+e deve se resolver em 48 horas [1]."</span>
+
+<span class="token-comment">// Fontes: Reddit, X, MacRumors Forums</span></code></pre>
+</div>
+</div>
+</div>
+
+<div class="tab-content" id="conn-more">
+<div class="card">
+<div class="card-title"><span class="card-icon">️</span> Mais Conectores <span class="badge badge-locked">Especializados</span></div>
+<p>Conectores especializados para nichos específicos:</p>
+</div>
+
+<div class="connector-grid">
+<div class="connector-card">
+<span class="connector-icon"></span>
+<div class="connector-name">Midpage <span class="badge badge-locked">↗</span></div>
+<div class="connector-desc">Pesquisa em bases jurídicas e legais. Ideal para advogados e estudantes de Direito que precisam de jurisprudência e legislação atualizada.</div>
+</div>
+<div class="connector-card">
+<span class="connector-icon"></span>
+<div class="connector-name">VisualDx <span class="badge badge-locked">↗</span></div>
+<div class="connector-desc">Base de dados médicos visuais. Permite diagnósticos assistidos por IA com imagens clínicas de referência.</div>
+</div>
+<div class="connector-card">
+<span class="connector-icon"></span>
+<div class="connector-name">Investment Portfolio <span class="badge badge-locked">↗</span></div>
+<div class="connector-desc">Análise de portfólio de investimentos. Integra com dados de mercado para recomendações financeiras.</div>
+</div>
+<div class="connector-card">
+<span class="connector-icon"></span>
+<div class="connector-name">Outlook <span class="badge badge-locked">↗</span></div>
+<div class="connector-desc">Similar ao Gmail, mas integrado ao ecossistema Microsoft 365. Pesquisa e-mails e agenda do Outlook.</div>
+</div>
+</div>
+
+<div class="info-box info-warning">
+<span class="info-icon">⚠️</span>
+<div class="info-content">
+<div class="info-label">Nota</div>
+<div class="info-text">Os conectores com <strong>↗</strong> redirecionam para serviços externos e podem requerer assinaturas ou autenticação adicional. Verifique a disponibilidade no seu plano Perplexity.</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- Expandable Hints -->
+<div style="margin-top:24px;">
+<h3 style="color:white;font-size:1.1rem;margin-bottom:12px;">💡 Dicas de Uso</h3>
+
+<div style="background:rgba(255,255,255,0.05);border-radius:12px;overflow:hidden;margin-bottom:8px;">
+<button class="hint-toggle" onclick="toggleHint(this)">
+<span>❓</span> Posso ativar múltiplos conectores ao mesmo tempo?
+<span class="hint-arrow">▼</span>
+</button>
+<div class="hint-content">
+<p>Sim! Você pode combinar <strong>Web + Social</strong> para ter uma visão completa (dados oficiais + opinião pública), ou <strong>Acadêmico + Web</strong> para fundamentar artigos com fontes acadêmicas e notícias recentes.</p>
+</div>
+</div>
+
+<div style="background:rgba(255,255,255,0.05);border-radius:12px;overflow:hidden;margin-bottom:8px;">
+<button class="hint-toggle" onclick="toggleHint(this)">
+<span>❓</span> O que acontece se eu não ativar nenhum conector?
+<span class="hint-arrow">▼</span>
+</button>
+<div class="hint-content">
+<p>O Perplexity usa o conector <strong>Web</strong> como padrão. Se nenhum conector estiver selecionado, ele faz uma busca genérica na internet, similar ao Google.</p>
+</div>
+</div>
+
+<div style="background:rgba(255,255,255,0.05);border-radius:12px;overflow:hidden;margin-bottom:8px;">
+<button class="hint-toggle" onclick="toggleHint(this)">
+<span>❓</span> Os conectores do Gmail/Outlook são seguros?
+<span class="hint-arrow">▼</span>
+</button>
+<div class="hint-content">
+<p>O Perplexity utiliza <strong>autenticação OAuth</strong> (o mesmo sistema do Google/Microsoft). A IA acessa apenas o que você autoriza e não armazena seus dados permanentemente. Você pode revogar o acesso a qualquer momento.</p>
+</div>
+</div>
+</div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- 3.3 Pro Search -->
+<section class="section" id="sec-3">
+<div class="section-header">
+<div class="section-number">3</div>
+<h2 class="section-title"><small>Pro Search</small>A IA que faz perguntas para você</h2>
+</div>
+
+<div class="card">
+<div class="card-title"><span class="card-icon"></span> Refinamento Automático</div>
+<p>O <strong>Pro Search</strong> (ou modo Reason) é o "superpoder" do Perplexity. Em vez de responder imediatamente, a IA faz <strong>perguntas de clarificação</strong> para entender o contexto exato da sua necessidade antes de pesquisar.</p>
+</div>
+
+<div class="info-box info-success">
+<span class="info-icon">🎯</span>
+<div class="info-content">
+<div class="info-label">Quando usar?</div>
+<div class="info-text">Use o Pro Search para tarefas <strong>complexas, vagas ou que exigem planejamento</strong>. Ex: "Planeje uma viagem de 15 dias pelo Japão com orçamento médio". Se a pergunta for simples ("Quem é o presidente da França?"), o modo normal é mais rápido.</div>
+</div>
+</div>
+
+<!-- Pro Search Flow -->
+<div class="card">
+<div class="card-title"><span class="card-icon">🔄</span> Fluxo do Pro Search</div>
+<div style="display:flex;flex-direction:column;gap:16px;margin-top:16px;">
+<div style="display:flex;align-items:center;gap:16px;">
+<div style="width:36px;height:36px;background:var(--secondary);color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">1</div>
+<div style="background:#f9fafb;padding:12px;border-radius:8px;flex:1;border-left:3px solid var(--secondary);">
+<p style="font-weight:600;color:var(--text-primary);margin:0;">Você faz a pergunta inicial</p>
+<p style="font-size:0.85rem;color:var(--text-secondary);margin:4px 0 0;">"Quero começar a investir em ações."</p>
+</div>
+</div>
+<div style="display:flex;align-items:center;gap:16px;">
+<div style="width:36px;height:36px;background:var(--primary);color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">2</div>
+<div style="background:#f9fafb;padding:12px;border-radius:8px;flex:1;border-left:3px solid var(--primary);">
+<p style="font-weight:600;color:var(--text-primary);margin:0;">IA faz perguntas de clarificação</p>
+<p style="font-size:0.85rem;color:var(--text-secondary);margin:4px 0 0;">"Qual seu perfil de risco? Qual o valor inicial? Prazo curto ou longo?"</p>
+</div>
+</div>
+<div style="display:flex;align-items:center;gap:16px;">
+<div style="width:36px;height:36px;background:var(--success);color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;">3</div>
+<div style="background:#f9fafb;padding:12px;border-radius:8px;flex:1;border-left:3px solid var(--success);">
+<p style="font-weight:600;color:var(--text-primary);margin:0;">Resposta hiper-personalizada</p>
+<p style="font-size:0.85rem;color:var(--text-secondary);margin:4px 0 0;">"Baseado no seu perfil conservador e prazo longo, aqui estão ETFs seguros..."</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- Exercício Prático 3 -->
+<section class="section" id="sec-sim">
+<div class="section-header">
+<div class="section-number">4</div>
+<h2 class="section-title"><small>Exercício Prático 3</small>Simulador de Conectores</h2>
+</div>
+
+<div class="card">
+<div class="card-title"><span class="card-icon">🧪</span> Desafio: Escolha os Conectores Certos</div>
+<p>Seu objetivo é selecionar os conectores adequados para cada cenário de pesquisa. Pense: "Quais fontes preciso para responder esta pergunta da melhor forma?"</p>
+</div>
+
+<div class="challenge-card">
+<div class="challenge-header">
+<span class="challenge-icon"></span>
+<h3>Critérios de Avaliação</h3>
+</div>
+<p style="color:#0bff42;font-size:0.9rem;">A escolha correta dos conectores faz toda a diferença na qualidade da resposta.</p>
+<ul class="challenge-criteria">
+<li><span class="criteria-icon"></span> Selecione pelo menos 1 conector para cada cenário</li>
+<li><span class="criteria-icon"></span> Combine conectores quando a pergunta exige múltiplas fontes</li>
+<li><span class="criteria-icon"></span> Justifique suas escolhas</li>
+</ul>
+</div>
+
+<!-- Connector Simulator -->
+<div class="simulator">
+<div class="simulator-title">🛠️ Simulador: Ative os Conectores Certos</div>
+<div class="simulator-subtitle">Leia o cenário e ative os conectores que você usaria para pesquisar.</div>
+
+<div style="background:#f9fafb;border-radius:12px;padding:20px;margin-bottom:20px;border-left:4px solid var(--secondary);">
+<p style="font-weight:700;color:var(--text-primary);margin-bottom:8px;">📋 Cenário:</p>
+<p id="scenarioText" style="color:var(--text-secondary);font-size:0.95rem;line-height:1.6;">Você precisa escrever um artigo acadêmico sobre o impacto da IA na medicina, citando fontes científicas e incluindo opiniões recentes de médicos no Reddit.</p>
+</div>
+
+<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;">
+<button class="tool-option" onclick="toggleConnector(this)" data-connector="web" style="padding:10px 16px;border-radius:8px;border:2px solid #e5e7eb;background:white;color:var(--text-primary);cursor:pointer;font-family:Inter,sans-serif;font-weight:600;font-size:0.85rem;transition:all 0.2s ease;">🌐 Web</button>
+<button class="tool-option" onclick="toggleConnector(this)" data-connector="academic" style="padding:10px 16px;border-radius:8px;border:2px solid #e5e7eb;background:white;color:var(--text-primary);cursor:pointer;font-family:Inter,sans-serif;font-weight:600;font-size:0.85rem;transition:all 0.2s ease;"> Acadêmico</button>
+<button class="tool-option" onclick="toggleConnector(this)" data-connector="gmail" style="padding:10px 16px;border-radius:8px;border:2px solid #e5e7eb;background:white;color:var(--text-primary);cursor:pointer;font-family:Inter,sans-serif;font-weight:600;font-size:0.85rem;transition:all 0.2s ease;"> Gmail</button>
+<button class="tool-option" onclick="toggleConnector(this)" data-connector="social" style="padding:10px 16px;border-radius:8px;border:2px solid #e5e7eb;background:white;color:var(--text-primary);cursor:pointer;font-family:Inter,sans-serif;font-weight:600;font-size:0.85rem;transition:all 0.2s ease;"> Social</button>
+<button class="tool-option" onclick="toggleConnector(this)" data-connector="midpage" style="padding:10px 16px;border-radius:8px;border:2px solid #e5e7eb;background:white;color:var(--text-primary);cursor:pointer;font-family:Inter,sans-serif;font-weight:600;font-size:0.85rem;transition:all 0.2s ease;"> Midpage</button>
+<button class="tool-option" onclick="toggleConnector(this)" data-connector="visualdx" style="padding:10px 16px;border-radius:8px;border:2px solid #e5e7eb;background:white;color:var(--text-primary);cursor:pointer;font-family:Inter,sans-serif;font-weight:600;font-size:0.85rem;transition:all 0.2s ease;"> VisualDx</button>
+</div>
+
+<div class="simulator-field">
+<label><span class="field-icon"></span> Justifique sua escolha</label>
+<textarea id="connectorJustification" placeholder="Explique por que escolheu esses conectores..."></textarea>
+</div>
+
+<div class="simulator-actions">
+<button class="btn btn-primary" onclick="evaluateConnectors()">
+<span>⚡</span> Avaliar Escolha
+</button>
+<button class="btn btn-secondary" onclick="clearConnectorSim()">
+<span>🔄</span> Limpar
+</button>
+<button class="btn btn-secondary" onclick="nextScenario()">
+<span></span> Próximo Cenário
+</button>
+</div>
+
+<div class="simulator-result" id="connectorResult">
+<div class="result-header">
+<span></span> Avaliação
+</div>
+<div class="result-text" id="connectorOutput"></div>
+</div>
+</div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- Resumo Final -->
+<section class="section" id="sec-summary">
+<div class="section-header">
+<div class="section-number">5</div>
+<h2 class="section-title"><small>Resumo Final</small>Recapitulando o Módulo 3</h2>
+</div>
+
+<div class="summary-card">
+<h3>✅ O que aprendemos hoje</h3>
+<ul class="summary-list">
+<li><span class="check">✓</span> O Perplexity substitui a lista de links por <strong>respostas sintetizadas</strong> com fontes citadas</li>
+<li><span class="check">✓</span> Os <strong>Conectores</strong> (Web, Acadêmico, Gmail, Social, Midpage, VisualDx, etc.) direcionam a busca para fontes específicas</li>
+<li><span class="check">✓</span> O conector <strong>Web</strong> é ativado por padrão e cobre a internet aberta</li>
+<li><span class="check">✓</span> Você pode <strong>combinar múltiplos conectores</strong> para respostas mais completas</li>
+<li><span class="check">✓</span> O <strong>Pro Search</strong> faz perguntas de clarificação para refinar o contexto antes de responder</li>
+<li><span class="check">✓</span> A verificação de fontes (números entre colchetes) é essencial para combater alucinações</li>
+</ul>
+</div>
+
+<div class="card">
+<div class="card-title"><span class="card-icon">💎</span> Takeaways Principais</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px;margin-top:16px;">
+<div style="background:rgba(0,217,255,0.06);padding:16px;border-radius:12px;border-left:4px solid var(--secondary);">
+<p style="font-weight:700;color:var(--text-primary);font-size:0.9rem;"> Verifique as Fontes</p>
+<p style="font-size:0.85rem;color:var(--text-secondary);margin-top:4px;">Confiança cega em IA é perigosa. Clique nos números [1] para validar a informação.</p>
+</div>
+<div style="background:rgba(16,185,129,0.06);padding:16px;border-radius:12px;border-left:4px solid var(--success);">
+<p style="font-weight:700;color:var(--text-primary);font-size:0.9rem;">🎯 Use o Conector Certo</p>
+<p style="font-size:0.85rem;color:var(--text-secondary);margin-top:4px;">Não misture fontes sem necessidade. Se quer学术论文, use Acadêmico. Se quer opinião real, use Social.</p>
+</div>
+<div style="background:rgba(108,99,255,0.06);padding:16px;border-radius:12px;border-left:4px solid var(--primary);">
+<p style="font-weight:700;color:var(--text-primary);font-size:0.9rem;">⚡ Pro Search para Complexos</p>
+<p style="font-size:0.85rem;color:var(--text-secondary);margin-top:4px;">Reserve o Pro Search para tarefas que exigem contexto pessoal ou planejamento.</p>
+</div>
+</div>
+</div>
+
+<!-- Rating -->
+<div class="rating-card">
+<div class="card-title"><span class="card-icon">⭐</span> Avalie este módulo</div>
+<p style="color:rgba(255,255,255,0.5);font-size:0.9rem;">Como você avalia o conteúdo deste módulo?</p>
+<div class="stars-container" id="starsContainer">
+<span class="star" onclick="rateModule(1)">★</span>
+<span class="star" onclick="rateModule(2)">★</span>
+<span class="star" onclick="rateModule(3)">★</span>
+<span class="star" onclick="rateModule(4)">★</span>
+<span class="star" onclick="rateModule(5)">★</span>
+</div>
+<p id="ratingFeedback" style="color:var(--secondary);font-size:0.85rem;font-weight:600;margin-top:4px;"></p>
+</div>
+
+<!-- Next Module -->
+<div class="next-module">
+<div class="next-icon">️</div>
+<div class="next-info">
+<h4>Próximo Módulo: Visualização de Dados com IA</h4>
+<p>No Módulo 4, vamos aprender a transformar textos e planilhas em gráficos impactantes usando ferramentas de IA generativa.</p>
+</div>
+</div>
+
+<!-- Certificate Preview -->
+<div class="card" style="margin-top:24px;background:linear-gradient(135deg,#fef3c7,#fde68a);border:2px solid #f59e0b;">
+<div class="card-title" style="color:#92400e;"><span class="card-icon">🏆</span> Progresso do Curso</div>
+<div style="display:flex;align-items:center;gap:16px;margin-top:12px;">
+<div style="flex:1;">
+<div style="background:rgba(0,0,0,0.1);border-radius:8px;height:12px;overflow:hidden;">
+<div style="height:100%;width:60%;background:linear-gradient(90deg,#f59e0b,#d97706);border-radius:8px;"></div>
+</div>
+<p style="color:#92400e;font-size:0.8rem;margin-top:6px;">60% do curso concluído (3 de 5 módulos)</p>
+</div>
+</div>
+</div>
+</section>
+
+</div>
+</main>
+
+<footer class="footer">
+<div class="footer-content">
+<div class="footer-left">
+<p><strong>IA na Prática</strong> — Curso de Inteligência Artificial</p>
+<p>© 2025 Prof. Vitório Netto · Todos os direitos reservados</p>
+</div>
+<div class="footer-right">
+<a href="#intro">Voltar ao topo</a>
+<a href="#">Suporte</a>
+<a href="#">Certificado</a>
+</div>
+</div>
+</footer>
+
+<script>
+// Progress Bar
+window.addEventListener('scroll', function() {
+const scrollTop = window.scrollY;
+const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+const scrollPercent = (scrollTop / docHeight) * 100;
+
+document.getElementById('progressBar').style.width = scrollPercent + '%';
+document.getElementById('sidebarProgress').style.width = scrollPercent + '%';
+document.getElementById('progressPercent').textContent = Math.round(scrollPercent) + '% concluído';
+
+updateActiveSection();
+});
+
+// Active Section Tracking
+function updateActiveSection() {
+const sections = document.querySelectorAll('.section, .hero');
+const navLinks = document.querySelectorAll('.sidebar-nav a');
+let currentId = '';
+
+sections.forEach(function(section) {
+const rect = section.getBoundingClientRect();
+if (rect.top <= 150) {
+currentId = section.id;
+}
+});
+
+navLinks.forEach(function(link) {
+link.classList.remove('active');
+const href = link.getAttribute('href').replace('#', '');
+if (href === currentId) {
+link.classList.add('active');
+}
+});
+}
+
+// Scroll Animations
+const observer = new IntersectionObserver(function(entries) {
+entries.forEach(function(entry) {
+if (entry.isIntersecting) {
+entry.target.classList.add('visible');
+}
+});
+}, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+document.querySelectorAll('.section').forEach(function(section) {
+observer.observe(section);
+});
+
+// Sidebar Toggle
+document.getElementById('menuToggle').addEventListener('click', function() {
+document.getElementById('sidebar').classList.toggle('open');
+document.getElementById('sidebarOverlay').classList.toggle('open');
+});
+
+document.getElementById('sidebarOverlay').addEventListener('click', function() {
+document.getElementById('sidebar').classList.remove('open');
+document.getElementById('sidebarOverlay').classList.remove('open');
+});
+
+document.querySelectorAll('.sidebar-nav a').forEach(function(link) {
+link.addEventListener('click', function() {
+document.getElementById('sidebar').classList.remove('open');
+document.getElementById('sidebarOverlay').classList.remove('open');
+});
+});
+
+// Search Tabs
+function switchSearchTab(event, tabId) {
+const header = event.target.closest('.tabs-header');
+const parent = header.parentElement;
+
+parent.querySelectorAll('.tab-btn').forEach(function(btn) {
+btn.classList.remove('active');
+});
+parent.querySelectorAll('.tab-content').forEach(function(content) {
+content.classList.remove('active');
+});
+
+event.target.classList.add('active');
+document.getElementById(tabId).classList.add('active');
+}
+
+// Connector Tabs
+function switchConnTab(event, tabId) {
+const header = event.target.closest('.tabs-header');
+const parent = header.parentElement;
+
+parent.querySelectorAll('.tab-btn').forEach(function(btn) {
+btn.classList.remove('active');
+});
+parent.querySelectorAll('.tab-content').forEach(function(content) {
+content.classList.remove('active');
+});
+
+event.target.classList.add('active');
+document.getElementById(tabId).classList.add('active');
+}
+
+// Copy Code
+function copyCode(button) {
+const codeBlock = button.closest('.code-block') || button.closest('.simulator-result');
+let codeText = '';
+
+if (codeBlock) {
+const pre = codeBlock.querySelector('pre') || codeBlock.querySelector('.result-text');
+if (pre) {
+codeText = pre.textContent;
+}
+}
+
+navigator.clipboard.writeText(codeText).then(function() {
+button.classList.add('copied');
+const tooltip = button.querySelector('.copy-tooltip');
+if (tooltip) {
+tooltip.classList.add('show');
+tooltip.textContent = '✓ Copiado!';
+}
+button.innerHTML = '✓ Copiado! <span class="copy-tooltip show">✓ Copiado!</span>';
+
+setTimeout(function() {
+button.classList.remove('copied');
+button.innerHTML = '📋 Copiar <span class="copy-tooltip">Clique para copiar</span>';
+}, 2000);
+}).catch(function() {
+const textarea = document.createElement('textarea');
+textarea.value = codeText;
+document.body.appendChild(textarea);
+textarea.select();
+document.execCommand('copy');
+document.body.removeChild(textarea);
+
+button.classList.add('copied');
+setTimeout(function() {
+button.classList.remove('copied');
+button.innerHTML = '📋 Copiar <span class="copy-tooltip">Clique para copiar</span>';
+}, 2000);
+});
+}
+
+// Checklist Toggle
+function toggleChecklist(item) {
+item.classList.toggle('checked');
+}
+
+// Mockup Connector Toggle
+function toggleMockupConnector(element) {
+const toggle = element.querySelector('.mc-toggle');
+toggle.classList.toggle('active');
+}
+
+// Hint Toggle
+function toggleHint(button) {
+const content = button.nextElementSibling;
+button.classList.toggle('open');
+content.classList.toggle('open');
+}
+
+// Connector Simulator
+let currentScenarioIndex = 0;
+
+const scenarios = [
+{
+text: 'Você precisa escrever um artigo acadêmico sobre o impacto da IA na medicina, citando fontes científicas e incluindo opiniões recentes de médicos no Reddit.',
+correct: ['academic', 'social'],
+feedback: '🎯 Excelente! O conector <strong>Acadêmico</strong> garante fontes científicas verificadas, e o <strong>Social</strong> captura opiniões recentes de médicos no Reddit. A combinação dos dois enriquece seu artigo com dados rigorosos e perspectivas do campo.'
+},
+{
+text: 'Seu chefe pediu para você resumir todos os e-mails e compromissos da semana sobre o "Projeto Alpha" antes da reunião de segunda-feira.',
+correct: ['gmail'],
+feedback: '🎯 Perfeito! O conector <strong>Gmail com Calendar</strong> é exatamente o que você precisa. Ele permite pesquisar e-mails antigos, resumir conversas e consultar compromissos diretamente na sua agenda do Google.'
+},
+{
+text: 'Você quer saber o que os investidores estão dizendo sobre as ações da Tesla após o último relatório trimestral.',
+correct: ['web', 'social'],
+feedback: '🎯 Boa escolha! O conector <strong>Web</strong> traz notícias e análises de mercado, enquanto o <strong>Social</strong> captura opiniões em tempo real de investidores no Reddit e X. Juntos, dão uma visão completa do sentimento do mercado.'
+},
+{
+text: 'Você precisa pesquisar jurisprudência atualizada sobre direitos trabalhistas para um caso no escritório.',
+correct: ['midpage'],
+feedback: '🎯 Correto! O conector <strong>Midpage</strong> é especializado em bases jurídicas e legais, perfeito para pesquisar jurisprudência, legislação e decisões judiciais atualizadas.'
+}
+];
+
+function loadScenario(index) {
+const scenario = scenarios[index];
+document.getElementById('scenarioText').textContent = scenario.text;
+document.getElementById('connectorResult').classList.remove('visible');
+document.getElementById('connectorJustification').value = '';
+
+document.querySelectorAll('.simulator .tool-option').forEach(function(btn) {
+btn.classList.remove('selected');
+btn.style.borderColor = '#e5e7eb';
+btn.style.background = 'white';
+btn.style.color = 'var(--text-primary)';
+});
+}
+
+function toggleConnector(element) {
+element.classList.toggle('selected');
+if (element.classList.contains('selected')) {
+element.style.borderColor = 'var(--secondary)';
+element.style.background = 'rgba(0, 217, 255, 0.1)';
+element.style.color = 'var(--secondary)';
+} else {
+element.style.borderColor = '#e5e7eb';
+element.style.background = 'white';
+element.style.color = 'var(--text-primary)';
+}
+}
+
+function evaluateConnectors() {
+const selected = [];
+document.querySelectorAll('.simulator .tool-option.selected').forEach(function(btn) {
+selected.push(btn.getAttribute('data-connector'));
+});
+
+if (selected.length === 0) {
+alert('Selecione pelo menos um conector antes de avaliar!');
+return;
+}
+
+const scenario = scenarios[currentScenarioIndex];
+const resultDiv = document.getElementById('connectorResult');
+const outputDiv = document.getElementById('connectorOutput');
+
+let score = 0;
+let feedback = '';
+
+scenario.correct.forEach(function(correct) {
+if (selected.includes(correct)) {
+score++;
+}
+});
+
+if (score === scenario.correct.length && selected.length === scenario.correct.length) {
+feedback = '<span style="color:#10B981;font-size:1.2rem;">✨ Perfeito!</span>\n\n' + scenario.feedback;
+} else if (score > 0) {
+feedback = '<span style="color:#F59E0B;font-size:1.2rem;">👍 Quase lá!</span>\n\nVocê acertou ' + score + ' de ' + scenario.correct.length + ' conectores ideais.\n\n' + scenario.feedback;
+} else {
+feedback = '<span style="color:#EF4444;font-size:1.2rem;">😕 Tente novamente</span>\n\n' + scenario.feedback;
+}
+
+outputDiv.textContent = feedback;
+resultDiv.classList.add('visible');
+resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function clearConnectorSim() {
+document.querySelectorAll('.simulator .tool-option').forEach(function(btn) {
+btn.classList.remove('selected');
+btn.style.borderColor = '#e5e7eb';
+btn.style.background = 'white';
+btn.style.color = 'var(--text-primary)';
+});
+document.getElementById('connectorJustification').value = '';
+document.getElementById('connectorResult').classList.remove('visible');
+}
+
+function nextScenario() {
+currentScenarioIndex = (currentScenarioIndex + 1) % scenarios.length;
+loadScenario(currentScenarioIndex);
+}
+
+// Star Rating
+let currentRating = 0;
+
+function rateModule(rating) {
+currentRating = rating;
+const stars = document.querySelectorAll('.star');
+const feedback = document.getElementById('ratingFeedback');
+
+stars.forEach(function(star, index) {
+if (index < rating) {
+star.classList.add('active');
+} else {
+star.classList.remove('active');
+}
+});
+
+const messages = [
+'',
+'😕 Precisa melhorar',
+'😐 Razoável',
+'🙂 Bom',
+'😊 Muito bom!',
+'🤩 Excelente! Obrigado!'
+];
+
+feedback.textContent = messages[rating];
+}
+
+// Init
+document.addEventListener('DOMContentLoaded', function() {
+updateActiveSection();
+loadScenario(0);
+});
+</script>
+</body>
+</html>
+

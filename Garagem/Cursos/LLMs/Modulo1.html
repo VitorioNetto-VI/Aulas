@@ -1,0 +1,2731 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IA na Prática - Módulo 1: Engenharia de Prompt</title>
+<link href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/400.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/600.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.1.0/700.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@fontsource/fira-code@5.1.0/400.css" rel="stylesheet">
+<style>
+:root {
+--primary: #6C63FF;
+--primary-dark: #5A52D5;
+--primary-light: #8B85FF;
+--secondary: #00D9FF;
+--success: #10B981;
+--success-light: #D1FAE5;
+--success-dark: #065F46;
+--warning: #F59E0B;
+--warning-light: #FEF3C7;
+--warning-dark: #92400E;
+--danger: #EF4444;
+--danger-light: #FEE2E2;
+--danger-dark: #991B1B;
+--info: #3B82F6;
+--info-light: #DBEAFE;
+--info-dark: #1E40AF;
+--bg-gradient-start: #1a1040;
+--bg-gradient-mid: #2d1b69;
+--bg-gradient-end: #1e3a5f;
+--card-bg: #FFFFFF;
+--text-primary: #1F2937;
+--text-secondary: #6B7280;
+--text-light: #9CA3AF;
+--code-bg: #1e1e2e;
+--sidebar-width: 280px;
+--header-height: 60px;
+--border-radius-card: 16px;
+--border-radius-element: 8px;
+--shadow-card: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+--shadow-card-hover: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+--shadow-elevated: 0 25px 50px -12px rgba(0,0,0,0.25);
+--transition-fast: 0.2s ease;
+--transition-normal: 0.3s ease;
+--transition-slow: 0.5s ease;
+}
+
+* {
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+html {
+scroll-behavior: smooth;
+scroll-padding-top: var(--header-height);
+}
+
+body {
+font-family: 'Inter', sans-serif;
+background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-mid) 50%, var(--bg-gradient-end) 100%);
+color: var(--text-primary);
+line-height: 1.7;
+min-height: 100vh;
+}
+
+/* Progress Bar */
+.progress-bar {
+position: fixed;
+top: 0;
+left: 0;
+width: 0%;
+height: 4px;
+background: linear-gradient(90deg, var(--primary), var(--secondary), var(--primary-light));
+z-index: 10000;
+transition: width 0.1s linear;
+border-radius: 0 2px 2px 0;
+box-shadow: 0 0 10px rgba(108, 99, 255, 0.5);
+}
+
+/* Header */
+.header {
+position: fixed;
+top: 4px;
+left: 0;
+right: 0;
+height: var(--header-height);
+background: rgba(26, 16, 64, 0.95);
+backdrop-filter: blur(20px);
+-webkit-backdrop-filter: blur(20px);
+z-index: 9999;
+display: flex;
+align-items: center;
+justify-content: space-between;
+padding: 0 24px;
+border-bottom: 1px solid rgba(108, 99, 255, 0.2);
+}
+
+.header-logo {
+display: flex;
+align-items: center;
+gap: 12px;
+color: white;
+font-weight: 700;
+font-size: 1.1rem;
+}
+
+.header-logo .logo-icon {
+width: 36px;
+height: 36px;
+background: linear-gradient(135deg, var(--primary), var(--secondary));
+border-radius: 10px;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 1.2rem;
+}
+
+.header-nav {
+display: flex;
+align-items: center;
+gap: 16px;
+}
+
+.header-nav .badge-timer {
+background: rgba(108, 99, 255, 0.2);
+color: var(--primary-light);
+padding: 6px 14px;
+border-radius: 20px;
+font-size: 0.85rem;
+font-weight: 600;
+display: flex;
+align-items: center;
+gap: 6px;
+}
+
+.header-nav .badge-level {
+background: rgba(16, 185, 129, 0.2);
+color: var(--success);
+padding: 6px 14px;
+border-radius: 20px;
+font-size: 0.85rem;
+font-weight: 600;
+}
+
+.menu-toggle {
+display: none;
+background: none;
+border: none;
+color: white;
+font-size: 1.5rem;
+cursor: pointer;
+padding: 8px;
+}
+
+/* Sidebar */
+.sidebar {
+position: fixed;
+top: calc(var(--header-height) + 4px);
+left: 0;
+width: var(--sidebar-width);
+height: calc(100vh - var(--header-height) - 4px);
+background: rgba(26, 16, 64, 0.6);
+backdrop-filter: blur(10px);
+-webkit-backdrop-filter: blur(10px);
+z-index: 9998;
+overflow-y: auto;
+padding: 24px 16px;
+border-right: 1px solid rgba(108, 99, 255, 0.15);
+transition: transform var(--transition-normal);
+}
+
+.sidebar::-webkit-scrollbar {
+width: 4px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+background: rgba(108, 99, 255, 0.3);
+border-radius: 2px;
+}
+
+.sidebar-title {
+color: var(--text-light);
+font-size: 0.7rem;
+text-transform: uppercase;
+letter-spacing: 2px;
+font-weight: 700;
+margin-bottom: 16px;
+padding-left: 12px;
+}
+
+.sidebar-nav {
+list-style: none;
+}
+
+.sidebar-nav li {
+margin-bottom: 2px;
+}
+
+.sidebar-nav a {
+display: flex;
+align-items: center;
+gap: 10px;
+padding: 10px 12px;
+color: rgba(255,255,255,0.7);
+text-decoration: none;
+border-radius: var(--border-radius-element);
+font-size: 0.9rem;
+transition: all var(--transition-fast);
+position: relative;
+}
+
+.sidebar-nav a:hover,
+.sidebar-nav a.active {
+color: white;
+background: rgba(108, 99, 255, 0.2);
+}
+
+.sidebar-nav a.active::before {
+content: '';
+position: absolute;
+left: 0;
+top: 50%;
+transform: translateY(-50%);
+width: 3px;
+height: 60%;
+background: var(--primary);
+border-radius: 0 3px 3px 0;
+}
+
+.sidebar-nav a .nav-icon {
+font-size: 1.1rem;
+width: 24px;
+text-align: center;
+flex-shrink: 0;
+}
+
+.sidebar-nav a .nav-section-num {
+background: rgba(108, 99, 255, 0.15);
+color: var(--primary-light);
+font-size: 0.7rem;
+font-weight: 700;
+padding: 2px 8px;
+border-radius: 10px;
+margin-left: auto;
+}
+
+/* Main Content */
+.main-content {
+margin-left: var(--sidebar-width);
+padding-top: calc(var(--header-height) + 4px);
+min-height: 100vh;
+}
+
+.content-wrapper {
+max-width: 900px;
+margin: 0 auto;
+padding: 40px 48px 80px;
+}
+
+/* Hero Section */
+.hero {
+text-align: center;
+padding: 60px 0 40px;
+}
+
+.hero-badge {
+display: inline-flex;
+align-items: center;
+gap: 8px;
+background: rgba(108, 99, 255, 0.15);
+border: 1px solid rgba(108, 99, 255, 0.3);
+color: var(--primary-light);
+padding: 8px 20px;
+border-radius: 30px;
+font-size: 0.85rem;
+font-weight: 600;
+margin-bottom: 24px;
+}
+
+.hero h1 {
+font-size: 2.8rem;
+font-weight: 700;
+color: white;
+margin-bottom: 12px;
+line-height: 1.2;
+}
+
+.hero h1 span {
+background: linear-gradient(135deg, var(--primary-light), var(--secondary));
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+background-clip: text;
+}
+
+.hero-subtitle {
+font-size: 1.15rem;
+color: rgba(255,255,255,0.6);
+max-width: 600px;
+margin: 0 auto 32px;
+line-height: 1.6;
+}
+
+.hero-image {
+max-width: 800px;
+width: 100%;
+margin: 0 auto 40px;
+border-radius: var(--border-radius-card);
+overflow: hidden;
+box-shadow: var(--shadow-elevated);
+border: 2px solid rgba(108, 99, 255, 0.2);
+}
+
+.hero-image img {
+width: 100%;
+display: block;
+}
+
+.hero-meta {
+display: flex;
+justify-content: center;
+gap: 24px;
+flex-wrap: wrap;
+}
+
+.hero-meta-item {
+display: flex;
+align-items: center;
+gap: 8px;
+color: rgba(255,255,255,0.5);
+font-size: 0.9rem;
+}
+
+.hero-meta-item span:first-child {
+font-size: 1.1rem;
+}
+
+/* Section Styles */
+.section {
+margin-bottom: 56px;
+opacity: 0;
+transform: translateY(30px);
+transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.section.visible {
+opacity: 1;
+transform: translateY(0);
+}
+
+.section-header {
+display: flex;
+align-items: center;
+gap: 16px;
+margin-bottom: 28px;
+}
+
+.section-number {
+width: 48px;
+height: 48px;
+background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+color: white;
+border-radius: 14px;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 1.2rem;
+font-weight: 700;
+flex-shrink: 0;
+box-shadow: 0 4px 15px rgba(108, 99, 255, 0.4);
+}
+
+.section-title {
+font-size: 1.8rem;
+font-weight: 700;
+color: white;
+line-height: 1.3;
+}
+
+.section-title small {
+display: block;
+font-size: 0.75rem;
+color: var(--primary-light);
+font-weight: 600;
+text-transform: uppercase;
+letter-spacing: 1.5px;
+margin-bottom: 4px;
+}
+
+/* Cards */
+.card {
+background: var(--card-bg);
+border-radius: var(--border-radius-card);
+padding: 28px 32px;
+margin-bottom: 20px;
+box-shadow: var(--shadow-card);
+transition: all var(--transition-normal);
+border: 1px solid rgba(0,0,0,0.05);
+}
+
+.card:hover {
+box-shadow: var(--shadow-card-hover);
+transform: translateY(-2px);
+}
+
+.card-title {
+font-size: 1.15rem;
+font-weight: 700;
+color: var(--text-primary);
+margin-bottom: 12px;
+display: flex;
+align-items: center;
+gap: 10px;
+}
+
+.card-title .card-icon {
+font-size: 1.3rem;
+}
+
+.card p {
+color: var(--text-secondary);
+line-height: 1.8;
+}
+
+.card p + p {
+margin-top: 12px;
+}
+
+/* Info Boxes */
+.info-box {
+border-radius: var(--border-radius-element);
+padding: 20px 24px;
+margin: 20px 0;
+display: flex;
+gap: 14px;
+align-items: flex-start;
+border-left: 4px solid;
+}
+
+.info-box .info-icon {
+font-size: 1.3rem;
+flex-shrink: 0;
+margin-top: 2px;
+}
+
+.info-box .info-content {
+flex: 1;
+}
+
+.info-box .info-label {
+font-weight: 700;
+font-size: 0.85rem;
+text-transform: uppercase;
+letter-spacing: 1px;
+margin-bottom: 4px;
+}
+
+.info-box .info-text {
+font-size: 0.95rem;
+line-height: 1.7;
+}
+
+.info-box.info-success {
+background: var(--success-light);
+border-color: var(--success);
+color: var(--success-dark);
+}
+
+.info-box.info-warning {
+background: var(--warning-light);
+border-color: var(--warning);
+color: var(--warning-dark);
+}
+
+.info-box.info-danger {
+background: var(--danger-light);
+border-color: var(--danger);
+color: var(--danger-dark);
+}
+
+.info-box.info-info {
+background: var(--info-light);
+border-color: var(--info);
+color: var(--info-dark);
+}
+
+/* Code Blocks */
+.code-block {
+background: var(--code-bg);
+border-radius: var(--border-radius-card);
+margin: 20px 0;
+overflow: hidden;
+box-shadow: var(--shadow-card);
+border: 1px solid rgba(108, 99, 255, 0.15);
+}
+
+.code-block-header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 12px 20px;
+background: rgba(108, 99, 255, 0.1);
+border-bottom: 1px solid rgba(108, 99, 255, 0.1);
+}
+
+.code-block-lang {
+display: flex;
+align-items: center;
+gap: 8px;
+color: var(--primary-light);
+font-size: 0.8rem;
+font-weight: 600;
+text-transform: uppercase;
+letter-spacing: 1px;
+}
+
+.code-block-lang .lang-dot {
+width: 8px;
+height: 8px;
+border-radius: 50%;
+}
+
+.copy-btn {
+background: rgba(255,255,255,0.1);
+border: 1px solid rgba(255,255,255,0.15);
+color: rgba(255,255,255,0.6);
+padding: 6px 14px;
+border-radius: 6px;
+cursor: pointer;
+font-size: 0.8rem;
+font-family: 'Inter', sans-serif;
+font-weight: 600;
+display: flex;
+align-items: center;
+gap: 6px;
+transition: all var(--transition-fast);
+position: relative;
+}
+
+.copy-btn:hover {
+background: rgba(108, 99, 255, 0.3);
+color: white;
+border-color: rgba(108, 99, 255, 0.5);
+}
+
+.copy-btn.copied {
+background: rgba(16, 185, 129, 0.3);
+color: var(--success);
+border-color: rgba(16, 185, 129, 0.5);
+}
+
+.copy-btn .copy-tooltip {
+position: absolute;
+bottom: calc(100% + 8px);
+right: 0;
+background: var(--text-primary);
+color: white;
+padding: 4px 10px;
+border-radius: 4px;
+font-size: 0.7rem;
+white-space: nowrap;
+opacity: 0;
+pointer-events: none;
+transition: opacity var(--transition-fast);
+}
+
+.copy-btn .copy-tooltip.show {
+opacity: 1;
+}
+
+.code-block pre {
+padding: 20px;
+overflow-x: auto;
+font-family: 'Fira Code', monospace;
+font-size: 0.9rem;
+line-height: 1.7;
+color: #cdd6f4;
+}
+
+.code-block code {
+font-family: 'Fira Code', monospace;
+}
+
+/* Syntax highlighting colors */
+.token-keyword { color: #cba6f7; }
+.token-string { color: #a6e3a1; }
+.token-comment { color: #6c7086; font-style: italic; }
+.token-function { color: #89b4fa; }
+.token-operator { color: #f38ba8; }
+.token-number { color: #fab387; }
+.token-type { color: #89dceb; }
+.token-variable { color: #f5c2e7; }
+
+/* Tabs */
+.tabs-container {
+margin: 24px 0;
+}
+
+.tabs-header {
+display: flex;
+gap: 4px;
+background: rgba(0,0,0,0.05);
+padding: 4px;
+border-radius: 12px;
+margin-bottom: 0;
+overflow-x: auto;
+}
+
+.tab-btn {
+padding: 10px 20px;
+background: transparent;
+border: none;
+border-radius: 8px;
+cursor: pointer;
+font-family: 'Inter', sans-serif;
+font-size: 0.9rem;
+font-weight: 600;
+color: var(--text-secondary);
+transition: all var(--transition-fast);
+white-space: nowrap;
+display: flex;
+align-items: center;
+gap: 6px;
+}
+
+.tab-btn:hover {
+color: var(--text-primary);
+background: rgba(108, 99, 255, 0.1);
+}
+
+.tab-btn.active {
+background: white;
+color: var(--primary);
+box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.tab-content {
+display: none;
+padding: 24px 0;
+}
+
+.tab-content.active {
+display: block;
+animation: fadeInTab 0.3s ease;
+}
+
+@keyframes fadeInTab {
+from { opacity: 0; transform: translateY(8px); }
+to { opacity: 1; transform: translateY(0); }
+}
+
+/* Table */
+.table-wrapper {
+overflow-x: auto;
+margin: 20px 0;
+border-radius: var(--border-radius-card);
+box-shadow: var(--shadow-card);
+}
+
+table {
+width: 100%;
+border-collapse: collapse;
+background: white;
+}
+
+thead th {
+background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+color: white;
+padding: 14px 20px;
+text-align: left;
+font-size: 0.85rem;
+font-weight: 700;
+text-transform: uppercase;
+letter-spacing: 0.5px;
+}
+
+tbody td {
+padding: 14px 20px;
+border-bottom: 1px solid #f0f0f0;
+font-size: 0.9rem;
+color: var(--text-secondary);
+}
+
+tbody tr:hover {
+background: rgba(108, 99, 255, 0.04);
+}
+
+tbody tr:last-child td {
+border-bottom: none;
+}
+
+tbody td:first-child {
+font-weight: 600;
+color: var(--text-primary);
+}
+
+/* Badges */
+.badge {
+display: inline-flex;
+align-items: center;
+gap: 4px;
+padding: 3px 10px;
+border-radius: 12px;
+font-size: 0.75rem;
+font-weight: 700;
+text-transform: uppercase;
+letter-spacing: 0.5px;
+}
+
+.badge-primary { background: rgba(108, 99, 255, 0.15); color: var(--primary); }
+.badge-success { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+.badge-warning { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+.badge-danger { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
+.badge-info { background: rgba(59, 130, 246, 0.15); color: var(--info); }
+
+/* Hints / Expandable */
+.hint-toggle {
+background: none;
+border: none;
+width: 100%;
+text-align: left;
+padding: 16px 20px;
+display: flex;
+align-items: center;
+gap: 12px;
+cursor: pointer;
+font-family: 'Inter', sans-serif;
+font-size: 0.95rem;
+font-weight: 600;
+color: #25ff00;
+border-radius: var(--border-radius-element);
+transition: all var(--transition-fast);
+}
+
+.hint-toggle:hover {
+background: rgba(108, 99, 255, 0.05);
+}
+
+.hint-toggle .hint-arrow {
+transition: transform var(--transition-fast);
+font-size: 0.8rem;
+color: var(--text-light);
+margin-left: auto;
+}
+
+.hint-toggle.open .hint-arrow {
+transform: rotate(180deg);
+}
+
+.hint-content {
+max-height: 0;
+overflow: hidden;
+transition: max-height 0.4s ease, padding 0.3s ease;
+padding: 0 20px;
+}
+
+.hint-content.open {
+max-height: 500px;
+padding: 0 20px 16px;
+}
+
+.hint-content p {
+color: #ffbf00;
+font-size: 0.9rem;
+line-height: 1.7;
+}
+
+/* Interactive Simulator */
+.simulator {
+background: white;
+border-radius: var(--border-radius-card);
+padding: 32px;
+margin: 24px 0;
+box-shadow: var(--shadow-card);
+border: 2px solid rgba(108, 99, 255, 0.2);
+}
+
+.simulator-title {
+font-size: 1.2rem;
+font-weight: 700;
+color: var(--text-primary);
+margin-bottom: 8px;
+display: flex;
+align-items: center;
+gap: 10px;
+}
+
+.simulator-subtitle {
+color: var(--text-secondary);
+font-size: 0.9rem;
+margin-bottom: 24px;
+}
+
+.simulator-field {
+margin-bottom: 16px;
+}
+
+.simulator-field label {
+display: block;
+font-size: 0.85rem;
+font-weight: 700;
+color: var(--text-primary);
+margin-bottom: 6px;
+text-transform: uppercase;
+letter-spacing: 0.5px;
+}
+
+.simulator-field .field-icon {
+margin-right: 4px;
+}
+
+.simulator-field input,
+.simulator-field textarea {
+width: 100%;
+padding: 12px 16px;
+border: 2px solid #e5e7eb;
+border-radius: var(--border-radius-element);
+font-family: 'Inter', sans-serif;
+font-size: 0.9rem;
+color: var(--text-primary);
+transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+background: #f9fafb;
+}
+
+.simulator-field input:focus,
+.simulator-field textarea:focus {
+outline: none;
+border-color: var(--primary);
+box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.15);
+background: white;
+}
+
+.simulator-field textarea {
+min-height: 80px;
+resize: vertical;
+}
+
+.simulator-result {
+background: var(--code-bg);
+border-radius: var(--border-radius-element);
+padding: 20px;
+margin-top: 20px;
+display: none;
+animation: fadeInTab 0.3s ease;
+}
+
+.simulator-result.visible {
+display: block;
+}
+
+.simulator-result .result-header {
+display: flex;
+align-items: center;
+gap: 8px;
+color: var(--primary-light);
+font-size: 0.85rem;
+font-weight: 700;
+margin-bottom: 12px;
+text-transform: uppercase;
+letter-spacing: 1px;
+}
+
+.simulator-result .result-text {
+color: #cdd6f4;
+font-size: 0.95rem;
+line-height: 1.7;
+white-space: pre-wrap;
+}
+
+.simulator-actions {
+display: flex;
+gap: 12px;
+margin-top: 20px;
+}
+
+.btn {
+padding: 12px 28px;
+border: none;
+border-radius: var(--border-radius-element);
+cursor: pointer;
+font-family: 'Inter', sans-serif;
+font-size: 0.95rem;
+font-weight: 700;
+display: flex;
+align-items: center;
+gap: 8px;
+transition: all var(--transition-fast);
+}
+
+.btn-primary {
+background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+color: white;
+box-shadow: 0 4px 15px rgba(108, 99, 255, 0.4);
+}
+
+.btn-primary:hover {
+transform: translateY(-2px);
+box-shadow: 0 6px 20px rgba(108, 99, 255, 0.5);
+}
+
+.btn-secondary {
+background: rgba(108, 99, 255, 0.1);
+color: var(--primary);
+}
+
+.btn-secondary:hover {
+background: rgba(108, 99, 255, 0.2);
+}
+
+.btn-success {
+background: linear-gradient(135deg, var(--success), #059669);
+color: white;
+box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+}
+
+.btn-success:hover {
+transform: translateY(-2px);
+}
+
+/* Challenge Card */
+.challenge-card {
+background: linear-gradient(135deg, rgb(60 81 31 / 73%), rgba(0, 217, 255, 0.05));
+border: 2px solid rgba(108, 99, 255, 0.2);
+border-radius: var(--border-radius-card);
+padding: 32px;
+margin: 24px 0;
+}
+
+.challenge-header {
+display: flex;
+align-items: center;
+gap: 12px;
+margin-bottom: 16px;
+}
+
+.challenge-header .challenge-icon {
+font-size: 2rem;
+}
+
+.challenge-header h3 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #00f1f3;
+}
+
+.challenge-criteria {
+list-style: none;
+margin: 16px 0;
+}
+
+.challenge-criteria li {
+padding: 8px 0;
+display: flex;
+align-items: flex-start;
+gap: 10px;
+color: #0bff42;
+font-size: 0.9rem;
+}
+
+.challenge-criteria li .criteria-icon {
+flex-shrink: 0;
+margin-top: 2px;
+}
+
+/* Summary Section */
+.summary-card {
+background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+border-radius: var(--border-radius-card);
+padding: 32px;
+color: white;
+margin: 24px 0;
+}
+
+.summary-card h3 {
+font-size: 1.3rem;
+font-weight: 700;
+margin-bottom: 16px;
+display: flex;
+align-items: center;
+gap: 10px;
+}
+
+.summary-list {
+list-style: none;
+}
+
+.summary-list li {
+padding: 10px 0;
+display: flex;
+align-items: flex-start;
+gap: 10px;
+font-size: 0.95rem;
+color: rgba(255,255,255,0.9);
+border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.summary-list li:last-child {
+border-bottom: none;
+}
+
+.summary-list li .check {
+flex-shrink: 0;
+margin-top: 2px;
+}
+
+/* Next Module */
+.next-module {
+background: linear-gradient(135deg, rgba(0, 217, 255, 0.1), rgba(108, 99, 255, 0.1));
+border: 2px solid rgba(0, 217, 255, 0.3);
+border-radius: var(--border-radius-card);
+padding: 28px 32px;
+margin: 24px 0;
+display: flex;
+align-items: center;
+gap: 20px;
+transition: all var(--transition-normal);
+}
+
+.next-module:hover {
+transform: translateY(-2px);
+box-shadow: var(--shadow-card-hover);
+}
+
+.next-module .next-icon {
+width: 56px;
+height: 56px;
+background: linear-gradient(135deg, var(--secondary), #00a8cc);
+border-radius: 14px;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 1.5rem;
+flex-shrink: 0;
+}
+
+.next-module .next-info h4 {
+color: var(--text-primary);
+font-size: 1.1rem;
+font-weight: 700;
+margin-bottom: 4px;
+}
+
+.next-module .next-info p {
+color: var(--text-secondary);
+font-size: 0.9rem;
+}
+
+/* Footer */
+.footer {
+margin-left: var(--sidebar-width);
+background: rgba(15, 10, 30, 0.8);
+backdrop-filter: blur(10px);
+-webkit-backdrop-filter: blur(10px);
+border-top: 1px solid rgba(108, 99, 255, 0.15);
+padding: 32px 48px;
+}
+
+.footer-content {
+max-width: 900px;
+margin: 0 auto;
+display: flex;
+justify-content: space-between;
+align-items: center;
+flex-wrap: wrap;
+gap: 16px;
+}
+
+.footer-left p {
+color: rgba(255,255,255,0.5);
+font-size: 0.85rem;
+}
+
+.footer-left p strong {
+color: rgba(255,255,255,0.8);
+}
+
+.footer-right {
+display: flex;
+gap: 20px;
+}
+
+.footer-right a {
+color: rgba(255,255,255,0.4);
+text-decoration: none;
+font-size: 0.85rem;
+transition: color var(--transition-fast);
+}
+
+.footer-right a:hover {
+color: var(--primary-light);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+.menu-toggle {
+display: block;
+}
+
+.sidebar {
+transform: translateX(-100%);
+z-index: 10001;
+}
+
+.sidebar.open {
+transform: translateX(0);
+}
+
+.sidebar-overlay {
+display: none;
+position: fixed;
+inset: 0;
+background: rgba(0,0,0,0.5);
+z-index: 10000;
+}
+
+.sidebar-overlay.open {
+display: block;
+}
+
+.main-content {
+margin-left: 0;
+}
+
+.content-wrapper {
+padding: 24px 20px 60px;
+}
+
+.footer {
+margin-left: 0;
+padding: 24px 20px;
+}
+
+.hero h1 {
+font-size: 1.8rem;
+}
+
+.hero-subtitle {
+font-size: 1rem;
+}
+
+.section-title {
+font-size: 1.4rem;
+}
+
+.card {
+padding: 20px 24px;
+}
+
+.simulator {
+padding: 20px;
+}
+
+.challenge-card {
+padding: 20px;
+}
+
+.footer-content {
+flex-direction: column;
+text-align: center;
+}
+
+.tabs-header {
+overflow-x: auto;
+}
+
+.tab-btn {
+padding: 8px 14px;
+font-size: 0.8rem;
+}
+
+.next-module {
+flex-direction: column;
+text-align: center;
+}
+}
+
+@media (max-width: 480px) {
+.hero h1 {
+font-size: 1.5rem;
+}
+
+.hero-meta {
+flex-direction: column;
+align-items: center;
+}
+
+.section-header {
+flex-direction: column;
+align-items: flex-start;
+gap: 12px;
+}
+
+.simulator-actions {
+flex-direction: column;
+}
+
+.btn {
+justify-content: center;
+width: 100%;
+}
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+width: 8px;
+}
+
+::-webkit-scrollbar-track {
+background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+background: rgba(108, 99, 255, 0.3);
+border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+background: rgba(108, 99, 255, 0.5);
+}
+
+/* Animations */
+@keyframes pulse {
+0%, 100% { opacity: 1; }
+50% { opacity: 0.6; }
+}
+
+.animate-pulse {
+animation: pulse 2s infinite;
+}
+
+/* Inline code */
+p code,
+li code,
+.info-text code {
+background: rgba(108, 99, 255, 0.1);
+color: var(--primary);
+padding: 2px 8px;
+border-radius: 4px;
+font-family: 'Fira Code', monospace;
+font-size: 0.85em;
+}
+
+/* Strong emphasis */
+strong {
+color: #b700ff;
+}
+
+/* Divider */
+.section-divider {
+height: 1px;
+background: linear-gradient(90deg, transparent, rgba(108, 99, 255, 0.3), transparent);
+margin: 48px 0;
+}
+
+/* Highlight text */
+.highlight {
+background: linear-gradient(135deg, rgba(108, 99, 255, 0.15), rgba(0, 217, 255, 0.1));
+padding: 2px 6px;
+border-radius: 4px;
+font-weight: 600;
+}
+
+/* Checklist interactive */
+.checklist-item {
+display: flex;
+align-items: center;
+gap: 12px;
+padding: 12px 16px;
+border-radius: var(--border-radius-element);
+cursor: pointer;
+transition: all var(--transition-fast);
+margin-bottom: 8px;
+background: rgba(255,255,255,0.05);
+border: 1px solid transparent;
+}
+
+.checklist-item:hover {
+background: rgba(108, 99, 255, 0.1);
+border-color: rgba(108, 99, 255, 0.2);
+}
+
+.checklist-item.checked {
+background: rgba(16, 185, 129, 0.1);
+border-color: rgba(16, 185, 129, 0.3);
+}
+
+.checklist-checkbox {
+width: 22px;
+height: 22px;
+border: 2px solid rgba(255,255,255,0.3);
+border-radius: 6px;
+display: flex;
+align-items: center;
+justify-content: center;
+flex-shrink: 0;
+transition: all var(--transition-fast);
+font-size: 0.7rem;
+color: transparent;
+}
+
+.checklist-item.checked .checklist-checkbox {
+background: var(--success);
+border-color: var(--success);
+color: white;
+}
+
+.checklist-text {
+color: rgba(255,255,255,0.7);
+font-size: 0.9rem;
+}
+
+.checklist-item.checked .checklist-text {
+color: rgba(255,255,255,0.9);
+text-decoration: line-through;
+}
+
+/* Rating stars */
+.stars-container {
+display: flex;
+gap: 4px;
+margin: 12px 0;
+}
+
+.star {
+font-size: 1.8rem;
+cursor: pointer;
+transition: all var(--transition-fast);
+color: rgba(255,255,255,0.2);
+}
+
+.star:hover,
+.star.active {
+color: var(--warning);
+transform: scale(1.2);
+}
+
+/* Progress steps */
+.progress-steps {
+display: flex;
+justify-content: space-between;
+margin: 32px 0 16px;
+position: relative;
+}
+
+.progress-steps::before {
+content: '';
+position: absolute;
+top: 20px;
+left: 40px;
+right: 40px;
+height: 3px;
+background: rgba(255,255,255,0.1);
+border-radius: 2px;
+}
+
+.progress-step {
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 8px;
+z-index: 1;
+}
+
+.step-circle {
+width: 40px;
+height: 40px;
+border-radius: 50%;
+background: rgba(255,255,255,0.1);
+border: 3px solid rgba(255,255,255,0.2);
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 0.85rem;
+font-weight: 700;
+color: rgba(255,255,255,0.5);
+transition: all var(--transition-fast);
+}
+
+.step-circle.active {
+background: var(--primary);
+border-color: var(--primary);
+color: white;
+box-shadow: 0 0 15px rgba(108, 99, 255, 0.5);
+}
+
+.step-circle.completed {
+background: var(--success);
+border-color: var(--success);
+color: white;
+}
+
+.step-label {
+font-size: 0.75rem;
+color: rgba(255,255,255,0.4);
+font-weight: 600;
+text-align: center;
+}
+
+.step-circle.active + .step-label,
+.step-circle.completed + .step-label {
+color: rgba(255,255,255,0.8);
+}
+</style>
+</head>
+<body>
+
+<!-- Progress Bar -->
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- Header -->
+<header class="header">
+<div class="header-logo">
+<div class="logo-icon">🤖</div>
+<span>IA na Prática</span>
+</div>
+<div class="header-nav">
+<div class="badge-timer">🕒 Módulo 1 · 90 min</div>
+<div class="badge-level">Básico</div>
+<button class="menu-toggle" id="menuToggle" aria-label="Abrir menu">☰</button>
+</div>
+</header>
+
+<!-- Sidebar Overlay (mobile) -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- Sidebar -->
+<nav class="sidebar" id="sidebar">
+<p class="sidebar-title">Navegação</p>
+<ul class="sidebar-nav">
+<li><a href="#intro" class="active"><span class="nav-icon">📋</span>Introdução</a></li>
+<li><a href="#sec-1"><span class="nav-icon">🧠</span>1.1 O "Cérebro" da IA<span class="nav-section-num">01</span></a></li>
+<li><a href="#sec-2"><span class="nav-icon">📝</span>1.2 Método C.T.F.R.<span class="nav-section-num">02</span></a></li>
+<li><a href="#sec-3"><span class="nav-icon">⚡</span>1.3 Técnicas Avançadas<span class="nav-section-num">03</span></a></li>
+<li><a href="#sec-sim"><span class="nav-icon">🧪</span>Exercício Prático<span class="nav-section-num">04</span></a></li>
+<li><a href="#sec-deep"><span class="nav-icon">🔬</span>Aprofundamento<span class="nav-section-num">05</span></a></li>
+<li><a href="#sec-summary"><span class="nav-icon">📝</span>Resumo Final<span class="nav-section-num">06</span></a></li>
+</ul>
+
+<p class="sidebar-title" style="margin-top:24px;">Progresso</p>
+<div style="padding: 0 12px;">
+<div style="background:rgba(255,255,255,0.1);border-radius:6px;height:6px;overflow:hidden;margin-bottom:8px;">
+<div id="sidebarProgress" style="height:100%;width:0%;background:linear-gradient(90deg,var(--primary),var(--secondary));border-radius:6px;transition:width 0.3s ease;"></div>
+</div>
+<p id="progressPercent" style="color:rgba(255,255,255,0.5);font-size:0.75rem;">0% concluído</p>
+</div>
+</nav>
+
+<!-- Main Content -->
+<main class="main-content">
+<div class="content-wrapper">
+
+<!-- Hero Section -->
+<section class="hero" id="intro">
+<div class="hero-badge">🎓 Módulo 1 de 5 · Curso Completo</div>
+<h1>A Arte da <span>Engenharia de Prompt</span></h1>
+<p class="hero-subtitle">Domine as técnicas para criar prompts perfeitos e extrair o máximo potencial das IAs generativas de última geração.</p>
+
+<div class="hero-image">
+<img src="https://image.qwenlm.ai/public_source/86b25ad9-e1b6-4641-913f-121aa9370f10/1b794b9bc-8a01-4b97-9724-247ae5785358.png" alt="Ilustração representando inteligência artificial e engenharia de prompts, com um cérebro digital cercado por balões de fala contendo exemplos de prompts" loading="eager">
+</div>
+
+<div class="hero-meta">
+<div class="hero-meta-item"><span>👨🏫</span> Prof. Vitório Netto</div>
+<div class="hero-meta-item"><span>⏱️</span> 90 minutos</div>
+<div class="hero-meta-item"><span>📊</span> Nível Básico</div>
+<div class="hero-meta-item"><span>🎯</span> 3 Objetivos de Aprendizagem</div>
+</div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- Introduction Card -->
+<section class="section" id="intro-content">
+<div class="section-header">
+<div class="section-number">📋</div>
+<h2 class="section-title"><small>Introdução</small>Objetivos de Aprendizagem</h2>
+</div>
+
+<div class="card">
+<div class="card-title"><span class="card-icon">🎯</span> O que você vai aprender neste módulo</div>
+<p>Neste módulo, você vai compreender como os modelos de linguagem funcionam internamente e aprender frameworks práticos para criar prompts que geram resultados consistentes e de alta qualidade.</p>
+
+<div style="margin-top:20px;">
+<div class="checklist-item" onclick="toggleChecklist(this)">
+<div class="checklist-checkbox">✓</div>
+<span class="checklist-text">Entender como as LLMs processam e geram texto</span>
+</div>
+<div class="checklist-item" onclick="toggleChecklist(this)">
+<div class="checklist-checkbox">✓</div>
+<span class="checklist-text">Dominar o framework C.T.F.R. para prompts perfeitos</span>
+</div>
+<div class="checklist-item" onclick="toggleChecklist(this)">
+<div class="checklist-checkbox">✓</div>
+<span class="checklist-text">Aplicar técnicas avançadas como Few-Shot e Chain-of-Thought</span>
+</div>
+<div class="checklist-item" onclick="toggleChecklist(this)">
+<div class="checklist-checkbox">✓</div>
+<span class="checklist-text">Praticar com o simulador interativo de engenharia de prompt</span>
+</div>
+</div>
+</div>
+
+<!-- Progress Steps -->
+<div class="card" style="background:rgba(26,16,64,0.6);border-color:rgba(108,99,255,0.2);color:white;">
+<div class="card-title" style="color:white;"><span class="card-icon">🗺️</span> Estrutura do Módulo</div>
+<div class="progress-steps">
+<div class="progress-step">
+<div class="step-circle active">1</div>
+<span class="step-label">Conceito</span>
+</div>
+<div class="progress-step">
+<div class="step-circle">2</div>
+<span class="step-label">Framework</span>
+</div>
+<div class="progress-step">
+<div class="step-circle">3</div>
+<span class="step-label">Técnicas</span>
+</div>
+<div class="progress-step">
+<div class="step-circle">4</div>
+<span class="step-label">Prática</span>
+</div>
+<div class="progress-step">
+<div class="step-circle">5</div>
+<span class="step-label">Avançado</span>
+</div>
+</div>
+</div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- Section 1.1: O Cérebro da IA -->
+<section class="section" id="sec-1">
+<div class="section-header">
+<div class="section-number">1</div>
+<h2 class="section-title"><small>1.1 O "Cérebro" da IA</small>Como as LLMs realmente funcionam</h2>
+</div>
+
+<div class="card">
+<div class="card-title"><span class="card-icon">🧠</span> Tokens e Probabilidade</div>
+<p>As LLMs (<strong>Large Language Models</strong>) não "pensam" no sentido humano. Elas <strong>preveem o próximo token</strong> (pedaço de palavra) com base em <span class="highlight">probabilidade estatística</span>.</p>
+<p>Imagine uma máquina de escrever super sofisticada que já leu praticamente tudo que foi escrito na internet — ela sabe qual palavra provavelmente vem a seguir em qualquer contexto.</p>
+</div>
+
+<div class="info-box info-info">
+<span class="info-icon">💡</span>
+<div class="info-content">
+<div class="info-label">Dica de Ouro</div>
+<div class="info-text">Quanto mais <strong>contexto e clareza</strong> você der ao modelo, menor a chance de <strong>"alucinação"</strong> — quando a IA inventa informações falsas com total convicção.</div>
+</div>
+</div>
+
+<div class="card">
+<div class="card-title"><span class="card-icon">🔄</span> Como funciona o processo de geração</div>
+<p>Quando você faz um prompt, a IA segue este processo:</p>
+<ol style="margin:12px 0 0 20px;color:var(--text-secondary);line-height:2;">
+<li><strong>Tokenização:</strong> Seu texto é dividido em tokens (pedaços de palavras)</li>
+<li><strong>Contextualização:</strong> A IA analisa o contexto dos tokens anteriores</li>
+<li><strong>Previsão:</strong> Calcula a probabilidade de cada token possível</li>
+<li><strong>Amostragem:</strong> Seleciona o próximo token baseado nessas probabilidades</li>
+<li><strong>Repetição:</strong> Repete o processo até completar a resposta</li>
+</ol>
+</div>
+
+<!-- Interactive: Token Visualizer -->
+<div class="simulator">
+<div class="simulator-title"> Simulador: Como a IA "enxerga" seu texto</div>
+<div class="simulator-subtitle">Digite um texto e veja como ele é quebrado em tokens — o primeiro passo no processo da IA.</div>
+
+<div class="simulator-field">
+<label><span class="field-icon">✍️</span> Digite seu texto</label>
+<input type="text" id="tokenInput" placeholder="Ex: Olá, como você está?" value="Olá, como você está?">
+</div>
+
+<button class="btn btn-primary" onclick="visualizeTokens()">
+<span></span> Visualizar Tokens
+</button>
+
+<div class="simulator-result" id="tokenResult">
+<div class="result-header">
+<span>🧬</span> Resultado da Tokenização
+</div>
+<div class="result-text" id="tokenOutput"></div>
+<div style="margin-top:12px;color:rgba(255,255,255,0.5);font-size:0.8rem;">
+<span id="tokenCount"></span>
+</div>
+</div>
+</div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- Section 1.2: Método C.T.F.R. -->
+<section class="section" id="sec-2">
+<div class="section-header">
+<div class="section-number">2</div>
+<h2 class="section-title"><small>1.2 Framework de Escrita</small>O Método C.T.F.R.</h2>
+</div>
+
+<div class="card">
+<div class="card-title"><span class="card-icon">🏗️</span> Os 4 Pilares do Prompt Perfeito</div>
+<p>Para um prompt perfeito, utilize sempre estes <strong>quatro pilares</strong>. Pense no C.T.F.R. como uma receita: cada ingrediente é essencial para o resultado final.</p>
+</div>
+
+<!-- Tabs for C.T.F.R. -->
+<div class="tabs-container">
+<div class="tabs-header">
+<button class="tab-btn active" onclick="switchTab(event, 'tab-context')">
+<span>🎭</span> Contexto
+</button>
+<button class="tab-btn" onclick="switchTab(event, 'tab-tarefa')">
+<span>📌</span> Tarefa
+</button>
+<button class="tab-btn" onclick="switchTab(event, 'tab-formato')">
+<span>📐</span> Formato
+</button>
+<button class="tab-btn" onclick="switchTab(event, 'tab-restricoes')">
+<span>🚫</span> Restrições
+</button>
+</div>
+
+<div class="tab-content active" id="tab-context">
+<div class="card">
+<div class="card-title"><span class="card-icon">🎭</span> Contexto <span class="badge badge-info">Pilar 1</span></div>
+<p><strong>Quem a IA deve ser?</strong> Dar contexto define a persona, expertise e tom da resposta.</p>
+<p style="margin-top:12px;"><strong>Exemplo:</strong></p>
+</div>
+
+<div class="code-block">
+<div class="code-block-header">
+<div class="code-block-lang">
+<span class="lang-dot" style="background:#a6e3a1;"></span>
+Prompt com Contexto
+</div>
+<button class="copy-btn" onclick="copyCode(this)">
+📋 Copiar
+<span class="copy-tooltip">Clique para copiar</span>
+</button>
+</div>
+<pre><code><span class="token-comment">// ❌ Sem contexto:</span>
+"Escreva um texto sobre marketing."</code></pre>
+</div>
+
+<div class="code-block">
+<div class="code-block-header">
+<div class="code-block-lang">
+<span class="lang-dot" style="background:#89b4fa;"></span>
+Prompt com Contexto Forte
+</div>
+<button class="copy-btn" onclick="copyCode(this)">
+📋 Copiar
+<span class="copy-tooltip">Clique para copiar</span>
+</button>
+</div>
+<pre><code><span class="token-comment">// ✅ Com contexto:</span>
+<span class="token-string">"Atue como um especialista em marketing jurídico
+com 15 anos de experiência em escritórios de
+advocacia de médio porte."</span></code></pre>
+</div>
+</div>
+
+<div class="tab-content" id="tab-tarefa">
+<div class="card">
+<div class="card-title"><span class="card-icon">📌</span> Tarefa <span class="badge badge-primary">Pilar 2</span></div>
+<p><strong>O que deve ser feito?</strong> A tarefa deve ser clara, específica e acionável.</p>
+<p style="margin-top:12px;"><strong>Exemplo:</strong></p>
+</div>
+
+<div class="code-block">
+<div class="code-block-header">
+<div class="code-block-lang">
+<span class="lang-dot" style="background:#a6e3a1;"></span>
+Tarefa Vaga vs. Específica
+</div>
+<button class="copy-btn" onclick="copyCode(this)">
+📋 Copiar
+<span class="copy-tooltip">Clique para copiar</span>
+</button>
+</div>
+<pre><code><span class="token-comment">// ❌ Tarefa vaga:</span>
+<span class="token-string">"Me ajude com marketing."</span>
+
+<span class="token-comment">// ✅ Tarefa específica:</span>
+<span class="token-string">"Crie um cronograma de postagens para o LinkedIn
+com 5 posts por semana para o próximo mês."</span></code></pre>
+</div>
+</div>
+
+<div class="tab-content" id="tab-formato">
+<div class="card">
+<div class="card-title"><span class="card-icon">📐</span> Formato <span class="badge badge-success">Pilar 3</span></div>
+<p><strong>Como deve ser entregue?</strong> Definir o formato garante que o resultado seja exatamente como você precisa.</p>
+<p style="margin-top:12px;"><strong>Formatos comuns:</strong></p>
+<ul style="margin:8px 0 0 20px;color:var(--text-secondary);">
+<li>Tabela com colunas específicas</li>
+<li>Lista numerada</li>
+<li>Texto em parágrafos curtos</li>
+<li>JSON estruturado</li>
+<li>Markdown formatado</li>
+</ul>
+</div>
+
+<div class="code-block">
+<div class="code-block-header">
+<div class="code-block-lang">
+<span class="lang-dot" style="background:#89dceb;"></span>
+Definindo o Formato
+</div>
+<button class="copy-btn" onclick="copyCode(this)">
+📋 Copiar
+<span class="copy-tooltip">Clique para copiar</span>
+</button>
+</div>
+<pre><code><span class="token-string">"Entregue o resultado em formato de tabela,
+com colunas para: Tema, Legenda, Hashtags e
+Horário de Publicação."</span></code></pre>
+</div>
+</div>
+
+<div class="tab-content" id="tab-restricoes">
+<div class="card">
+<div class="card-title"><span class="card-icon"></span> Restrições <span class="badge badge-warning">Pilar 4</span></div>
+<p><strong>O que evitar?</strong> Restrições previnem resultados indesejados e refinam o output.</p>
+<p style="margin-top:12px;"><strong>Tipos de restrições:</strong></p>
+<ul style="margin:8px 0 0 20px;color:var(--text-secondary);">
+<li>Tom e linguagem</li>
+<li>Comprimento do texto</li>
+<li>Público-alvo</li>
+<li>Informações a excluir</li>
+</ul>
+</div>
+
+<div class="code-block">
+<div class="code-block-header">
+<div class="code-block-lang">
+<span class="lang-dot" style="background:#fab387;"></span>
+Aplicando Restrições
+</div>
+<button class="copy-btn" onclick="copyCode(this)">
+📋 Copiar
+<span class="copy-tooltip">Clique para copiar</span>
+</button>
+</div>
+<pre><code><span class="token-string">"Não use termos técnicos complexos.
+Mantenha um tom profissional mas acessível.
+Limite cada legenda a 3 linhas no máximo."</span></code></pre>
+</div>
+</div>
+</div>
+
+<!-- C.T.F.R. Complete Example -->
+<div class="card" style="margin-top:24px;">
+<div class="card-title"><span class="card-icon">✨</span> Exemplo Completo: C.T.F.R. na Prática</div>
+<p>Juntando todos os 4 pilares em um único prompt poderoso:</p>
+</div>
+
+<div class="code-block">
+<div class="code-block-header">
+<div class="code-block-lang">
+<span class="lang-dot" style="background:#f5c2e7;"></span>
+Prompt Completo — C.T.F.R.
+</div>
+<button class="copy-btn" onclick="copyCode(this)">
+ Copiar
+<span class="copy-tooltip">Clique para copiar</span>
+</button>
+</div>
+<pre><code><span class="token-comment">// 🎭 CONTEXTO</span>
+<span class="token-string">"Atue como um especialista em marketing jurídico
+com 15 anos de experiência."</span>
+
+<span class="token-comment">// 📌 TAREFA</span>
+<span class="token-string">"Crie um cronograma de postagens para o LinkedIn
+com 5 posts por semana para o próximo mês."</span>
+
+<span class="token-comment">// 📐 FORMATO</span>
+<span class="token-string">"Em formato de tabela, com colunas para:
+Tema, Legenda, Hashtags e Horário."</span>
+
+<span class="token-comment">// 🚫 RESTRIÇÕES</span>
+<span class="token-string">"Não use termos técnicos complexos.
+Mantenha tom profissional mas acessível.
+Máximo de 3 linhas por legenda."</span></code></pre>
+</div>
+
+<!-- Comparison Table -->
+<div class="table-wrapper">
+<table>
+<thead>
+<tr>
+<th>Pilar</th>
+<th>O que faz</th>
+<th>Exemplo rápido</th>
+<th>Impacto</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>🎭 Contexto</td>
+<td>Define quem a IA é</td>
+<td>"Atue como especialista em..."</td>
+<td><span class="badge badge-info">Alto</span></td>
+</tr>
+<tr>
+<td>📌 Tarefa</td>
+<td>Define o que fazer</td>
+<td>"Crie um cronograma de..."</td>
+<td><span class="badge badge-primary">Crítico</span></td>
+</tr>
+<tr>
+<td>📐 Formato</td>
+<td>Define como entregar</td>
+<td>"Em formato de tabela com..."</td>
+<td><span class="badge badge-success">Médio</span></td>
+</tr>
+<tr>
+<td>🚫 Restrições</td>
+<td>Define limites</td>
+<td>"Não use termos técnicos..."</td>
+<td><span class="badge badge-warning">Alto</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<!-- Expandable Hints -->
+<div style="margin-top:24px;">
+<h3 style="color:white;font-size:1.1rem;margin-bottom:12px;">💡 Dicas e Observações</h3>
+
+<div style="background:rgba(255,255,255,0.05);border-radius:12px;overflow:hidden;margin-bottom:8px;">
+<button class="hint-toggle" onclick="toggleHint(this)">
+<span>❓</span> E se eu esquecer um dos pilares?
+<span class="hint-arrow">▼</span>
+</button>
+<div class="hint-content">
+<p>Não precisa ser rígido! Você pode omitir um pilar se não for relevante. Por exemplo, se o formato não importa, pule. Mas <strong>Contexto</strong> e <strong>Tarefa</strong> são quase sempre essenciais.</p>
+</div>
+</div>
+
+<div style="background:rgba(255,255,255,0.05);border-radius:12px;overflow:hidden;margin-bottom:8px;">
+<button class="hint-toggle" onclick="toggleHint(this)">
+<span>❓</span> Posso combinar C.T.F.R. com outras técnicas?
+<span class="hint-arrow">▼</span>
+</button>
+<div class="hint-content">
+<p>Absolutamente! O C.T.F.R. é a <strong>base estrutural</strong>. Na próxima seção, veremos como adicionar Few-Shot Prompting e Chain-of-Thought para resultados ainda melhores.</p>
+</div>
+</div>
+
+<div style="background:rgba(255,255,255,0.05);border-radius:12px;overflow:hidden;margin-bottom:8px;">
+<button class="hint-toggle" onclick="toggleHint(this)">
+<span>❓</span> A ordem dos pilares importa?
+<span class="hint-arrow">▼</span>
+</button>
+<div class="hint-content">
+<p>A ordem mais natural é <strong>Contexto → Tarefa → Formato → Restrições</strong>, mas você pode adaptar. O importante é que todos os elementos relevantes estejam presentes.</p>
+</div>
+</div>
+</div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- Section 1.3: Técnicas Avançadas -->
+<section class="section" id="sec-3">
+<div class="section-header">
+<div class="section-number">3</div>
+<h2 class="section-title"><small>1.3 Técnicas Avançadas</small>Elevando seus prompts ao próximo nível</h2>
+</div>
+
+<div class="card">
+<div class="card-title"><span class="card-icon">🚀</span> Duas técnicas que transformam resultados</div>
+<p>Depois de dominar o C.T.F.R., estas técnicas vão levar seus prompts a um patamar completamente novo.</p>
+</div>
+
+<!-- Technique 1: Few-Shot -->
+<div class="card">
+<div class="card-title"><span class="card-icon">🎯</span> Few-Shot Prompting <span class="badge badge-primary">Intermediário</span></div>
+<p><strong>Dê 2 ou 3 exemplos do que você quer</strong> antes de pedir o resultado final. A IA aprende pelo exemplo!</p>
+<p>Essa técnica funciona porque o modelo identifica <span class="highlight">padrões de raciocínio</span> nos exemplos e os replica na resposta.</p>
+</div>
+
+<div class="code-block">
+<div class="code-block-header">
+<div class="code-block-lang">
+<span class="lang-dot" style="background:#f5c2e7;"></span>
+Few-Shot Prompting — Exemplo Completo
+</div>
+<button class="copy-btn" onclick="copyCode(this)">
+📋 Copiar
+<span class="copy-tooltip">Clique para copiar</span>
+</button>
+</div>
+<pre><code><span class="token-string">"Classifique o sentimento dos seguintes textos:
+
+Texto: 'Estou muito feliz com o resultado!'
+Sentimento: Positivo
+
+Texto: 'O atendimento foi péssimo, não recomendo.'
+Sentimento: Negativo
+
+Texto: 'O produto chegou no prazo, sem surpresas.'
+Sentimento: Neutro
+
+Texto: 'Incrível experiência! Superou todas as expectativas!'
+Sentimento: "</span></code></pre>
+</div>
+
+<!-- Technique 2: Chain-of-Thought -->
+<div class="card" style="margin-top:24px;">
+<div class="card-title"><span class="card-icon"></span> Chain-of-Thought <span class="badge badge-warning">Avançado</span></div>
+<p><strong>Adicione "Pense passo a passo antes de responder"</strong> para melhorar o raciocínio da IA em tarefas lógicas e complexas.</p>
+<p>Essa técnica força o modelo a <span class="highlight">expor seu raciocínio</span>, o que reduz erros e alucinações significativamente.</p>
+</div>
+
+<div class="code-block">
+<div class="code-block-header">
+<div class="code-block-lang">
+<span class="lang-dot" style="background:#89dceb;"></span>
+Chain-of-Thought — Exemplo
+</div>
+<button class="copy-btn" onclick="copyCode(this)">
+📋 Copiar
+<span class="copy-tooltip">Clique para copiar</span>
+</button>
+</div>
+<pre><code><span class="token-string">"Uma loja tem 50 unidades de um produto.
+Vendeu 15 na segunda, 8 na terça e 12 na quarta.
+Quantas unidades restam?
+
+Pense passo a passo antes de responder."</span>
+
+<span class="token-comment">// Resultado esperado (com raciocínio exposto):</span>
+<span class="token-string">"Vamos calcular passo a passo:
+1. Estoque inicial: 50 unidades
+2. Segunda: 50 - 15 = 35 unidades
+3. Terça: 35 - 8 = 27 unidades
+4. Quarta: 27 - 12 = 15 unidades
+
+Resposta: Restam 15 unidades."</span></code></pre>
+</div>
+
+<!-- Comparison: Com e Sem Chain-of-Thought -->
+<div class="table-wrapper" style="margin-top:24px;">
+<table>
+<thead>
+<tr>
+<th>Critério</th>
+<th>Sem CoT</th>
+<th>Com Chain-of-Thought</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Precisão</td>
+<td>~65-70%</td>
+<td><strong>~85-95%</strong></td>
+</tr>
+<tr>
+<td>Raciocínio lógico</td>
+<td>Básico</td>
+<td><strong>Detalhado</strong></td>
+</tr>
+<tr>
+<td>Transparência</td>
+<td>Resultado direto</td>
+<td><strong>Raciocínio visível</strong></td>
+</tr>
+<tr>
+<td>Melhor para</td>
+<td>Questões simples</td>
+<td><strong>Problemas complexos</strong></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<!-- Interactive: Few-Shot Demo -->
+<div class="simulator" style="margin-top:24px;">
+<div class="simulator-title"> Demo Interativa: Few-Shot Prompting</div>
+<div class="simulator-subtitle">Veja como exemplos transformam a qualidade da resposta da IA.</div>
+
+<div class="tabs-header" style="margin-bottom:16px;">
+<button class="tab-btn active" onclick="switchDemoTab(event, 'demo-ruim')">
+<span>😟</span> Sem Exemplos
+</button>
+<button class="tab-btn" onclick="switchDemoTab(event, 'demo-bom')">
+<span></span> Com Few-Shot
+</button>
+</div>
+
+<div class="tab-content active" id="demo-ruim" style="padding-top:0;">
+<div class="code-block" style="margin:0;">
+<div class="code-block-header">
+<div class="code-block-lang">
+<span class="lang-dot" style="background:#f38ba8;"></span>
+Prompt Sem Few-Shot
+</div>
+</div>
+<pre><code><span class="token-string">"Classifique o sentimento: 'O serviço foi razoável,
+mas o preço é muito alto para a qualidade oferecida.'"
+
+Resposta da IA: <span class="token-variable">"Misto"</span>
+<span class="token-comment">// ❌ Genérico, sem nuance</span></code></pre>
+</div>
+</div>
+
+<div class="tab-content" id="demo-bom" style="padding-top:0;">
+<div class="code-block" style="margin:0;">
+<div class="code-block-header">
+<div class="code-block-lang">
+<span class="lang-dot" style="background:#a6e3a1;"></span>
+Prompt Com Few-Shot (3 Exemplos)
+</div>
+</div>
+<pre><code><span class="token-string">"Classifique o sentimento em:
+Positivo, Negativo, Neutro ou Misto-Preço.
+
+Ex1: 'Adorei o produto, superou expectativas!' → Positivo
+Ex2: 'Péssimo atendimento, nunca mais volto.' → Negativo
+Ex3: 'Entregaram no prazo combinado.' → Neutro
+Ex4: 'Produto bom, mas caro demais.' → Misto-Preço
+
+Agora classifique: 'O serviço foi razoável,
+mas o preço é muito alto para a qualidade oferecida.'
+
+Resposta da IA: <span class="token-variable">"Misto-Preço"</span>
+<span class="token-comment">// ✅ Preciso, com nuance específica!</span></code></pre>
+</div>
+</div>
+</div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- Section: Exercício Prático -->
+<section class="section" id="sec-sim">
+<div class="section-header">
+<div class="section-number">4</div>
+<h2 class="section-title"><small>Exercício Prático 1</small>Simulador C.T.F.R. Interativo</h2>
+</div>
+
+<div class="card">
+<div class="card-title"><span class="card-icon">🧪</span> Desafio: Transforme um prompt básico</div>
+<p>Seu desafio: transformar o prompt <code>"Escreva um e-mail para um cliente"</code> usando o método C.T.F.R. para um caso real de <strong>atraso na entrega de um projeto</strong>.</p>
+<p>Use o simulador abaixo para construir seu prompt passo a passo!</p>
+</div>
+
+<div class="challenge-card">
+<div class="challenge-header">
+<span class="challenge-icon">🎯</span>
+<h3>Critérios de Avaliação</h3>
+</div>
+<p style="color:#0bff42;">Seu prompt será avaliado em cada pilar do C.T.F.R. Tente maximizar sua pontuação!</p>
+<ul class="challenge-criteria">
+<li><span class="criteria-icon">🎭</span> O Contexto define uma persona específica</li>
+<li><span class="criteria-icon">📌</span> A Tarefa é clara e específica sobre o e-mail</li>
+<li><span class="criteria-icon">📐</span> O Formato define estrutura esperada do e-mail</li>
+<li><span class="criteria-icon">🚫</span> As Restrições estabelecem limites claros</li>
+<li><span class="criteria-icon">⭐</span> Bônus: Inclui técnica Few-Shot ou Chain-of-Thought</li>
+</ul>
+</div>
+
+<!-- C.T.F.R. Simulator -->
+<div class="simulator">
+<div class="simulator-title">🛠️ Simulador: Construtor de Prompts C.T.F.R.</div>
+<div class="simulator-subtitle">Preencha cada campo e clique em "Gerar Prompt" para ver o resultado completo.</div>
+
+<div class="simulator-field">
+<label><span class="field-icon">🎭</span> Contexto — Quem a IA deve ser?</label>
+<textarea id="ctxContexto" placeholder="Ex: Atue como um gerente de projetos experiente em comunicação com clientes..."></textarea>
+</div>
+
+<div class="simulator-field">
+<label><span class="field-icon">📌</span> Tarefa — O que deve ser feito?</label>
+<textarea id="ctxTarefa" placeholder="Ex: Escreva um e-mail profissional comunicando um atraso de 1 semana na entrega..."></textarea>
+</div>
+
+<div class="simulator-field">
+<label><span class="field-icon">📐</span> Formato — Como deve ser entregue?</label>
+<textarea id="ctxFormato" placeholder="Ex: Em formato de e-mail com: assunto, saudação, corpo com 3 parágrafos e assinatura..."></textarea>
+</div>
+
+<div class="simulator-field">
+<label><span class="field-icon">🚫</span> Restrições — O que evitar?</label>
+<textarea id="ctxRestricoes" placeholder="Ex: Não use desculpas genéricas, não mencione problemas internos, mantenha tom profissional..."></textarea>
+</div>
+
+<div class="simulator-field">
+<label><span class="field-icon">⚡</span> Bônus — Técnica Avançada (opcional)</label>
+<input type="text" id="ctxBonus" placeholder="Ex: Inclua 1 exemplo de tom antes de gerar | Pense passo a passo">
+</div>
+
+<div class="simulator-actions">
+<button class="btn btn-primary" onclick="generateCTFR()">
+<span>⚡</span> Gerar Prompt Completo
+</button>
+<button class="btn btn-secondary" onclick="clearCTFR()">
+<span>🔄</span> Limpar
+</button>
+<button class="btn btn-secondary" onclick="loadExample()">
+<span>📋</span> Carregar Exemplo
+</button>
+</div>
+
+<!-- Score -->
+<div id="scoreDisplay" style="display:none;margin-top:20px;">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+<span style="font-weight:700;color:var(--text-primary);font-size:0.9rem;">📊 Pontuação C.T.F.R.</span>
+<span id="scoreValue" style="font-weight:700;color:var(--primary);font-size:1.1rem;"></span>
+</div>
+<div style="background:#e5e7eb;border-radius:6px;height:10px;overflow:hidden;">
+<div id="scoreBar" style="height:100%;width:0%;border-radius:6px;transition:width 0.8s ease;background:linear-gradient(90deg,var(--danger),var(--warning),var(--success));"></div>
+</div>
+</div>
+
+<!-- Generated Prompt -->
+<div class="simulator-result" id="generatedPrompt">
+<div class="result-header">
+<span>✨</span> Seu Prompt Gerado
+</div>
+<div class="result-text" id="promptOutput"></div>
+<button class="copy-btn" onclick="copyCode(this)" style="margin-top:12px;background:rgba(255,255,255,0.15);color:rgba(255,255,255,0.8);border-color:rgba(255,255,255,0.2);">
+📋 Copiar Prompt
+<span class="copy-tooltip">Clique para copiar</span>
+</button>
+</div>
+</div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- Section: Aprofundamento -->
+<section class="section" id="sec-deep">
+<div class="section-header">
+<div class="section-number">5</div>
+<h2 class="section-title"><small>Aprofundamento</small>Técnicas Avançadas de Prompt Engineering</h2>
+</div>
+
+<div class="card">
+<div class="card-title"><span class="card-icon">🔬</span> Técnicas que os especialistas usam</div>
+<p>Agora que você domina o básico, estas técnicas vão separar você dos amadores. São usadas por engenheiros de prompt profissionais.</p>
+</div>
+
+<!-- Advanced Technique Tabs -->
+<div class="tabs-container">
+<div class="tabs-header">
+<button class="tab-btn active" onclick="switchAdvTab(event, 'adv-tree')">
+<span>🌳</span> Tree of Thoughts
+</button>
+<button class="tab-btn" onclick="switchAdvTab(event, 'adv-self')">
+<span>🪞</span> Self-Reflection
+</button>
+<button class="tab-btn" onclick="switchAdvTab(event, 'adv-role')">
+<span>🎭</span> Role Stacking
+</button>
+</div>
+
+<div class="tab-content active" id="adv-tree">
+<div class="card">
+<div class="card-title"><span class="card-icon">🌳</span> Tree of Thoughts</div>
+<p>Em vez de uma única linha de raciocínio, peça à IA para <strong>explorar múltiplas abordagens</strong> antes de decidir a melhor.</p>
+</div>
+<div class="code-block">
+<div class="code-block-header">
+<div class="code-block-lang">
+<span class="lang-dot" style="background:#a6e3a1;"></span>
+Tree of Thoughts
+</div>
+<button class="copy-btn" onclick="copyCode(this)">
+📋 Copiar
+<span class="copy-tooltip">Clique para copiar</span>
+</button>
+</div>
+<pre><code><span class="token-string">"Para resolver este problema, gere 3 abordagens
+diferentes. Para cada uma, liste prós e contras.
+Depois, escolha a melhor com justificativa."</span></code></pre>
+</div>
+</div>
+
+<div class="tab-content" id="adv-self">
+<div class="card">
+<div class="card-title"><span class="card-icon">🪞</span> Self-Reflection</div>
+<p>Peça à IA para <strong>revisar e corrigir sua própria resposta</strong>. Isso melhora significativamente a qualidade do output.</p>
+</div>
+<div class="code-block">
+<div class="code-block-header">
+<div class="code-block-lang">
+<span class="lang-dot" style="background:#89dceb;"></span>
+Self-Reflection
+</div>
+<button class="copy-btn" onclick="copyCode(this)">
+📋 Copiar
+<span class="copy-tooltip">Clique para copiar</span>
+</button>
+</div>
+<pre><code><span class="token-string">"Gere uma resposta inicial. Depois, critique
+sua própria resposta identificando falhas.
+Finalmente, gere uma versão melhorada
+corrigindo os problemas identificados."</span></code></pre>
+</div>
+</div>
+
+<div class="tab-content" id="adv-role">
+<div class="card">
+<div class="card-title"><span class="card-icon"></span> Role Stacking</div>
+<p>Combine <strong>múltiplas personas</strong> para obter perspectivas ricas e multidisciplinares em uma única resposta.</p>
+</div>
+<div class="code-block">
+<div class="code-block-header">
+<div class="code-block-lang">
+<span class="lang-dot" style="background:#f5c2e7;"></span>
+Role Stacking
+</div>
+<button class="copy-btn" onclick="copyCode(this)">
+📋 Copiar
+<span class="copy-tooltip">Clique para copiar</span>
+</button>
+</div>
+<pre><code><span class="token-string">"Analise esta campanha de marketing sob 3
+perspectivas:
+1. Como especialista em SEO
+2. Como designer UX
+3. Como copywriter
+
+Para cada perspectiva, dê 3 recomendações
+específicas."</span></code></pre>
+</div>
+</div>
+</div>
+
+<!-- Comparison of all techniques -->
+<div class="table-wrapper" style="margin-top:24px;">
+<table>
+<thead>
+<tr>
+<th>Técnica</th>
+<th>Complexidade</th>
+<th>Melhor para</th>
+<th>Token Cost</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>🎭 C.T.F.R.</td>
+<td><span class="badge badge-success">Fácil</span></td>
+<td>Qualquer tarefa</td>
+<td>Baixo</td>
+</tr>
+<tr>
+<td>🎯 Few-Shot</td>
+<td><span class="badge badge-primary">Médio</span></td>
+<td>Classificação, padronização</td>
+<td>Médio</td>
+</tr>
+<tr>
+<td>🧩 Chain-of-Thought</td>
+<td><span class="badge badge-primary">Médio</span></td>
+<td>Raciocínio lógico, cálculos</td>
+<td>Médio</td>
+</tr>
+<tr>
+<td>🌳 Tree of Thoughts</td>
+<td><span class="badge badge-warning">Avançado</span></td>
+<td>Decisões complexas</td>
+<td>Alto</td>
+</tr>
+<tr>
+<td>🪞 Self-Reflection</td>
+<td><span class="badge badge-warning">Avançado</span></td>
+<td>Qualidade máxima</td>
+<td>Alto</td>
+</tr>
+<tr>
+<td>🎭 Role Stacking</td>
+<td><span class="badge badge-primary">Médio</span></td>
+<td>Análises multidisciplinares</td>
+<td>Médio</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- Section: Resumo Final -->
+<section class="section" id="sec-summary">
+<div class="section-header">
+<div class="section-number">6</div>
+<h2 class="section-title"><small>Resumo Final</small>Recapitulando o Módulo 1</h2>
+</div>
+
+<!-- Summary Card -->
+<div class="summary-card">
+<h3>✅ O que aprendemos hoje</h3>
+<ul class="summary-list">
+<li><span class="check">✓</span> As LLMs funcionam por <strong>previsão de tokens</strong> baseada em probabilidade estatística</li>
+<li><span class="check">✓</span> O framework <strong>C.T.F.R.</strong> (Contexto, Tarefa, Formato, Restrições) é a base para prompts perfeitos</li>
+<li><span class="check">✓</span> <strong>Few-Shot Prompting</strong> usa exemplos para guiar o modelo a padrões específicos</li>
+<li><span class="check">✓</span> <strong>Chain-of-Thought</strong> melhora raciocínio lógico expondo o processo de pensamento</li>
+<li><span class="check">✓</span> Técnicas avançadas como <strong>Tree of Thoughts</strong> e <strong>Self-Reflection</strong> elevam a qualidade</li>
+</ul>
+</div>
+
+<!-- Key Takeaways -->
+<div class="card">
+<div class="card-title"><span class="card-icon">💎</span> Takeaways Principais</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px;margin-top:16px;">
+<div style="background:rgba(108,99,255,0.06);padding:16px;border-radius:12px;border-left:4px solid var(--primary);">
+<p style="font-weight:700;color:var(--text-primary);font-size:0.9rem;">🎯 Regra de Ouro</p>
+<p style="font-size:0.85rem;color:var(--text-secondary);margin-top:4px;">Contexto claro = Resposta precisa. Sempre defina quem a IA deve ser.</p>
+</div>
+<div style="background:rgba(16,185,129,0.06);padding:16px;border-radius:12px;border-left:4px solid var(--success);">
+<p style="font-weight:700;color:var(--text-primary);font-size:0.9rem;">📐 Formato Importa</p>
+<p style="font-size:0.85rem;color:var(--text-secondary);margin-top:4px;">Especifique sempre como quer o resultado. A IA não lê sua mente.</p>
+</div>
+<div style="background:rgba(245,158,11,0.06);padding:16px;border-radius:12px;border-left:4px solid var(--warning);">
+<p style="font-weight:700;color:var(--text-primary);font-size:0.9rem;">🔥 Exemplos São Poder</p>
+<p style="font-size:0.85rem;color:var(--text-secondary);margin-top:4px;">Few-shot é a técnica mais subestimada e com maior impacto prático.</p>
+</div>
+<div style="background:rgba(59,130,246,0.06);padding:16px;border-radius:12px;border-left:4px solid var(--info);">
+<p style="font-weight:700;color:var(--text-primary);font-size:0.9rem;">🧩 Raciocínio Passo a Passo</p>
+<p style="font-size:0.85rem;color:var(--text-secondary);margin-top:4px;">"Pense passo a passo" aumenta a precisão em até 30%.</p>
+</div>
+</div>
+</div>
+
+<!-- Feedback -->
+<div class="card" style="margin-top:24px;background:rgba(26,16,64,0.6);border-color:rgba(108,99,255,0.2);">
+<div class="card-title" style="color:white;"><span class="card-icon">⭐</span> Avalie este módulo</div>
+<p style="color:rgba(255,255,255,0.5);font-size:0.9rem;">Como você avalia o conteúdo deste módulo?</p>
+<div class="stars-container" id="starsContainer">
+<span class="star" onclick="rateModule(1)">★</span>
+<span class="star" onclick="rateModule(2)">★</span>
+<span class="star" onclick="rateModule(3)">★</span>
+<span class="star" onclick="rateModule(4)">★</span>
+<span class="star" onclick="rateModule(5)">★</span>
+</div>
+<p id="ratingFeedback" style="color:var(--primary-light);font-size:0.85rem;font-weight:600;margin-top:4px;"></p>
+</div>
+
+<!-- Next Module -->
+<div class="next-module">
+<div class="next-icon">️</div>
+<div class="next-info">
+<h4>Próximo Módulo: Ferramentas de IA Generativa</h4>
+<p>No Módulo 2, vamos explorar as principais ferramentas de IA generativa disponíveis no mercado e como utilizá-las na prática.</p>
+</div>
+</div>
+
+<!-- Certificate Preview -->
+<div class="card" style="margin-top:24px;background:linear-gradient(135deg,#fef3c7,#fde68a);border:2px solid #f59e0b;">
+<div class="card-title" style="color:#92400e;"><span class="card-icon">🏆</span> Progresso do Curso</div>
+<div style="display:flex;align-items:center;gap:16px;margin-top:12px;">
+<div style="flex:1;">
+<div style="background:rgba(0,0,0,0.1);border-radius:8px;height:12px;overflow:hidden;">
+<div style="height:100%;width:20%;background:linear-gradient(90deg,#f59e0b,#d97706);border-radius:8px;"></div>
+</div>
+<p style="color:#92400e;font-size:0.8rem;margin-top:6px;">20% do curso concluído (1 de 5 módulos)</p>
+</div>
+</div>
+</div>
+</section>
+
+</div>
+</main>
+
+<!-- Footer -->
+<footer class="footer">
+<div class="footer-content">
+<div class="footer-left">
+<p><strong>IA na Prática</strong> — Curso de Inteligência Artificial</p>
+<p>© 2025 Prof. Vitório Netto · Todos os direitos reservados</p>
+</div>
+<div class="footer-right">
+<a href="#intro">Voltar ao topo</a>
+<a href="#">Suporte</a>
+<a href="#">Certificado</a>
+</div>
+</div>
+</footer>
+
+<script>
+// =====================
+// PROGRESS BAR
+// =====================
+window.addEventListener('scroll', function() {
+const scrollTop = window.scrollY;
+const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+const scrollPercent = (scrollTop / docHeight) * 100;
+
+document.getElementById('progressBar').style.width = scrollPercent + '%';
+document.getElementById('sidebarProgress').style.width = scrollPercent + '%';
+document.getElementById('progressPercent').textContent = Math.round(scrollPercent) + '% concluído';
+
+// Update active sidebar link
+updateActiveSection();
+});
+
+// =====================
+// ACTIVE SECTION TRACKING
+// =====================
+function updateActiveSection() {
+const sections = document.querySelectorAll('.section, .hero');
+const navLinks = document.querySelectorAll('.sidebar-nav a');
+let currentId = '';
+
+sections.forEach(function(section) {
+const rect = section.getBoundingClientRect();
+if (rect.top <= 150) {
+currentId = section.id;
+}
+});
+
+navLinks.forEach(function(link) {
+link.classList.remove('active');
+const href = link.getAttribute('href').replace('#', '');
+if (href === currentId) {
+link.classList.add('active');
+}
+});
+}
+
+// =====================
+// SCROLL ANIMATIONS
+// =====================
+const observer = new IntersectionObserver(function(entries) {
+entries.forEach(function(entry) {
+if (entry.isIntersecting) {
+entry.target.classList.add('visible');
+}
+});
+}, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+document.querySelectorAll('.section').forEach(function(section) {
+observer.observe(section);
+});
+
+// =====================
+// SIDEBAR TOGGLE (MOBILE)
+// =====================
+document.getElementById('menuToggle').addEventListener('click', function() {
+document.getElementById('sidebar').classList.toggle('open');
+document.getElementById('sidebarOverlay').classList.toggle('open');
+});
+
+document.getElementById('sidebarOverlay').addEventListener('click', function() {
+document.getElementById('sidebar').classList.remove('open');
+document.getElementById('sidebarOverlay').classList.remove('open');
+});
+
+// Close sidebar on nav link click (mobile)
+document.querySelectorAll('.sidebar-nav a').forEach(function(link) {
+link.addEventListener('click', function() {
+document.getElementById('sidebar').classList.remove('open');
+document.getElementById('sidebarOverlay').classList.remove('open');
+});
+});
+
+// =====================
+// TABS - C.T.F.R.
+// =====================
+function switchTab(event, tabId) {
+const container = event.target.closest('.tabs-container') || event.target.closest('.simulator');
+const tabsHeader = event.target.closest('.tabs-header');
+const parent = tabsHeader.parentElement;
+
+parent.querySelectorAll('.tab-btn').forEach(function(btn) {
+btn.classList.remove('active');
+});
+parent.querySelectorAll('.tab-content').forEach(function(content) {
+content.classList.remove('active');
+});
+
+event.target.classList.add('active');
+document.getElementById(tabId).classList.add('active');
+}
+
+// =====================
+// TABS - Demo
+// =====================
+function switchDemoTab(event, tabId) {
+const header = event.target.closest('.tabs-header');
+const parent = header.parentElement;
+
+parent.querySelectorAll('.tab-btn').forEach(function(btn) {
+btn.classList.remove('active');
+});
+parent.querySelectorAll('.tab-content').forEach(function(content) {
+content.classList.remove('active');
+});
+
+event.target.classList.add('active');
+document.getElementById(tabId).classList.add('active');
+}
+
+// =====================
+// TABS - Advanced
+// =====================
+function switchAdvTab(event, tabId) {
+const header = event.target.closest('.tabs-header');
+const parent = header.parentElement;
+
+parent.querySelectorAll('.tab-btn').forEach(function(btn) {
+btn.classList.remove('active');
+});
+parent.querySelectorAll('.tab-content').forEach(function(content) {
+content.classList.remove('active');
+});
+
+event.target.classList.add('active');
+document.getElementById(tabId).classList.add('active');
+}
+
+// =====================
+// COPY CODE
+// =====================
+function copyCode(button) {
+const codeBlock = button.closest('.code-block') || button.closest('.simulator-result');
+let codeText = '';
+
+if (codeBlock) {
+const pre = codeBlock.querySelector('pre') || codeBlock.querySelector('.result-text');
+if (pre) {
+codeText = pre.textContent;
+}
+}
+
+navigator.clipboard.writeText(codeText).then(function() {
+button.classList.add('copied');
+const tooltip = button.querySelector('.copy-tooltip');
+if (tooltip) {
+tooltip.classList.add('show');
+tooltip.textContent = '✓ Copiado!';
+}
+button.childNodes[button.childNodes.length - 1].textContent = '';
+button.childNodes[button.childNodes.length - 1].textContent = '';
+button.innerHTML = '✓ Copiado! <span class="copy-tooltip show">✓ Copiado!</span>';
+
+setTimeout(function() {
+button.classList.remove('copied');
+button.innerHTML = '📋 Copiar <span class="copy-tooltip">Clique para copiar</span>';
+}, 2000);
+}).catch(function() {
+// Fallback
+const textarea = document.createElement('textarea');
+textarea.value = codeText;
+document.body.appendChild(textarea);
+textarea.select();
+document.execCommand('copy');
+document.body.removeChild(textarea);
+
+button.classList.add('copied');
+setTimeout(function() {
+button.classList.remove('copied');
+button.innerHTML = ' Copiar <span class="copy-tooltip">Clique para copiar</span>';
+}, 2000);
+});
+}
+
+// =====================
+// HINT TOGGLE
+// =====================
+function toggleHint(button) {
+const content = button.nextElementSibling;
+button.classList.toggle('open');
+content.classList.toggle('open');
+}
+
+// =====================
+// CHECKLIST TOGGLE
+// =====================
+function toggleChecklist(item) {
+item.classList.toggle('checked');
+}
+
+// =====================
+// TOKEN VISUALIZER
+// =====================
+function visualizeTokens() {
+const input = document.getElementById('tokenInput').value.trim();
+if (!input) return;
+
+const resultDiv = document.getElementById('tokenResult');
+const outputDiv = document.getElementById('tokenOutput');
+const countSpan = document.getElementById('tokenCount');
+
+// Simple tokenization simulation (split by spaces and punctuation)
+const words = input.split(/\s+/);
+let html = '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;">';
+
+const colors = ['#f5c2e7', '#89b4fa', '#a6e3a1', '#fab387', '#cba6f7', '#89dceb', '#f38ba8'];
+
+words.forEach(function(word, index) {
+const color = colors[index % colors.length];
+html += '<span style="background:' + color + ';color:#1e1e2e;padding:4px 10px;border-radius:6px;font-family:Fira Code,monospace;font-size:0.85rem;font-weight:600;">' + escapeHtml(word) + '</span>';
+});
+
+html += '</div>';
+html += '<p style="color:rgba(255,255,255,0.5);font-size:0.8rem;">A IA processa seu texto token por token, prevendo o próximo com base nos anteriores.</p>';
+
+outputDiv.innerHTML = html;
+countSpan.textContent = 'Total: ' + words.length + ' tokens · Cada um será processado sequencialmente pela LLM';
+
+resultDiv.classList.add('visible');
+}
+
+function escapeHtml(text) {
+var div = document.createElement('div');
+div.appendChild(document.createTextNode(text));
+return div.innerHTML;
+}
+
+// =====================
+// CTFR SIMULATOR
+// =====================
+function generateCTFR() {
+const contexto = document.getElementById('ctxContexto').value.trim();
+const tarefa = document.getElementById('ctxTarefa').value.trim();
+const formato = document.getElementById('ctxFormato').value.trim();
+const restricoes = document.getElementById('ctxRestricoes').value.trim();
+const bonus = document.getElementById('ctxBonus').value.trim();
+
+if (!contexto && !tarefa && !formato && !restricoes) {
+alert('Preencha pelo menos um campo para gerar o prompt!');
+return;
+}
+
+let prompt = '';
+let score = 0;
+let maxScore = 5;
+
+if (contexto) {
+prompt += '🎭 CONTEXTO\n"' + contexto + '"\n\n';
+score += 1;
+}
+if (tarefa) {
+prompt += '📌 TAREFA\n"' + tarefa + '"\n\n';
+score += 1;
+}
+if (formato) {
+prompt += '📐 FORMATO\n"' + formato + '"\n\n';
+score += 1;
+}
+if (restricoes) {
+prompt += '🚫 RESTRIÇÕES\n"' + restricoes + '"\n\n';
+score += 1;
+}
+if (bonus) {
+prompt += '⚡ TÉCNICA AVANÇADA\n"' + bonus + '"';
+score += 1;
+}
+
+// Show score
+const scoreDisplay = document.getElementById('scoreDisplay');
+const scoreValue = document.getElementById('scoreValue');
+const scoreBar = document.getElementById('scoreBar');
+scoreDisplay.style.display = 'block';
+scoreValue.textContent = score + '/' + maxScore + ' pilares';
+scoreBar.style.width = (score / maxScore * 100) + '%';
+
+// Show generated prompt
+const resultDiv = document.getElementById('generatedPrompt');
+const outputDiv = document.getElementById('promptOutput');
+outputDiv.textContent = prompt;
+resultDiv.classList.add('visible');
+}
+
+function clearCTFR() {
+document.getElementById('ctxContexto').value = '';
+document.getElementById('ctxTarefa').value = '';
+document.getElementById('ctxFormato').value = '';
+document.getElementById('ctxRestricoes').value = '';
+document.getElementById('ctxBonus').value = '';
+document.getElementById('scoreDisplay').style.display = 'none';
+document.getElementById('generatedPrompt').classList.remove('visible');
+}
+
+function loadExample() {
+document.getElementById('ctxContexto').value = 'Atue como um gerente de projetos experiente em comunicação com clientes, com tom profissional e empático. Você trabalha em uma agência de desenvolvimento de software.';
+document.getElementById('ctxTarefa').value = 'Escreva um e-mail comunicando ao cliente que o projeto terá um atraso de 1 semana na entrega. Explique os motivos técnicos de forma transparente, proponha uma nova data de entrega e ofereça um bônus como compensação pelo inconveniente.';
+document.getElementById('ctxFormato').value = 'Formato de e-mail profissional com: linha de assunto clara, saudação personalizada, corpo dividido em 3 parágrafos (contexto, solução, próximo passo), e assinatura com nome e cargo.';
+document.getElementById('ctxRestricoes').value = 'Não use desculpas genéricas como "imprevistos". Não mencione problemas internos da equipe. Não faça promessas que não podemos cumprir. Mantenha o tom positivo mas realista.';
+document.getElementById('ctxBonus').value = 'Inclua 1 exemplo de tom antes de gerar: "Prezado [Nome], espero que esta mensagem o encontre bem..."';
+
+generateCTFR();
+}
+
+// =====================
+// STAR RATING
+// =====================
+let currentRating = 0;
+
+function rateModule(rating) {
+currentRating = rating;
+const stars = document.querySelectorAll('.star');
+const feedback = document.getElementById('ratingFeedback');
+
+stars.forEach(function(star, index) {
+if (index < rating) {
+star.classList.add('active');
+} else {
+star.classList.remove('active');
+}
+});
+
+const messages = [
+'',
+'😕 Precisa melhorar',
+'😐 Razoável',
+'🙂 Bom',
+'😊 Muito bom!',
+'🤩 Excelente! Obrigado!'
+];
+
+feedback.textContent = messages[rating];
+}
+
+// =====================
+// INIT
+// =====================
+document.addEventListener('DOMContentLoaded', function() {
+updateActiveSection();
+});
+</script>
+</body>
+</html>
+

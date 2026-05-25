@@ -1,0 +1,1646 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Refatoração Segura com Testes Automatizados em Python</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-gradient-start: #4f46e5;
+            --bg-gradient-end: #06b6d4;
+            --card-bg: #ffffff;
+            --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --card-hover-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --text-light: #f8fafc;
+            --primary: #4f46e5;
+            --info: #0ea5e9;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --code-bg: #1e1e2e;
+            --border-radius-lg: 16px;
+            --border-radius-md: 8px;
+            --font-text: 'Inter', sans-serif;
+            --font-code: 'Fira Code', monospace;
+            --sidebar-width: 260px;
+            --header-height: 80px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-text);
+            background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Progress Bar */
+        #progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--success), var(--info));
+            width: 0%;
+            z-index: 1001;
+            transition: width 0.1s ease-out;
+        }
+
+        /* Layout */
+        .app-container {
+            display: flex;
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding-top: 20px;
+            flex: 1;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            position: sticky;
+            top: 20px;
+            height: calc(100vh - 40px);
+            overflow-y: auto;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: var(--border-radius-lg);
+            margin: 0 20px 20px 20px;
+            box-shadow: var(--card-shadow);
+            z-index: 100;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--primary);
+        }
+
+        .nav-list {
+            list-style: none;
+        }
+
+        .nav-item {
+            margin-bottom: 8px;
+        }
+
+        .nav-link {
+            display: block;
+            padding: 10px 14px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: var(--border-radius-md);
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: rgba(79, 70, 229, 0.1);
+            color: var(--primary);
+            border-left-color: var(--primary);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 0 20px 40px 0;
+            min-width: 0;
+        }
+
+        .content-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--card-shadow);
+            padding: 30px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .card:hover {
+            box-shadow: var(--card-hover-shadow);
+        }
+
+        .card-header {
+            margin-bottom: 20px;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 15px;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-subtitle {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-top: 5px;
+        }
+
+        .section-number {
+            background: var(--primary);
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        /* Typography */
+        h1, h2, h3 {
+            color: var(--text-primary);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        p {
+            margin-bottom: 15px;
+            color: var(--text-secondary);
+        }
+
+        strong {
+            color: var(--text-primary);
+        }
+
+        /* Header Section */
+        .header-section {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .header-title {
+            color: var(--text-light);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            margin-bottom: 15px;
+        }
+
+        .header-subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto 30px;
+        }
+
+        .header-image {
+            max-width: 800px;
+            width: 100%;
+            border-radius: var(--border-radius-lg);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            margin: 0 auto;
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: 1px solid;
+        }
+
+        .badge-primary { background: rgba(79, 70, 229, 0.1); color: var(--primary); border-color: rgba(79, 70, 229, 0.3); }
+        .badge-info { background: rgba(14, 165, 233, 0.1); color: var(--info); border-color: rgba(14, 165, 233, 0.3); }
+        .badge-success { background: rgba(16, 185, 129, 0.1); color: var(--success); border-color: rgba(16, 185, 129, 0.3); }
+        .badge-warning { background: rgba(245, 158, 11, 0.1); color: var(--warning); border-color: rgba(245, 158, 11, 0.3); }
+        .badge-danger { background: rgba(239, 68, 68, 0.1); color: var(--danger); border-color: rgba(239, 68, 68, 0.3); }
+
+        /* Info Boxes */
+        .info-box {
+            padding: 15px 20px;
+            border-radius: var(--border-radius-md);
+            margin: 20px 0;
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+            border: 1px solid;
+        }
+
+        .info-box-icon {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .info-box-content {
+            flex: 1;
+        }
+
+        .info-box-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .info-box p {
+            margin-bottom: 0;
+            font-size: 0.95rem;
+        }
+
+        .info-box.info { background: rgba(14, 165, 233, 0.08); border-color: rgba(14, 165, 233, 0.3); color: #0c4a6e; }
+        .info-box.success { background: rgba(16, 185, 129, 0.08); border-color: rgba(16, 185, 129, 0.3); color: #065f46; }
+        .info-box.warning { background: rgba(245, 158, 11, 0.08); border-color: rgba(245, 158, 11, 0.3); color: #78350f; }
+        .info-box.danger { background: rgba(239, 68, 68, 0.08); border-color: rgba(239, 68, 68, 0.3); color: #7f1d1d; }
+
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+            margin: 20px 0;
+            border-radius: var(--border-radius-md);
+            border: 1px solid #e2e8f0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        th, td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+
+        td {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        tr:hover td {
+            background: #f8fafc;
+        }
+
+        /* Code Blocks */
+        .code-block {
+            background: var(--code-bg);
+            border-radius: var(--border-radius-md);
+            margin: 20px 0;
+            overflow: hidden;
+            border-left: 4px solid var(--primary);
+            position: relative;
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .code-lang {
+            font-family: var(--font-code);
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.6);
+            font-weight: 500;
+        }
+
+        .copy-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.7);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            font-family: var(--font-text);
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .copy-btn.copied {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+
+        pre {
+            padding: 20px;
+            overflow-x: auto;
+            font-family: var(--font-code);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: #e2e8f0;
+        }
+
+        code {
+            font-family: var(--font-code);
+        }
+
+        /* Syntax Highlighting */
+        .kw { color: #c792ea; }
+        .fn { color: #82aaff; }
+        .str { color: #c3e88d; }
+        .num { color: #f78c6c; }
+        .com { color: #546e7a; font-style: italic; }
+        .op { color: #89ddff; }
+        .cls { color: #ffcb6b; }
+        .dec { color: #ff5370; }
+        .builtin { color: #82aaff; }
+        .self { color: #f78c6c; font-style: italic; }
+        .param { color: #e2e8f0; }
+
+        /* Tabs */
+        .tabs {
+            margin: 20px 0;
+        }
+
+        .tab-headers {
+            display: flex;
+            gap: 5px;
+            border-bottom: 2px solid #e2e8f0;
+            margin-bottom: 20px;
+            overflow-x: auto;
+        }
+
+        .tab-header {
+            padding: 10px 20px;
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--text-secondary);
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .tab-header:hover {
+            color: var(--primary);
+        }
+
+        .tab-header.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Simulator */
+        .simulator {
+            background: #0f172a;
+            border-radius: var(--border-radius-md);
+            padding: 20px;
+            margin: 20px 0;
+            font-family: var(--font-code);
+        }
+
+        .simulator-header {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .sim-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .sim-dot.red { background: #ef4444; }
+        .sim-dot.yellow { background: #f59e0b; }
+        .sim-dot.green { background: #10b981; }
+
+        .sim-output {
+            color: #e2e8f0;
+            font-size: 0.85rem;
+            min-height: 150px;
+            white-space: pre-wrap;
+            line-height: 1.5;
+        }
+
+        .sim-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sim-btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            font-family: var(--font-text);
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .sim-btn.primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .sim-btn.primary:hover {
+            background: #4338ca;
+        }
+
+        .sim-btn.secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .sim-btn.secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .sim-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Challenge Card */
+        .challenge-card {
+            border: 2px dashed var(--warning);
+            background: rgba(245, 158, 11, 0.05);
+        }
+
+        .challenge-card .card-title {
+            color: var(--warning);
+        }
+
+        .challenge-criteria {
+            list-style: none;
+            margin: 15px 0;
+        }
+
+        .challenge-criteria li {
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+            color: var(--text-secondary);
+        }
+
+        .challenge-criteria li::before {
+            content: '✅';
+            position: absolute;
+            left: 0;
+        }
+
+        /* Tips */
+        .tip {
+            background: rgba(14, 165, 233, 0.1);
+            border-left: 4px solid var(--info);
+            padding: 15px 20px;
+            margin: 15px 0;
+            border-radius: 0 var(--border-radius-md) var(--border-radius-md) 0;
+            cursor: pointer;
+        }
+
+        .tip-header {
+            font-weight: 600;
+            color: var(--info);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tip-content {
+            margin-top: 10px;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            display: none;
+        }
+
+        .tip.expanded .tip-content {
+            display: block;
+        }
+
+        /* Footer */
+        .footer {
+            background: rgba(0, 0, 0, 0.2);
+            color: rgba(255, 255, 255, 0.8);
+            padding: 30px 20px;
+            text-align: center;
+            margin-top: 40px;
+            backdrop-filter: blur(10px);
+        }
+
+        .footer-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .footer-link {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+
+        .footer-link:hover {
+            color: white;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .app-container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: -300px;
+                width: 280px;
+                height: 100vh;
+                margin: 0;
+                border-radius: 0;
+                z-index: 1000;
+                transition: left 0.3s ease;
+            }
+
+            .sidebar.open {
+                left: 0;
+            }
+
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 999;
+            }
+
+            .sidebar-overlay.open {
+                display: block;
+            }
+
+            .main-content {
+                padding: 0 15px 30px;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            h2 {
+                font-size: 1.4rem;
+            }
+
+            .header-image {
+                max-width: 100%;
+            }
+
+            .tab-headers {
+                gap: 2px;
+            }
+
+            .tab-header {
+                padding: 8px 12px;
+                font-size: 0.85rem;
+            }
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 998;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-menu-btn {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+        }
+
+        /* List Styling */
+        ul.styled-list {
+            list-style: none;
+            margin: 15px 0;
+        }
+
+        ul.styled-list li {
+            padding: 8px 0 8px 25px;
+            position: relative;
+            color: var(--text-secondary);
+        }
+
+        ul.styled-list li::before {
+            content: '▹';
+            position: absolute;
+            left: 5px;
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        /* Grid for prerequisites */
+        .prereq-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .prereq-item {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: var(--border-radius-md);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .prereq-icon {
+            font-size: 1.5rem;
+        }
+
+        .prereq-text {
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div id="progress-bar"></div>
+
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <div class="app-container">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header"> Navegação</div>
+            <ul class="nav-list">
+                <li class="nav-item"><a href="#intro" class="nav-link active">Introdução</a></li>
+                <li class="nav-item"><a href="#bloco1" class="nav-link">1. Conceitos Fundamentais</a></li>
+                <li class="nav-item"><a href="#bloco2" class="nav-link">2. Setup do Ambiente</a></li>
+                <li class="nav-item"><a href="#bloco3" class="nav-link">3. Mapeamento de Classes</a></li>
+                <li class="nav-item"><a href="#bloco4" class="nav-link">4. Refatoração com TDD</a></li>
+                <li class="nav-item"><a href="#bloco5" class="nav-link">5. Cobertura e CI</a></li>
+                <li class="nav-item"><a href="#bloco6" class="nav-link">6. Encerramento e Desafio</a></li>
+                <li class="nav-item"><a href="#resumo" class="nav-link">Resumo Final</a></li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <div class="content-wrapper">
+                <!-- Header Section -->
+                <section class="header-section card visible" style="background: transparent; box-shadow: none;">
+                    <h1 class="header-title">Refatoração Segura com Testes Automatizados</h1>
+                    <p class="header-subtitle">Mapeamento de Classes em Python • pytest • TDD • GitHub Actions</p>
+                    <img src="https://image.qwenlm.ai/public_source/3a447b45-8953-49dd-8e5f-047d2d2c315c/1a002f08c-21fc-43f6-a0f0-143c1d9e669e.png" alt="Ilustração de refatoração de código Python com testes automatizados, mostrando uma cobra estilizada se transformando de código emaranhado para blocos modulares organizados com checkmarks verdes" class="header-image">
+                    
+                    <div style="margin-top: 30px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                        <span class="badge badge-primary">Python 3.10+</span>
+                        <span class="badge badge-success">pytest</span>
+                        <span class="badge badge-info">TDD</span>
+                        <span class="badge badge-warning">3 Horas</span>
+                        <span class="badge badge-danger">Intermediário</span>
+                    </div>
+                </section>
+
+                <!-- Introduction -->
+                <section id="intro" class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <span class="section-number">i</span>
+                            Introdução
+                        </div>
+                        <p class="card-subtitle">Contexto, objetivos e pré-requisitos da aula</p>
+                    </div>
+                    
+                    <p>Esta aula prática de 3 horas foi desenvolvida para desenvolvedores que já possuem conhecimento básico de classes e funções em Python e desejam dominar técnicas de refatoração segura utilizando testes automatizados. Você aprenderá a mapear comportamentos existentes, escrever testes de caracterização e refatorar código legado com confiança.</p>
+
+                    <div class="info-box info">
+                        <div class="info-box-icon">🎯</div>
+                        <div class="info-box-content">
+                            <div class="info-box-title">Objetivo de Aprendizado</div>
+                            <p>Ao final desta aula, você será capaz de refatorar classes Python complexas com segurança, utilizando pytest, fixtures, mocks e cobertura de testes para garantir que nenhuma funcionalidade seja quebrada durante o processo.</p>
+                        </div>
+                    </div>
+
+                    <h3>Pré-requisitos</h3>
+                    <div class="prereq-grid">
+                        <div class="prereq-item">
+                            <div class="prereq-icon">🐍</div>
+                            <div class="prereq-text">Python 3.10+ e pip instalados</div>
+                        </div>
+                        <div class="prereq-item">
+                            <div class="prereq-icon">💻</div>
+                            <div class="prereq-text">VS Code, PyCharm ou similar</div>
+                        </div>
+                        <div class="prereq-item">
+                            <div class="prereq-icon"></div>
+                            <div class="prereq-text">Git configurado e acesso ao repositório</div>
+                        </div>
+                        <div class="prereq-item">
+                            <div class="prereq-icon">🧠</div>
+                            <div class="prereq-text">Conhecimento básico de classes Python</div>
+                        </div>
+                    </div>
+
+                    <div class="tip" onclick="this.classList.toggle('expanded')">
+                        <div class="tip-header">💡 Dica: Clone o Repositório</div>
+                        <div class="content">
+                            <p style="margin-top: 10px;">Recomendamos clonar o repositório base antes da aula:</p>
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <span class="code-lang">bash</span>
+                                    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                                </div>
+                                <pre><code><span class="fn">git</span> clone <span class="str">git@github.com:garageunicorn/Refatorar-Snake.git</span>
+<span class="kw">cd</span> Refatorar-Snake
+<span class="fn">pip</span> install -r requirements.txt</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Bloco 1 -->
+                <section id="bloco1" class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <span class="section-number">1</span>
+                            Abertura e Conceitos Fundamentais
+                        </div>
+                        <p class="card-subtitle">Por que testar ao refatorar? Pirâmide de testes e ciclo Red-Green-Refactor</p>
+                    </div>
+
+                    <p>A refatoração sem testes é como reformar uma casa sem alicerces: qualquer mudança pode causar danos invisíveis. Testes automatizados fornecem a <strong>rede de segurança</strong> necessária para modificar código com confiança.</p>
+
+                    <h3>Pirâmide de Testes</h3>
+                    <p>A pirâmide de testes define a proporção ideal entre diferentes tipos de testes:</p>
+
+                    <div class="tabs">
+                        <div class="tab-headers">
+                            <div class="tab-header active" onclick="switchTab(event, 'tab-unit')">Testes Unitários</div>
+                            <div class="tab-header" onclick="switchTab(event, 'tab-integration')">Testes de Integração</div>
+                            <div class="tab-header" onclick="switchTab(event, 'tab-e2e')">Testes E2E</div>
+                        </div>
+                        <div id="tab-unit" class="tab-content active">
+                            <div class="info-box success">
+                                <div class="info-box-icon">🏗️</div>
+                                <div class="info-box-content">
+                                    <div class="info-box-title">Base da Pirâmide (70%)</div>
+                                    <p>Testes isolados de funções e métodos. Rápidos, baratos e determinísticos. Devem cobrir a maior parte do código.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="tab-integration" class="tab-content">
+                            <div class="info-box info">
+                                <div class="info-box-icon"></div>
+                                <div class="info-box-content">
+                                    <div class="info-box-title">Meio da Pirâmide (20%)</div>
+                                    <p>Testam a interação entre módulos, classes e serviços externos mockados. Garantem que as peças se encaixam corretamente.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="tab-e2e" class="tab-content">
+                            <div class="info-box warning">
+                                <div class="info-box-icon">🌐</div>
+                                <div class="info-box-content">
+                                    <div class="info-box-title">Topo da Pirâmide (10%)</div>
+                                    <p>Testes de ponta a ponta que simulam o comportamento real do usuário. Mais lentos e caros, mas essenciais para cenários críticos.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3>Ciclo Red-Green-Refactor</h3>
+                    <table class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Fase</th>
+                                    <th>Ação</th>
+                                    <th>Estado do Teste</th>
+                                    <th>Objetivo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><span class="badge badge-danger">Red</span></td>
+                                    <td>Escrever teste falhando</td>
+                                    <td>❌ Falha</td>
+                                    <td>Definir comportamento esperado</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="badge badge-success">Green</span></td>
+                                    <td>Implementar código mínimo</td>
+                                    <td>✅ Passa</td>
+                                    <td>Fazer o teste passar</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="badge badge-primary">Refactor</span></td>
+                                    <td>Melhorar código mantendo testes</td>
+                                    <td>✅ Passa</td>
+                                    <td>Limpar código sem mudar comportamento</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </table>
+                </section>
+
+                <!-- Bloco 2 -->
+                <section id="bloco2" class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <span class="section-number">2</span>
+                            Setup do Ambiente
+                        </div>
+                        <p class="card-subtitle">Instalação do pytest, estrutura de diretórios e primeiras fixtures</p>
+                    </div>
+
+                    <p>Um ambiente bem estruturado é fundamental para testes eficientes. Vamos configurar a estrutura padrão <code>src/</code> e <code>tests/</code>.</p>
+
+                    <h3>Estrutura de Diretórios</h3>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-lang">tree</span>
+                            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                        </div>
+                        <pre><code>projeto/
+── src/
+│   ├── __init__.py
+│   ├── game.py
+│   ├── snake.py
+│   └── food.py
+├── tests/
+│   ├── __init__.py
+│   ├── conftest.py
+│   ├── test_snake.py
+│   └── test_game.py
+├── pyproject.toml
+└── requirements.txt</code></pre>
+                    </div>
+
+                    <h3>Instalação das Dependências</h3>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-lang">bash</span>
+                            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                        </div>
+                        <pre><code><span class="fn">pip</span> install pytest pytest-cov pytest-mock</code></pre>
+                    </div>
+
+                    <h3>Configuração do pytest</h3>
+                    <p>Adicione ao <code>pyproject.toml</code> ou <code>pytest.ini</code>:</p>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-lang">toml</span>
+                            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                        </div>
+                        <pre><code>[tool.pytest.ini_options]
+testpaths = [<span class="str">"tests"</span>]
+pythonpath = [<span class="str">"src"</span>]
+addopts = <span class="str">"-v --cov=src --cov-report=html"</span></code></pre>
+                    </div>
+
+                    <div class="info-box success">
+                        <div class="info-box-icon">📌</div>
+                        <div class="info-box-content">
+                            <div class="info-box-title">Fixture Básica no conftest.py</div>
+                            <p>Fixtures são funções que fornecem dados de teste reutilizáveis:</p>
+                        </div>
+                    </div>
+
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-lang">python</span>
+                            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                        </div>
+                        <pre><code><span class="com"># tests/conftest.py</span>
+<span class="kw">import</span> pytest
+<span class="kw">from</span> snake <span class="kw">import</span> Snake
+
+<span class="dec">@pytest.fixture</span>
+<span class="kw">def</span> <span class="fn">snake_inicial</span>():
+    <span class="str">"""Retorna uma instância de Snake na posição inicial."""</span>
+    <span class="kw">return</span> Snake(posicao_inicial=[(<span class="num">5</span>, <span class="num">5</span>)])
+
+<span class="dec">@pytest.fixture</span>
+<span class="kw">def</span> <span class="fn">snake_com_cauda</span>(snake_inicial):
+    <span class="str">"""Snake com 3 segmentos para testes de crescimento."""</span>
+    snake_inicial.crescer()
+    snake_inicial.crescer()
+    <span class="kw">return</span> snake_inicial</code></pre>
+                    </div>
+                </section>
+
+                <!-- Bloco 3 -->
+                <section id="bloco3" class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <span class="section-number">3</span>
+                            Mapeando uma Classe Existente
+                        </div>
+                        <p class="card-subtitle">Testes de caracterização: descobrindo comportamento sem documentação</p>
+                    </div>
+
+                    <p>Quando enfrentamos código legado sem testes, o primeiro passo é criar <strong>testes de caracterização</strong>. Eles capturam o comportamento atual do sistema, permitindo que identifiquemos bugs e comportamentos inesperados antes de começar a refatorar.</p>
+
+                    <div class="info-box warning">
+                        <div class="info-box-icon">️</div>
+                        <div class="info-box-content">
+                            <div class="info-box-title">Atenção</div>
+                            <p>Testes de caracterização documentam o comportamento <strong>atual</strong>, não necessariamente o comportamento <strong>correto</strong>. Se um teste falhar durante a refatoração, verifique se o bug estava no código original ou na sua alteração.</p>
+                        </div>
+                    </div>
+
+                    <h3>Exemplo: Mapeando a classe Snake</h3>
+                    <p>Vamos descobrir como a classe <code>Snake</code> se comporta na prática:</p>
+
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-lang">python</span>
+                            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                        </div>
+                        <pre><code><span class="com"># tests/test_snake_characterization.py</span>
+<span class="kw">import</span> pytest
+<span class="kw">from</span> snake <span class="kw">import</span> Snake
+
+<span class="kw">class</span> <span class="cls">TestSnakeCharacterization</span>:
+    <span class="str">"""Testes de caracterização para entender o comportamento atual."""</span>
+
+    <span class="kw">def</span> <span class="fn">test_posicao_inicial</span>(<span class="self">self</span>):
+        snake = Snake(posicao_inicial=[(<span class="num">5</span>, <span class="num">5</span>)])
+        <span class="kw">assert</span> snake.get_cabeca() == (<span class="num">5</span>, <span class="num">5</span>)
+        <span class="kw">assert</span> snake.get_corpo() == [(<span class="num">5</span>, <span class="num">5</span>)]
+
+    <span class="kw">def</span> <span class="fn">test_movimento_cima</span>(<span class="self">self</span>):
+        snake = Snake(posicao_inicial=[(<span class="num">5</span>, <span class="num">5</span>)])
+        snake.mover(<span class="str">'UP'</span>)
+        <span class="kw">assert</span> snake.get_cabeca() == (<span class="num">5</span>, <span class="num">4</span>)
+
+    <span class="kw">def</span> <span class="fn">test_crescimento_apos_comer</span>(<span class="self">self</span>):
+        snake = Snake(posicao_inicial=[(<span class="num">5</span>, <span class="num">5</span>)])
+        tamanho_antes = snake.get_tamanho()
+        snake.comer()  <span class="com"># Simula comer uma maçã</span>
+        tamanho_depois = snake.get_tamanho()
+        <span class="kw">assert</span> tamanho_depois == tamanho_antes + <span class="num">1</span>
+
+    <span class="dec">@pytest.mark.xfail</span>
+    <span class="kw">def</span> <span class="fn">test_colisao_com_parede</span>(<span class="self">self</span>):
+        <span class="str">"""Comportamento descoberto: lança exceção ao colidir."""</span>
+        snake = Snake(posicao_inicial=[(<span class="num">0</span>, <span class="num">0</span>)])
+        snake.mover(<span class="str">'UP'</span>)  <span class="com"># Deveria colidir com parede superior</span>
+        <span class="com"># Se passar, o comportamento é diferente do esperado!</span></code></pre>
+                    </div>
+
+                    <div class="tip" onclick="this.classList.toggle('expanded')">
+                        <div class="tip-header">💡 Dica: Use pytest.mark.xfail</div>
+                        <div class="tip-content">
+                            <p>O decorator <code>@pytest.mark.xfail</code> marca testes que <strong>esperamos que falhem</strong>. Isso é útil para documentar comportamentos bugados que você ainda não corrigiu, sem quebrar o build.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Bloco 4 -->
+                <section id="bloco4" class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <span class="section-number">4</span>
+                            Refatoração Guiada com TDD
+                        </div>
+                        <p class="card-subtitle">Extrair método, tratar exceções, parametrizar e usar mocks</p>
+                    </div>
+
+                    <p>Agora que temos testes de caracterização, podemos começar a refatorar com segurança. Vamos aplicar técnicas de TDD para melhorar a estrutura do código.</p>
+
+                    <h3>1. Extrair Método</h3>
+                    <p>Identifique blocos de código complexos e extraia-os em métodos com nomes descritivos:</p>
+
+                    <div class="tabs">
+                        <div class="tab-headers">
+                            <div class="tab-header active" onclick="switchTab(event, 'tab-before')">Antes (Código Original)</div>
+                            <div class="tab-header" onclick="switchTab(event, 'tab-after')">Depois (Refatorado)</div>
+                        </div>
+                        <div id="tab-before" class="tab-content active">
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <span class="code-lang">python</span>
+                                    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                                </div>
+                                <pre><code><span class="kw">def</span> <span class="fn">mover</span>(<span class="self">self</span>, direcao):
+    <span class="com"># Código espaguete: muita lógica misturada</span>
+    x, y = <span class="self">self</span>.posicoes[<span class="num">0</span>]
+    <span class="kw">if</span> direcao == <span class="str">'UP'</span>:
+        nova_pos = (x, y - <span class="num">1</span>)
+    <span class="kw">elif</span> direcao == <span class="str">'DOWN'</span>:
+        nova_pos = (x, y + <span class="num">1</span>)
+    <span class="kw">elif</span> direcao == <span class="str">'LEFT'</span>:
+        nova_pos = (x - <span class="num">1</span>, y)
+    <span class="kw">elif</span> direcao == <span class="str">'RIGHT'</span>:
+        nova_pos = (x + <span class="num">1</span>, y)
+    
+    <span class="com"># Verificação de colisão misturada com movimento</span>
+    <span class="kw">if</span> nova_pos[<span class="num">0</span>] < <span class="num">0</span> <span class="kw">or</span> nova_pos[<span class="num">0</span>] >= <span class="self">self</span>.largura:
+        <span class="kw">raise</span> ValueError(<span class="str">"Colisão horizontal!"</span>)
+    <span class="kw">if</span> nova_pos[<span class="num">1</span>] < <span class="num">0</span> <span class="kw">or</span> nova_pos[<span class="num">1</span>] >= <span class="self">self</span>.altura:
+        <span class="kw">raise</span> ValueError(<span class="str">"Colisão vertical!"</span>)
+    
+    <span class="self">self</span>.posicoes.insert(<span class="num">0</span>, nova_pos)
+    <span class="kw">if not</span> <span class="self">self</span>.crescendo:
+        <span class="self">self</span>.posicoes.pop()</code></pre>
+                            </div>
+                        </div>
+                        <div id="tab-after" class="tab-content">
+                            <div class="code-block">
+                                <div class="code-header">
+                                    <span class="code-lang">python</span>
+                                    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                                </div>
+                                <pre><code><span class="kw">def</span> <span class="fn">mover</span>(<span class="self">self</span>, direcao):
+    nova_cabeca = <span class="self">self</span>._calcular_proxima_posicao(direcao)
+    <span class="self">self</span>._verificar_colisao(nova_cabeca)
+    <span class="self">self</span>._atualizar_corpo(nova_cabeca)
+
+<span class="kw">def</span> <span class="fn">_calcular_proxima_posicao</span>(<span class="self">self</span>, direcao):
+    <span class="str">"""Calcula a próxima posição da cabeça baseada na direção."""</span>
+    deltas = {
+        <span class="str">'UP'</span>: (<span class="num">0</span>, -<span class="num">1</span>), <span class="str">'DOWN'</span>: (<span class="num">0</span>, <span class="num">1</span>),
+        <span class="str">'LEFT'</span>: (-<span class="num">1</span>, <span class="num">0</span>), <span class="str">'RIGHT'</span>: (<span class="num">1</span>, <span class="num">0</span>)
+    }
+    dx, dy = deltas[direcao]
+    x, y = <span class="self">self</span>.get_cabeca()
+    <span class="kw">return</span> (x + dx, y + dy)
+
+<span class="kw">def</span> <span class="fn">_verificar_colisao</span>(<span class="self">self</span>, posicao):
+    <span class="str">"""Verifica se a posição está dentro dos limites do tabuleiro."""</span>
+    <span class="kw">if not</span> (<span class="num">0</span> <= posicao[<span class="num">0</span>] < <span class="self">self</span>.largura):
+        <span class="kw">raise</span> ColisaoError(<span class="str">"Colisão com parede horizontal"</span>)
+    <span class="kw">if not</span> (<span class="num">0</span> <= posicao[<span class="num">1</span>] < <span class="self">self</span>.altura):
+        <span class="kw">raise</span> ColisaoError(<span class="str">"Colisão com parede vertical"</span>)
+
+<span class="kw">def</span> <span class="fn">_atualizar_corpo</span>(<span class="self">self</span>, nova_cabeca):
+    <span class="str">"""Atualiza o corpo da cobra com a nova posição."""</span>
+    <span class="self">self</span>.posicoes.insert(<span class="num">0</span>, nova_cabeca)
+    <span class="kw">if not</span> <span class="self">self</span>.crescendo:
+        <span class="self">self</span>.posicoes.pop()
+    <span class="self">self</span>.crescendo = <span class="builtin">False</span></code></pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3>2. Testes Parametrizados</h3>
+                    <p>Use <code>@pytest.mark.parametrize</code> para testar múltiplos cenários com um único teste:</p>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-lang">python</span>
+                            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                        </div>
+                        <pre><code><span class="dec">@pytest.mark.parametrize</span>(<span class="str">"direcao, delta_esperado"</span>, [
+    (<span class="str">'UP'</span>, (<span class="num">0</span>, -<span class="num">1</span>)),
+    (<span class="str">'DOWN'</span>, (<span class="num">0</span>, <span class="num">1</span>)),
+    (<span class="str">'LEFT'</span>, (-<span class="num">1</span>, <span class="num">0</span>)),
+    (<span class="str">'RIGHT'</span>, (<span class="num">1</span>, <span class="num">0</span>)),
+])
+<span class="kw">def</span> <span class="fn">test_calculo_posicao</span>(<span class="self">self</span>, direcao, delta_esperado, mocker):
+    <span class="com"># Testa se o cálculo de posição está correto para todas as direções</span>
+    snake = Snake(largura=<span class="num">10</span>, altura=<span class="num">10</span>)
+    mocker.patch.object(snake, <span class="str">'get_cabeca'</span>, return_value=(<span class="num">5</span>, <span class="num">5</span>))
+    resultado = snake._calcular_proxima_posicao(direcao)
+    esperado = (<span class="num">5</span> + delta_esperado[<span class="num">0</span>], <span class="num">5</span> + delta_esperado[<span class="num">1</span>])
+    <span class="kw">assert</span> resultado == esperado</code></pre>
+                    </div>
+
+                    <h3>3. Usando Mocks com pytest-mock</h3>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-lang">python</span>
+                            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                        </div>
+                        <pre><code><span class="kw">def</span> <span class="fn">test_game_loop_com_mock</span>(<span class="self">self</span>, mocker):
+    <span class="str">"""Testa o game loop isolando a lógica de input."""</span>
+    <span class="com"># Mocka a função input para simular teclas do jogador</span>
+    mocker.patch(<span class="str">'builtins.input'</span>, side_effect=[<span class="str">'UP'</span>, <span class="str">'RIGHT'</span>, <span class="str">'QUIT'</span>])
+    
+    game = Game()
+    game.rodar()  <span class="com"># Executa o loop até receber 'QUIT'</span>
+    
+    <span class="com"># Verifica se o jogo terminou corretamente</span>
+    <span class="kw">assert</span> game.rodando == <span class="builtin">False</span>
+    <span class="kw">assert</span> game.get_pontuacao() == <span class="num">0</span>  <span class="com"># Sem comida consumida</span></code></pre>
+                    </div>
+                </section>
+
+                <!-- Bloco 5 -->
+                <section id="bloco5" class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <span class="section-number">5</span>
+                            Cobertura e Integração Contínua
+                        </div>
+                        <p class="card-subtitle">pytest-cov, relatórios de cobertura e configuração do GitHub Actions</p>
+                    </div>
+
+                    <p>A cobertura de testes mede qual porcentagem do seu código é exercida pelos testes. Não é uma métrica perfeita, mas ajuda a identificar áreas não testadas.</p>
+
+                    <h3>Rodando com Cobertura</h3>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-lang">bash</span>
+                            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                        </div>
+                        <pre><code><span class="com"># Roda testes e gera relatório HTML</span>
+<span class="fn">pytest</span> --cov=src --cov-report=html
+
+<span class="com"># Gera relatório no terminal com falha se cobertura < 80%</span>
+<span class="fn">pytest</span> --cov=src --cov-fail-under=<span class="num">80</span></code></pre>
+                    </div>
+
+                    <h3>Interpretando o Relatório</h3>
+                    <table class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Métrica</th>
+                                    <th>Significado</th>
+                                    <th>Meta Recomendada</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Stmts</strong></td>
+                                    <td>Total de linhas de código</td>
+                                    <td>-</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Miss</strong></td>
+                                    <td>Linhas não executadas</td>
+                                    <td>0</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Cover</strong></td>
+                                    <td>Porcentagem de cobertura</td>
+                                    <td>≥ 80%</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Branch</strong></td>
+                                    <td>Cobertura de ramificações (if/else)</td>
+                                    <td>≥ 75%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </table>
+
+                    <div class="info-box info">
+                        <div class="info-box-icon">📊</div>
+                        <div class="info-box-content">
+                            <div class="info-box-title">Cuidado com a Obsessão por Cobertura</div>
+                            <p>100% de cobertura não significa 100% de qualidade. Testes mal escritos podem cobrir código sem testar comportamento real. Foque em <strong>cobertura de cenários</strong>, não apenas de linhas.</p>
+                        </div>
+                    </div>
+
+                    <h3>GitHub Actions para CI</h3>
+                    <p>Configure um workflow para rodar testes automaticamente em cada push:</p>
+                    <div class="code-block">
+                        <div class="code-header">
+                            <span class="code-lang">yaml</span>
+                            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                        </div>
+                        <pre><code><span class="kw">name</span>: Python Tests
+
+<span class="kw">on</span>: [push, pull_request]
+
+<span class="kw">jobs</span>:
+  <span class="fn">test</span>:
+    <span class="kw">runs-on</span>: ubuntu-latest
+    
+    <span class="kw">steps</span>:
+      - <span class="kw">uses</span>: actions/checkout@v3
+      
+      - <span class="kw">name</span>: Setup Python
+        <span class="kw">uses</span>: actions/setup-python@v4
+        <span class="kw">with</span>:
+          <span class="kw">python-version</span>: <span class="str">'3.10'</span>
+      
+      - <span class="kw">name</span>: Install Dependencies
+        <span class="kw">run</span>: |
+          <span class="kw">pip</span> install -r requirements.txt
+          <span class="kw">pip</span> install pytest pytest-cov
+      
+      - <span class="kw">name</span>: Run Tests with Coverage
+        <span class="kw">run</span>: <span class="str">pytest --cov=src --cov-fail-under=80</span></code></pre>
+                    </div>
+
+                    <!-- Simulator -->
+                    <h3>🎮 Simulador de Test Runner</h3>
+                    <p>Clique em "Rodar Testes" para simular a execução do pytest com cobertura:</p>
+                    <div class="simulator">
+                        <div class="simulator-header">
+                            <div class="sim-dot red"></div>
+                            <div class="sim-dot yellow"></div>
+                            <div class="sim-dot green"></div>
+                            <span style="color: rgba(255,255,255,0.5); margin-left: 10px; font-size: 0.8rem;">pytest terminal</span>
+                        </div>
+                        <div class="sim-output" id="sim-output">
+<span style="color: #546e7a;">$ pytest --cov=src --cov-report=term</span>
+<span style="color: #546e7a;">Aguardando execução...</span>
+                        </div>
+                        <div class="sim-controls">
+                            <button class="sim-btn primary" id="run-btn" onclick="runSimulator()">▶ Rodar Testes</button>
+                            <button class="sim-btn secondary" onclick="resetSimulator()"> Reset</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Bloco 6 -->
+                <section id="bloco6" class="card challenge-card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <span class="section-number" style="background: var(--warning);">6</span>
+                            Encerramento e Desafio Final
+                        </div>
+                        <p class="card-subtitle">Exercício pós-aula: Refatorar o repositório Snake</p>
+                    </div>
+
+                    <p>Parabéns por chegar até aqui! Agora é hora de aplicar tudo que aprendeu em um desafio real.</p>
+
+                    <div class="info-box success">
+                        <div class="info-box-icon">🏆</div>
+                        <div class="info-box-content">
+                            <div class="info-box-title">Desafio: Refatorar Snake Game</div>
+                            <p>Refatore o repositório <a href="https://github.com/garageunicorn/Refatorar-Snake.git" target="_blank" style="color: inherit; text-decoration: underline;">garageunicorn/Refatorar-Snake</a> aplicando todas as técnicas aprendidas.</p>
+                        </div>
+                    </div>
+
+                    <h3>Critérios de Avaliação</h3>
+                    <ul class="challenge-criteria">
+                        <li>Separar classes em arquivos individuais (<code>snake.py</code>, <code>food.py</code>, <code>game.py</code>)</li>
+                        <li>Cobertura de testes ≥ 80% para todas as classes</li>
+                        <li>Uso de fixtures no <code>conftest.py</code> para reutilização</li>
+                        <li>Testes parametrizados para cenários múltiplos</li>
+                        <li>Mocks isolando dependências externas (input, random, etc.)</li>
+                        <li>Código seguindo PEP 8 com type hints</li>
+                        <li>Workflow GitHub Actions configurado e passando</li>
+                    </ul>
+
+                    <div class="tip" onclick="this.classList.toggle('expanded')">
+                        <div class="tip-header">💡 Dicas para o Desafio</div>
+                        <div class="tip-content">
+                            <ul style="margin-top: 10px; margin-left: 20px;">
+                                <li>Comece criando testes de caracterização antes de modificar qualquer código</li>
+                                <li>Use <code>pytest --lf</code> para rodar apenas os testes que falharam na última execução</li>
+                                <li>Documente decisões de refatoração em comentários ou README</li>
+                                <li>Submeta um Pull Request com descrição detalhada das mudanças</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Resumo Final -->
+                <section id="resumo" class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <span class="section-number" style="background: var(--success);">✓</span>
+                            Resumo Final
+                        </div>
+                        <p class="card-subtitle">Recapitulação e próximos passos</p>
+                    </div>
+
+                    <h3>O que aprendemos hoje</h3>
+                    <div class="prereq-grid">
+                        <div class="prereq-item">
+                            <div class="prereq-icon">1️⃣</div>
+                            <div class="prereq-text">Importância de testar antes de refatorar</div>
+                        </div>
+                        <div class="prereq-item">
+                            <div class="prereq-icon">2️⃣</div>
+                            <div class="prereq-text">Configuração de ambiente pytest profissional</div>
+                        </div>
+                        <div class="prereq-item">
+                            <div class="prereq-icon">3️⃣</div>
+                            <div class="prereq-text">Testes de caracterização para código legado</div>
+                        </div>
+                        <div class="prereq-item">
+                            <div class="prereq-icon">4️⃣</div>
+                            <div class="prereq-text">TDD com extração de métodos e parametrização</div>
+                        </div>
+                        <div class="prereq-item">
+                            <div class="prereq-icon">5️⃣</div>
+                            <div class="prereq-text">Mocks e isolamento de dependências</div>
+                        </div>
+                        <div class="prereq-item">
+                            <div class="prereq-icon">6️⃣</div>
+                            <div class="prereq-text">CI/CD com GitHub Actions e cobertura</div>
+                        </div>
+                    </div>
+
+                    <h3>Próximos Passos</h3>
+                    <ul class="styled-list">
+                        <li>Pratique refatorando outros projetos open-source</li>
+                        <li>Estude padrões de projeto para classes Python</li>
+                        <li>Aprenda sobre property-based testing com Hypothesis</li>
+                        <li>Explore mutation testing com mutmut</li>
+                        <li>Contribua para projetos reais com testes bem escritos</li>
+                    </ul>
+
+                    <div class="info-box info">
+                        <div class="info-box-icon">📚</div>
+                        <div class="info-box-content">
+                            <div class="info-box-title">Leituras Recomendadas</div>
+                            <p>• "Python Testing with pytest" - Brian Okken<br>
+                            • "Clean Code" - Robert C. Martin (capítulos sobre testes)<br>
+                            • Documentação oficial do pytest: docs.pytest.org</p>
+                        </div>
+                    </div>
+
+                    <p style="text-align: center; margin-top: 30px; font-size: 1.1rem; color: var(--primary); font-weight: 600;">
+                        Obrigado por participar! ✨<br>
+                        <span style="font-size: 0.9rem; font-weight: 400; color: var(--text-secondary);">Agora vá refatorar com confiança!</span>
+                    </p>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p><strong>Curso Interativo: Refatoração Segura com Testes Automatizados</strong></p>
+            <p style="font-size: 0.9rem; margin-top: 10px;">Desenvolvido para desenvolvedores Python • Duração: 3 horas</p>
+            <div class="footer-links">
+                <a href="#intro" class="footer-link">Voltar ao Início</a>
+                <a href="https://docs.pytest.org/" target="_blank" class="footer-link">Docs pytest</a>
+                <a href="https://github.com/garageunicorn/Refatorar-Snake" target="_blank" class="footer-link">Repositório Snake</a>
+            </div>
+            <p style="margin-top: 20px; font-size: 0.8rem; opacity: 0.6;">© 2024 - Material Educacional Open Source</p>
+        </div>
+    </footer>
+
+    <button class="mobile-menu-btn" id="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+
+    <script>
+        // Progress Bar
+        function updateProgressBar() {
+            const scrollTop = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const progress = (scrollTop / docHeight) * 100;
+            document.getElementById('progress-bar').style.width = progress + '%';
+        }
+
+        // Scroll Spy
+        function updateActiveNav() {
+            const sections = document.querySelectorAll('section[id]');
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop - 100;
+                if (window.scrollY >= sectionTop) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + current) {
+                    link.classList.add('active');
+                }
+            });
+        }
+
+        // Scroll Animations
+        function animateCards() {
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => {
+                const rect = card.getBoundingClientRect();
+                const windowHeight = window.innerHeight;
+                if (rect.top < windowHeight * 0.85) {
+                    card.classList.add('visible');
+                }
+            });
+        }
+
+        // Event Listeners
+        window.addEventListener('scroll', () => {
+            updateProgressBar();
+            updateActiveNav();
+            animateCards();
+        });
+
+        window.addEventListener('load', () => {
+            updateProgressBar();
+            animateCards();
+        });
+
+        // Tabs
+        function switchTab(event, tabId) {
+            const tabContainer = event.target.closest('.tabs');
+            
+            // Remove active from all headers in this container
+            tabContainer.querySelectorAll('.tab-header').forEach(h => h.classList.remove('active'));
+            // Remove active from all contents in this container
+            tabContainer.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            // Add active to clicked header
+            event.target.classList.add('active');
+            // Add active to corresponding content
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        // Copy Code
+        function copyCode(btn) {
+            const codeBlock = btn.closest('.code-block');
+            const code = codeBlock.querySelector('code').innerText;
+            
+            navigator.clipboard.writeText(code).then(() => {
+                const originalText = btn.innerText;
+                btn.innerText = 'Copiado!';
+                btn.classList.add('copied');
+                
+                setTimeout(() => {
+                    btn.innerText = originalText;
+                    btn.classList.remove('copied');
+                }, 2000);
+            }).catch(() => {
+                btn.innerText = 'Erro';
+                setTimeout(() => {
+                    btn.innerText = 'Copiar';
+                }, 2000);
+            });
+        }
+
+        // Simulator
+        function runSimulator() {
+            const output = document.getElementById('sim-output');
+            const runBtn = document.getElementById('run-btn');
+            runBtn.disabled = true;
+            
+            const steps = [
+                { text: '<span style="color: #546e7a;">$ pytest --cov=src --cov-report=term</span>', delay: 500 },
+                { text: '<span style="color: #546e7a;">platform linux -- Python 3.10.12, pytest-7.4.3, pluggy-1.3.0</span>', delay: 300 },
+                { text: '<span style="color: #546e7a;">rootdir: /home/user/Refatorar-Snake</span>', delay: 200 },
+                { text: '<span style="color: #546e7a;">configfile: pyproject.toml</span>', delay: 200 },
+                { text: '<span style="color: #546e7a;">plugins: cov-4.1.0, mock-3.12.0</span>', delay: 300 },
+                { text: '<span style="color: #546e7a;">collected 24 items</span>\n', delay: 400 },
+                { text: '<span style="color: #10b981;">tests/test_snake.py</span> <span style="color: #10b981;">............</span>                                    [ 50%]', delay: 600 },
+                { text: '<span style="color: #10b981;">tests/test_game.py</span> <span style="color: #10b981;">............</span>                                     [100%]\n', delay: 600 },
+                { text: '\n<span style="color: #10b981;">---------- coverage: platform linux, python 3.10.12-final-0 ----------</span>', delay: 500 },
+                { text: '<span style="color: #e2e8f0;">Name            Stmts   Miss  Cover</span>', delay: 300 },
+                { text: '<span style="color: #e2e8f0;">-------------------------------</span>', delay: 200 },
+                { text: '<span style="color: #e2e8f0;">src/snake.py      85      4    95%</span>', delay: 200 },
+                { text: '<span style="color: #e2e8f0;">src/food.py       32      2    94%</span>', delay: 200 },
+                { text: '<span style="color: #e2e8f0;">src/game.py       67      3    96%</span>', delay: 200 },
+                { text: '<span style="color: #e2e8f0;">-------------------------------</span>', delay: 200 },
+                { text: '<span style="color: #e2e8f0;">TOTAL            184      9    95%</span>', delay: 300 },
+                { text: '<span style="color: #e2e8f0;">Coverage HTML written to dir htmlcov</span>\n', delay: 300 },
+                { text: '<span style="color: #10b981;">======================== 24 passed in 0.42s =========================</span>', delay: 500 }
+            ];
+
+            output.innerHTML = '';
+            let currentStep = 0;
+
+            function runStep() {
+                if (currentStep < steps.length) {
+                    const span = document.createElement('div');
+                    span.innerHTML = steps[currentStep].text;
+                    output.appendChild(span);
+                    output.scrollTop = output.scrollHeight;
+                    currentStep++;
+                    setTimeout(runStep, steps[currentStep - 1].delay);
+                } else {
+                    runBtn.disabled = false;
+                    runBtn.innerText = '▶ Rodar Novamente';
+                }
+            }
+
+            runStep();
+        }
+
+        function resetSimulator() {
+            const output = document.getElementById('sim-output');
+            const runBtn = document.getElementById('run-btn');
+            output.innerHTML = '<span style="color: #546e7a;">$ pytest --cov=src --cov-report=term</span>\n<span style="color: #546e7a;">Aguardando execução...</span>';
+            runBtn.disabled = false;
+            runBtn.innerText = '▶ Rodar Testes';
+        }
+
+        // Mobile Sidebar
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('sidebar-overlay').classList.toggle('open');
+        }
+
+        document.getElementById('sidebar-overlay').addEventListener('click', toggleSidebar);
+
+        // Close sidebar when clicking nav link on mobile
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth <= 768) {
+                    toggleSidebar();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
