@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desafio do Milhão - Arquitetura de Software</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@4.5.0/index.min.css">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        body { background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%); }
+        
+        .option-btn { 
+            transition: all 0.3s ease; 
+            position: relative;
+            overflow: hidden;
+        }
+        .option-btn:hover:not(:disabled) { 
+            transform: translateY(-2px); 
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+        }
+        .option-btn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+        
+        .correct-anim { animation: flashGreen 0.8s ease-in-out; }
+        .wrong-anim { animation: flashRed 0.8s ease-in-out; }
+        
+        @keyframes flashGreen { 
+            0%, 100% { background-color: rgb(59, 130, 246); } 
+            50% { background-color: rgb(34, 197, 94); } 
+        }
+        @keyframes flashRed { 
+            0%, 100% { background-color: rgb(59, 130, 246); } 
+            50% { background-color: rgb(239, 68, 68); } 
+        }
+        @keyframes pulse-gold {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(234, 179, 8, 0.4); }
+            50% { box-shadow: 0 0 0 10px rgba(234, 179, 8, 0); }
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .slide-in { animation: slideIn 0.5s ease-out; }
+        .fade-in { animation: fadeIn 0.3s ease-out; }
+        
+        .ladder-item { transition: all 0.3s ease; }
+        .ladder-current { 
+            background: linear-gradient(90deg, #eab308, #f59e0b); 
+            color: #000; 
+            font-weight: bold; 
+            transform: scale(1.05);
+            animation: pulse-gold 2s infinite;
+        }
+        .ladder-safe { 
+            background: linear-gradient(90deg, #f97316, #ea580c); 
+            color: #fff; 
+            font-weight: bold; 
+        }
+        .ladder-passed {
+            background-color: #10b981;
+            color: #fff;
+        }
+        
+        .modal-backdrop { 
+            background-color: rgba(15, 23, 42, 0.95); 
+            backdrop-filter: blur(8px); 
+        }
+        
+        .lifeline-btn {
+            transition: all 0.3s ease;
+        }
+        .lifeline-btn:hover:not(:disabled) {
+            transform: scale(1.05);
+        }
+        .lifeline-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        
+        .question-card {
+            background: linear-gradient(145deg, #1e293b, #334155);
+            border: 1px solid #475569;
+        }
+        
+        .header-gradient {
+            background: linear-gradient(90deg, #1e293b, #0f172a, #1e293b);
+        }
+        
+        .title-glow {
+            text-shadow: 0 0 20px rgba(234, 179, 8, 0.5);
+        }
+    </style>
+</head>
+<body class="text-white min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="header-gradient border-b border-yellow-600/30 p-4 shadow-2xl">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <h1 class="text-2xl md:text-4xl font-bold text-yellow-400 tracking-tight title-glow">
+                💰 DESAFIO DO MILHÃO
+            </h1>
+            <div class="flex items-center gap-6">
+                <div class="text-center">
+                    <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Prêmio Atual</p>
+                    <p id="currentPrizeDisplay" class="text-2xl md:text-3xl font-bold text-green-400">R$ 0</p>
+                </div>
+                <button onclick="quitGame()" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl font-bold transition-all shadow-lg hover:shadow-red-500/50 text-sm md:text-base">
+                    🛑 PARAR
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 max-w-7xl mx-auto w-full p-4 md:p-6 flex flex-col lg:flex-row gap-6">
+        
+        <!-- Game Area -->
+        <div class="flex-1 flex flex-col gap-6">
+            
+            <!-- Lifelines -->
+            <div class="flex justify-center gap-3 md:gap-4 flex-wrap">
+                <button id="btnDica" onclick="useLifeline('dica')" class="lifeline-btn flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-700 disabled:text-slate-500 px-4 md:px-6 py-3 rounded-full font-bold transition-all border-2 border-indigo-400 shadow-lg">
+                    <span class="text-xl">💡</span> 
+                    <span>Dica (<span id="countDica">2</span>)</span>
+                </button>
+                <button id="btnFifty" onclick="useLifeline('fifty')" class="lifeline-btn flex items-center gap-2 bg-purple-600 hover:bg-purple-500 disabled:bg-slate-700 disabled:text-slate-500 px-4 md:px-6 py-3 rounded-full font-bold transition-all border-2 border-purple-400 shadow-lg">
+                    <span class="text-xl">✂️</span> 
+                    <span>50:50 (<span id="countFifty">3</span>)</span>
+                </button>
+                <button id="btnSkip" onclick="useLifeline('skip')" class="lifeline-btn flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-700 disabled:text-slate-500 px-4 md:px-6 py-3 rounded-full font-bold transition-all border-2 border-emerald-400 shadow-lg">
+                    <span class="text-xl">⏭️</span> 
+                    <span>Pular (<span id="countSkip">1</span>)</span>
+                </button>
+            </div>
+
+            <!-- Question Card -->
+            <div class="question-card rounded-2xl p-6 md:p-8 shadow-2xl flex-1 flex flex-col justify-center min-h-[400px] slide-in">
+                <div class="mb-6">
+                    <span id="questionNumber" class="inline-block bg-blue-600 text-white text-xs font-bold px-4 py-2 rounded-full mb-4 shadow-lg">QUESTÃO 1</span>
+                    <h2 id="questionText" class="text-lg md:text-2xl font-semibold leading-relaxed text-slate-100"></h2>
+                </div>
+
+                <!-- Options Container -->
+                <div id="optionsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Options injected via JS -->
+                </div>
+
+                <!-- Final Question Special UI -->
+                <div id="finalQuestionUI" class="hidden flex-col gap-6">
+                    <div class="relative">
+                        <input type="text" id="finalAnswerInput" readonly placeholder="Sua resposta aparecerá aqui..." 
+                            class="w-full bg-slate-900 border-2 border-yellow-500 text-yellow-400 text-xl font-bold p-4 rounded-xl text-center focus:outline-none">
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <button onclick="submitFinalAnswer(0)" class="option-btn bg-slate-700 hover:bg-blue-600 border-2 border-slate-600 p-6 rounded-xl text-lg font-semibold text-center">
+                            <span class="text-yellow-400 mr-2 font-bold">A)</span> <span id="finalOpt0"></span>
+                        </button>
+                        <button onclick="submitFinalAnswer(1)" class="option-btn bg-slate-700 hover:bg-blue-600 border-2 border-slate-600 p-6 rounded-xl text-lg font-semibold text-center">
+                            <span class="text-yellow-400 mr-2 font-bold">B)</span> <span id="finalOpt1"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Prize Ladder -->
+        <div class="lg:w-80 bg-slate-800/80 border border-slate-700 rounded-2xl p-4 shadow-xl h-fit backdrop-blur">
+            <h3 class="text-center text-yellow-400 text-sm font-bold uppercase tracking-wider mb-4">🏆 Escada de Prêmios</h3>
+            <div id="prizeLadder" class="flex flex-col-reverse gap-1">
+                <!-- Ladder items injected via JS -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Hint Modal -->
+    <div id="hintModal" class="fixed inset-0 modal-backdrop hidden items-center justify-center z-50 p-4">
+        <div class="bg-slate-800 border-2 border-indigo-500 rounded-2xl p-6 max-w-md w-full shadow-2xl fade-in">
+            <h3 class="text-xl font-bold text-indigo-400 mb-4 flex items-center gap-2">💡 Dica do Especialista</h3>
+            <p id="hintText" class="text-slate-200 leading-relaxed mb-6"></p>
+            <button onclick="closeHint()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl transition-colors">
+                Entendi
+            </button>
+        </div>
+    </div>
+
+    <!-- Game Over / Victory Modal -->
+    <div id="endModal" class="fixed inset-0 modal-backdrop hidden items-center justify-center z-50 p-4">
+        <div class="bg-slate-800 border-2 border-yellow-500 rounded-2xl p-8 max-w-md w-full shadow-2xl text-center fade-in">
+            <div id="endIcon" class="text-6xl mb-4">🏆</div>
+            <h2 id="endTitle" class="text-3xl font-bold text-white mb-2">Fim de Jogo</h2>
+            <p id="endMessage" class="text-slate-300 mb-6"></p>
+            <div class="bg-slate-900 rounded-xl p-4 mb-6 border border-slate-700">
+                <p class="text-sm text-slate-400 uppercase">Prêmio Final</p>
+                <p id="endPrize" class="text-4xl font-bold text-green-400">R$ 0</p>
+            </div>
+            <button onclick="resetGame()" class="w-full bg-yellow-500 hover:bg-yellow-400 text-slate-900 font-bold py-4 rounded-xl transition-colors text-lg">
+                🔄 Jogar Novamente
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            { 
+                q: "Na modelagem UML, qual é a sequência CORRETA dos três compartimentos obrigatórios de uma classe?", 
+                options: ["Atributos, Nome e Métodos", "Nome, Atributos e Métodos", "Métodos, Nome e Atributos", "Nome, Métodos e Atributos"], 
+                correct: 1, 
+                hint: "Pense na ordem lógica: primeiro identificamos o que é (nome), depois suas características (atributos) e finalmente seu comportamento (métodos)." 
+            },
+            { 
+                q: "Um analista modela que 'Carro' conhece 'Motor', mas 'Motor' não tem conhecimento de 'Carro'. Que tipo de relacionamento isso representa?", 
+                options: ["Associação bidirecional", "Associação unidirecional com navegabilidade única", "Composição com losango preenchido", "Dependência tracejada"], 
+                correct: 1, 
+                hint: "Quando apenas um lado do relacionamento 'sabe' da existência do outro, temos navegabilidade em um único sentido." 
+            },
+            { 
+                q: "Em um sistema de e-commerce, um Cliente pode fazer zero ou vários pedidos (sem limite infinito). Qual a multiplicidade correta?", 
+                options: ["1 (exatamente um)", "0..1 (zero ou um)", "0..* (zero ou muitos)", "1..* (um ou muitos)"], 
+                correct: 2, 
+                hint: "A notação que permite zero ou mais instâncias, sem limite superior definido, usa o asterisco." 
+            },
+            { 
+                q: "Qual notação visual representa um relacionamento de BAIXO acoplamento onde a parte pode existir independentemente do todo?", 
+                options: ["Losango preenchido (composição)", "Losango vazio (agregação)", "Linha sólida sem losango", "Seta vazada (herança)"], 
+                correct: 1, 
+                hint: "O losango VAZIO indica que as partes têm ciclo de vida independente do todo." 
+            },
+            { 
+                q: "Em um sistema de pedidos, 'ItemPedido' não pode existir sem 'Pedido'. Qual relacionamento representa essa dependência existencial?", 
+                options: ["Agregação com losango vazio", "Associação simples", "Composição com losango preenchido", "Dependência com seta tracejada"], 
+                correct: 2, 
+                hint: "Quando a parte NÃO existe sem o todo (alto acoplamento), usamos o losango PREENCHIDO." 
+            },
+            { 
+                q: "Um relacionamento entre 'Aluno' e 'Curso' precisa armazenar semestre e nota. Qual elemento de modelagem deve ser usado?", 
+                options: ["Classe de associação", "Agregação com atributos extras", "Composição recursiva", "Generalização de classes"], 
+                correct: 0, 
+                hint: "Quando o próprio relacionamento gera informações adicionais, ele se torna um objeto." 
+            },
+            { 
+                q: "Qual é o PRIMEIRO passo correto na construção de um Diagrama de Classes a partir de requisitos fragmentados?", 
+                options: ["Conectar todas as classes com composição", "Extrair substantivos principais e transformá-los em classes base", "Definir todos os métodos antes dos atributos", "Criar apenas classes de associação"], 
+                correct: 1, 
+                hint: "O primeiro passo é identificar as entidades principais mencionadas nos requisitos de negócio." 
+            },
+            { 
+                q: "Segundo a regra de ouro da modelagem de casos de uso, onde os atores devem ser posicionados?", 
+                options: ["Dentro da fronteira do sistema", "Sobrepondo a fronteira", "Sempre fora da fronteira do sistema", "Alternadamente dentro e fora"], 
+                correct: 2, 
+                hint: "Atores representam papéis externos ao sistema - usuários, hardware ou outros sistemas." 
+            },
+            { 
+                q: "Quando 'Emprestar livro' OBRIGATORIAMENTE precisa 'Verificar livro reservado' primeiro, qual relacionamento usar?", 
+                options: ["<<extend>> apontando para o estendido", "<<include>> com linha tracejada apontando para o incluído", "Generalização com seta vazada", "Associação simples"], 
+                correct: 1, 
+                hint: "A inclusão é OBRIGATÓRIA - o caso base 'chama' o outro para poder ser concluído." 
+            },
+            { 
+                q: "O caso 'Ler livro' funciona sozinho, mas pode ter 'Virar página' como funcionalidade OPCIONAL. Qual relacionamento usar?", 
+                options: ["<<include>> apontando do base para o opcional", "<<extend>> com linha tracejada apontando para o caso base", "Herança com seta sólida vazada", "Realização com elipse tracejada"], 
+                correct: 1, 
+                hint: "A extensão é OPCIONAL - o caso base funciona perfeitamente sem ela." 
+            },
+            { 
+                q: "Para representar que 'Gerente' é um tipo de 'Usuário' com permissões adicionais, qual notação usar?", 
+                options: ["Associação bidirecional", "Generalização com linha sólida e seta vazada apontando para o pai", "Dependência com <<include>>", "Agregação com losango vazio"], 
+                correct: 1, 
+                hint: "A herança/generalização usa seta TRIANGULAR VAZADA apontando para o elemento pai." 
+            },
+            { 
+                q: "Qual destes casos de uso está CORRETAMENTE modelado segundo a regra de ouro?", 
+                options: ["'Clicar botão' - ação atômica", "'Preencher campo' - tarefa do usuário", "'Efetuar Compra' - objetivo de negócio completo", "Todos estão corretamente modelados"], 
+                correct: 2, 
+                hint: "Um caso de uso deve representar um OBJETIVO DE NEGÓCIO COMPLETO, não apenas um clique." 
+            },
+            { 
+                q: "Qual elemento representa a ponte entre o caso de uso abstrato e a implementação concreta em código?", 
+                options: ["Associação simples", "Realização (<<realization>>) com colaboração", "Generalização entre casos de uso", "Extensão opcional com <<extend>>"], 
+                correct: 1, 
+                hint: "A realização mostra como o requisito abstrato será fisicamente implementado por objetos colaborativos." 
+            },
+            { 
+                q: "Na notação UML, qual é a representação técnica CORRETA de atributos PRIVADOS da classe 'Pedido'?", 
+                options: ["+id: int, +data: Date, +valor: double", "-id: int, -data: Date, -valor: double", "id(): int, data(): Date, valor(): double", "#id: int, #data: Date, #valor: double"], 
+                correct: 1, 
+                hint: "O símbolo '-' indica visibilidade privada, '+' pública e '#' protegida." 
+            },
+            { 
+                q: "Em um app de saúde, todo remédio exige pagamento (obrigatório), mas usar pontos de fidelidade é opcional. Como modelar?", 
+                options: ["<<include>> para pagamento e <<extend>> para pontos", "<<extend>> para pagamento e <<include>> para pontos", "Apenas <<include>> para ambos", "Apenas generalização para ambos"], 
+                correct: 0, 
+                hint: "Obrigatório = include; Opcional = extend." 
+            },
+            { 
+                q: "Qual princípio SOLID afirma que uma classe deve ter apenas um motivo para mudar?", 
+                options: ["Aberto/Fechado", "Responsabilidade Única (SRP)", "Inversão de Dependência", "Substituição de Liskov"], 
+                correct: 1, 
+                hint: "É o 'S' do acrônimo SOLID, focado em coesão e responsabilidade única." 
+            },
+            { 
+                q: "Em um banco de dados relacional, o que é uma 'Chave Primária'?", 
+                options: ["Senha do administrador", "Identificador único de um registro", "Tipo de dado texto", "Índice de performance"], 
+                correct: 1, 
+                hint: "Garante que cada linha em uma tabela seja unicamente identificável." 
+            },
+            { 
+                q: "Qual estrutura de dados opera no princípio LIFO (Last In, First Out)?", 
+                options: ["Fila", "Pilha", "Árvore", "Grafo"], 
+                correct: 1, 
+                hint: "Pense em uma pilha de pratos: o último a ser colocado é o primeiro a ser retirado." 
+            },
+            { 
+                q: "Em arquitetura de microserviços, o que é um 'API Gateway'?", 
+                options: ["Um banco de dados central", "Ponto único de entrada para clientes", "Um servidor de e-mail", "Uma ferramenta de teste"], 
+                correct: 1, 
+                hint: "Atua como um proxy reverso, roteando solicitações para os microserviços apropriados." 
+            },
+            { 
+                q: "Na modelagem UML, qual relacionamento indica que a parte NÃO pode existir sem o todo?", 
+                options: ["Composição", "Agregação"], 
+                correct: 0, 
+                hint: "Diferente da agregação, aqui o ciclo de vida da parte é estritamente vinculado ao todo.", 
+                isFinal: true 
+            }
+        ];
+
+        const prizes = [
+            500, 1000, 2000, 3000, 5000, 
+            10000, 20000, 30000, 40000, 50000, 
+            100000, 150000, 200000, 300000, 400000, 
+            500000, 600000, 700000, 800000, 1000000
+        ];
+
+        let currentQ = 0;
+        let lifelines = { dica: 2, fifty: 3, skip: 1 };
+        let isAnswering = false;
+        let eliminatedOptions = [];
+
+        function formatMoney(value) {
+            return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
+        function getSafePrize(index) {
+            if (index < 4) return 0;
+            if (index < 9) return 5000;
+            return 50000;
+        }
+
+        function renderLadder() {
+            const ladder = document.getElementById('prizeLadder');
+            ladder.innerHTML = '';
+            prizes.forEach((prize, idx) => {
+                const div = document.createElement('div');
+                let cls = 'ladder-item flex justify-between items-center p-2 md:p-3 rounded-lg text-xs md:text-sm ';
+                
+                if (idx === currentQ) {
+                    cls += 'ladder-current';
+                } else if (idx < currentQ) {
+                    cls += 'ladder-passed';
+                } else if (idx === 4 || idx === 9) {
+                    cls += 'ladder-safe text-slate-300';
+                } else {
+                    cls += 'text-slate-400';
+                }
+                
+                div.className = cls;
+                div.innerHTML = `<span class="font-bold">${idx + 1}</span><span>${formatMoney(prize)}</span>`;
+                ladder.appendChild(div);
+            });
+            
+            const currentPrize = currentQ > 0 ? prizes[currentQ - 1] : 0;
+            document.getElementById('currentPrizeDisplay').textContent = formatMoney(currentPrize);
+        }
+
+        function renderQuestion() {
+            const q = questions[currentQ];
+            document.getElementById('questionNumber').textContent = `QUESTÃO ${currentQ + 1} ${q.isFinal ? '⭐ (DESAFIO FINAL)' : ''}`;
+            document.getElementById('questionText').textContent = q.q;
+            
+            const optionsContainer = document.getElementById('optionsContainer');
+            const finalUI = document.getElementById('finalQuestionUI');
+            
+            if (q.isFinal) {
+                optionsContainer.classList.add('hidden');
+                finalUI.classList.remove('hidden');
+                finalUI.classList.add('flex');
+                document.getElementById('finalOpt0').textContent = q.options[0];
+                document.getElementById('finalOpt1').textContent = q.options[1];
+                document.getElementById('finalAnswerInput').value = '';
+                document.getElementById('btnFifty').disabled = true;
+            } else {
+                optionsContainer.classList.remove('hidden');
+                finalUI.classList.add('hidden');
+                finalUI.classList.remove('flex');
+                optionsContainer.innerHTML = '';
+                eliminatedOptions = [];
+                
+                q.options.forEach((opt, idx) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'option-btn bg-slate-700 hover:bg-blue-600 border-2 border-slate-600 p-4 md:p-5 rounded-xl text-left font-semibold text-slate-100 flex items-center gap-3 text-sm md:text-base';
+                    btn.innerHTML = `<span class="text-yellow-400 font-bold text-lg">${String.fromCharCode(65 + idx)})</span> <span>${opt}</span>`;
+                    btn.onclick = () => selectOption(idx, btn);
+                    btn.dataset.index = idx;
+                    btn.id = `opt-${idx}`;
+                    optionsContainer.appendChild(btn);
+                });
+            }
+            renderLadder();
+        }
+
+        function selectOption(selectedIndex, btnElement) {
+            if (isAnswering) return;
+            isAnswering = true;
+            
+            const q = questions[currentQ];
+            const isCorrect = selectedIndex === q.correct;
+            
+            btnElement.classList.add('correct-anim');
+            
+            setTimeout(() => {
+                if (isCorrect) {
+                    if (currentQ === 19) {
+                        endGame(true);
+                    } else {
+                        currentQ++;
+                        isAnswering = false;
+                        renderQuestion();
+                    }
+                } else {
+                    btnElement.classList.remove('correct-anim');
+                    btnElement.classList.add('wrong-anim');
+                    
+                    // Show correct answer
+                    const correctBtn = document.getElementById(`opt-${q.correct}`);
+                    if (correctBtn) {
+                        setTimeout(() => {
+                            correctBtn.style.backgroundColor = 'rgb(34, 197, 94)';
+                            correctBtn.style.borderColor = 'rgb(34, 197, 94)';
+                        }, 500);
+                    }
+                    
+                    setTimeout(() => endGame(false), 1500);
+                }
+            }, 1500);
+        }
+
+        function submitFinalAnswer(optIndex) {
+            if (isAnswering) return;
+            isAnswering = true;
+            
+            const q = questions[currentQ];
+            const isCorrect = optIndex === q.correct;
+            const input = document.getElementById('finalAnswerInput');
+            
+            input.value = q.options[optIndex];
+            input.style.borderColor = isCorrect ? 'rgb(34, 197, 94)' : 'rgb(239, 68, 68)';
+            input.style.color = isCorrect ? 'rgb(34, 197, 94)' : 'rgb(239, 68, 68)';
+            
+            setTimeout(() => {
+                if (isCorrect) {
+                    endGame(true);
+                } else {
+                    endGame(false);
+                }
+            }, 1500);
+        }
+
+        function useLifeline(type) {
+            if (lifelines[type] <= 0 || isAnswering) return;
+            
+            const q = questions[currentQ];
+            
+            if (type === 'dica') {
+                document.getElementById('hintText').textContent = q.hint;
+                document.getElementById('hintModal').classList.remove('hidden');
+                document.getElementById('hintModal').classList.add('flex');
+                lifelines.dica--;
+                document.getElementById('countDica').textContent = lifelines.dica;
+                if (lifelines.dica === 0) document.getElementById('btnDica').disabled = true;
+            } 
+            else if (type === 'fifty' && !q.isFinal) {
+                const buttons = document.querySelectorAll('#optionsContainer button');
+                const wrongIndices = [];
+                buttons.forEach((btn, idx) => {
+                    if (idx !== q.correct && !eliminatedOptions.includes(idx)) {
+                        wrongIndices.push(idx);
+                    }
+                });
+                wrongIndices.sort(() => Math.random() - 0.5);
+                const toRemove = wrongIndices.slice(0, 2);
+                
+                toRemove.forEach(idx => {
+                    eliminatedOptions.push(idx);
+                    buttons[idx].style.visibility = 'hidden';
+                    buttons[idx].disabled = true;
+                });
+                
+                lifelines.fifty--;
+                document.getElementById('countFifty').textContent = lifelines.fifty;
+                if (lifelines.fifty === 0) document.getElementById('btnFifty').disabled = true;
+            } 
+            else if (type === 'skip') {
+                if (currentQ === 19) {
+                    alert("Não é possível pular a questão final!");
+                    return;
+                }
+                currentQ++;
+                lifelines.skip--;
+                document.getElementById('countSkip').textContent = lifelines.skip;
+                if (lifelines.skip === 0) document.getElementById('btnSkip').disabled = true;
+                renderQuestion();
+            }
+        }
+
+        function closeHint() {
+            document.getElementById('hintModal').classList.add('hidden');
+            document.getElementById('hintModal').classList.remove('flex');
+        }
+
+        function quitGame() {
+            if (confirm("Tem certeza que deseja parar e levar o prêmio atual?")) {
+                endGame(false, true);
+            }
+        }
+
+        function endGame(victory, quit = false) {
+            const modal = document.getElementById('endModal');
+            const icon = document.getElementById('endIcon');
+            const title = document.getElementById('endTitle');
+            const message = document.getElementById('endMessage');
+            const prizeEl = document.getElementById('endPrize');
+            
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            
+            if (victory) {
+                icon.textContent = '🏆';
+                title.textContent = 'PARABÉNS! VOCÊ É O MILIONÁRIO!';
+                title.className = 'text-2xl md:text-3xl font-bold text-yellow-400 mb-2';
+                message.textContent = 'Você conquistou o prêmio máximo de R$ 1.000.000!';
+                prizeEl.textContent = formatMoney(1000000);
+            } else {
+                icon.textContent = quit ? '🛑' : '❌';
+                title.textContent = quit ? 'Você Parou!' : 'Você Errou!';
+                title.className = 'text-2xl md:text-3xl font-bold text-red-400 mb-2';
+                message.textContent = quit 
+                    ? 'Boa estratégia! Você garantiu seu prêmio.' 
+                    : 'Não foi dessa vez, mas você pode tentar novamente!';
+                const finalPrize = quit ? (currentQ > 0 ? prizes[currentQ - 1] : 0) : getSafePrize(currentQ);
+                prizeEl.textContent = formatMoney(finalPrize);
+            }
+        }
+
+        function resetGame() {
+            currentQ = 0;
+            lifelines = { dica: 2, fifty: 3, skip: 1 };
+            isAnswering = false;
+            eliminatedOptions = [];
+            
+            document.getElementById('countDica').textContent = 2;
+            document.getElementById('countFifty').textContent = 3;
+            document.getElementById('countSkip').textContent = 1;
+            document.getElementById('btnDica').disabled = false;
+            document.getElementById('btnFifty').disabled = false;
+            document.getElementById('btnSkip').disabled = false;
+            
+            document.getElementById('endModal').classList.add('hidden');
+            document.getElementById('endModal').classList.remove('flex');
+            
+            renderQuestion();
+        }
+
+        // Initialize game
+        renderQuestion();
+    </script>
+</body>
+</html>
+
