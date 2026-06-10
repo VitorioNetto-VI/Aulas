@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ambiente de Estudos: Git e Manutenção de Software</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.fontsource.fyi/fontsource/inter/400,500,600,700.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background-color: #0b1120;
+            color: #f8fafc;
+        }
+        .option-btn {
+            transition: all 0.2s ease-in-out;
+        }
+        .option-btn:hover:not(:disabled):not(.correct):not(.wrong) {
+            transform: translateX(4px);
+            border-color: #f59e0b;
+            background-color: #1e293b;
+        }
+        .option-btn.correct {
+            background-color: #064e3b !important;
+            border-color: #10b981 !important;
+            color: #ffffff !important;
+        }
+        .option-btn.wrong {
+            background-color: #450a0a !important;
+            border-color: #ef4444 !important;
+            color: #ffffff !important;
+        }
+        .option-btn.selected {
+            border-color: #f59e0b;
+            background-color: #1e293b;
+        }
+        .fade-in {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .discursive-textarea {
+            resize: vertical;
+            min-height: 180px;
+        }
+        .answer-box {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-out, opacity 0.3s ease-out;
+            opacity: 0;
+        }
+        .answer-box.open {
+            max-height: 1000px;
+            opacity: 1;
+        }
+        .letter-badge {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 0.875rem;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-slate-900/80 backdrop-blur border-b border-slate-700 sticky top-0 z-10">
+        <div class="max-w-4xl mx-auto px-4 py-4">
+            <div class="flex justify-between items-center mb-2">
+                <h1 class="text-lg md:text-xl font-bold text-amber-400">Ambiente de Estudos</h1>
+                <span id="progress-text" class="text-xs md:text-sm font-medium text-slate-400">Questão 1 de 20</span>
+            </div>
+            <div class="w-full bg-slate-700 rounded-full h-2">
+                <div id="progress-bar" class="bg-amber-500 h-2 rounded-full transition-all duration-500" style="width: 5%"></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 max-w-4xl mx-auto w-full px-4 py-6 md:py-8">
+        <div id="quiz-container" class="fade-in">
+            <!-- Dynamic Content Here -->
+        </div>
+    </main>
+
+    <!-- Footer Navigation -->
+    <footer class="bg-slate-900/80 backdrop-blur border-t border-slate-700 sticky bottom-0 z-10">
+        <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
+            <button id="btn-prev" onclick="prevQuestion()" class="px-4 md:px-6 py-2 rounded-lg font-medium text-slate-300 hover:text-white hover:bg-slate-700 transition-colors disabled:opacity-30 disabled:cursor-not-allowed" disabled>
+                ← Anterior
+            </button>
+            <button id="btn-next" onclick="nextQuestion()" class="px-4 md:px-6 py-2 rounded-lg font-medium bg-amber-500 text-slate-900 hover:bg-amber-400 transition-colors">
+                Próxima →
+            </button>
+        </div>
+    </footer>
+
+    <!-- Result Modal -->
+    <div id="result-modal" class="hidden fixed inset-0 bg-slate-900/95 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 md:p-8 max-w-lg w-full text-center shadow-2xl">
+            <div class="w-16 h-16 bg-amber-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+            <h2 class="text-2xl font-bold text-white mb-2">Estudo Concluído!</h2>
+            <p class="text-slate-300 mb-6">Você revisou todas as 20 questões.</p>
+            <div class="bg-slate-900 rounded-xl p-6 mb-6 border border-slate-700">
+                <div class="text-sm text-slate-400 uppercase tracking-wider mb-1">Desempenho nas Objetivas</div>
+                <div class="text-4xl font-bold text-emerald-400" id="final-score">0/16</div>
+                <p class="text-sm text-slate-400 mt-2">As questões discursivas (17-20) podem ser revisadas no modo de estudo.</p>
+            </div>
+            <button onclick="resetQuiz()" class="w-full py-3 rounded-lg font-bold bg-amber-500 text-slate-900 hover:bg-amber-400 transition-colors">
+                Reiniciar Estudos
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const questionsData = [
+            {
+                id: 1, type: 'multiple',
+                text: "O controle de versão é fundamental para o desenvolvimento de software, especialmente em ambientes ágeis como startups. No contexto apresentado, é comum que iniciantes confundam as ferramentas e plataformas disponíveis para essa finalidade. O texto destaca a distinção entre duas tecnologias amplamente utilizadas, explicando que uma opera localmente, gerenciando snapshots e permitindo trabalho offline, enquanto a outra atua como uma plataforma web que hospeda os repositórios e adiciona funcionalidades de colaboração social, como Pull Requests e Issues.\n\nCom base nas informações do texto, assinale a alternativa que identifica correta e respectivamente a ferramenta local e a plataforma web descritas.",
+                options: ["SVN e Bitbucket.", "Git e GitHub.", "Mercurial e GitLab.", "Docker e Kubernetes."],
+                correct: 1,
+                explanation: "O Git é a ferramenta de controle de versão instalada localmente, enquanto o GitHub é a plataforma web que hospeda repositórios e adiciona ferramentas de colaboração."
+            },
+            {
+                id: 2, type: 'multiple',
+                text: "Para equipes multidisciplinares em startups, a adoção de um sistema de controle de versão distribuído traz benefícios que vão além do simples armazenamento de código. O texto enfatiza que essa prática permite coordenar o trabalho em equipe, manter um histórico completo de mudanças e proporciona um ambiente onde os desenvolvedores podem experimentar novas soluções com segurança, revertendo mudanças indesejadas caso necessário.\n\nDe acordo com o texto, qual das alternativas abaixo apresenta uma característica intrínseca da ferramenta local de controle de versão mencionada?",
+                options: ["Exige conexão constante com a internet para que os commits sejam salvos no histórico local.", "Armazena snapshots do projeto e permite a criação de branches para experimentação offline.", "Funciona exclusivamente como um repositório centralizado na nuvem para hospedar o código-fonte.", "Depende de uma plataforma web para que a criação de branches e a reversão de mudanças sejam possíveis."],
+                correct: 1,
+                explanation: "O Git armazena snapshots do projeto localmente, permitindo a criação de branches e trabalho offline sem depender de conexão constante."
+            },
+            {
+                id: 3, type: 'multiple',
+                text: "A prática de salvar o estado do projeto é uma das rotinas mais frequentes no desenvolvimento de software. O texto compara esse registro a um 'save point', que armazena um conjunto de alterações acompanhado de uma mensagem descritiva. Para manter a qualidade e a clareza do histórico do projeto, o material apresenta boas práticas essenciais para a redação dessas mensagens, visando facilitar a compreensão das mudanças por qualquer membro da equipe.\n\nSegundo as diretrizes do texto, qual das alternativas abaixo representa uma boa prática para a escrita de mensagens de commit?",
+                options: ["Utilizar o modo indicativo, descrevendo as ações no passado, como 'Corrigi o erro de login'.", "Ser o mais genérico possível, utilizando termos como 'atualizações' ou 'ajustes' para abranger múltiplas mudanças.", "Empregar o modo imperativo, como 'Adicione' ou 'Corrija', e manter a primeira linha com até 50 caracteres.", "Escrever mensagens detalhadas em parágrafos longos na primeira linha para contextualizar todo o histórico do projeto."],
+                correct: 2,
+                explanation: "As boas práticas recomendam o uso do modo imperativo e a brevidade na primeira linha (até 50 caracteres) para clareza e padronização."
+            },
+            {
+                id: 4, type: 'multiple',
+                text: "Startups com equipes ágeis necessitam de fluxos de trabalho que equilibrem a velocidade de entrega com a segurança das mudanças no código. O texto recomenda um modelo específico, estruturado em etapas que vão desde a criação de um ambiente isolado para novas funcionalidades até a integração do código após revisão. Esse modelo utiliza branches de funcionalidade e revisões por pares antes da incorporação das mudanças ao branch principal.\n\nConsiderando o 'GitHub Flow' descrito no texto, qual é a sequência correta de etapas recomendada para a implementação de uma nova funcionalidade?",
+                options: ["Criar um branch, fazer deploy imediato, abrir um Pull Request e discutir as mudanças.", "Fazer commits diretos no branch main, abrir um Pull Request e revisar o código após o deploy.", "Criar um branch para a funcionalidade, fazer commits frequentes, abrir um Pull Request, revisar e fazer deploy após o merge.", "Clonar o repositório, alterar o código diretamente no branch main, revisar com a equipe e criar um branch de hotfix."],
+                correct: 2,
+                explanation: "O GitHub Flow segue a sequência: criar branch isolado, commits frequentes, abrir Pull Request, revisar (Code Review) e fazer deploy após o merge."
+            },
+            {
+                id: 5, type: 'multiple',
+                text: "A organização dos branches em um repositório é crucial para a estabilidade do ambiente de produção e o fluxo de desenvolvimento. O texto apresenta estratégias de branching para startups, definindo papéis específicos para cada tipo de branch. Um deles deve ser mantido sempre estável e pronto para ser enviado a produção, enquanto outros são utilizados para o desenvolvimento de novas funcionalidades ou para correções urgentes em ambiente produtivo.\n\nCom base na estratégia de branching apresentada, assinale a alternativa que descreve corretamente a função do branch main.",
+                options: ["Servir como um ambiente de integração contínua para features em desenvolvimento.", "Armazenar correções urgentes que serão aplicadas diretamente no banco de dados de produção.", "Permanecer sempre estável, representando o código pronto para deploy.", "Substituir o branch develop na integração de todas as novas funcionalidades antes da revisão."],
+                correct: 2,
+                explanation: "O branch main deve permanecer sempre estável, representando o estado do código que está pronto para ser enviado à produção (deploy)."
+            },
+            {
+                id: 6, type: 'multiple',
+                text: "A integração de mudanças entre branches pode ser realizada de diferentes maneiras, cada uma com impactos distintos sobre o histórico do projeto. O texto compara duas operações fundamentais, destacando que uma preserva o histórico completo e os pontos de bifurcação, sendo ideal para Pull Requests em equipe. A outra operação reescreve o histórico para torná-lo linear e limpo, sendo recomendada apenas para commits locais antes do envio ao repositório remoto.\n\nDe acordo com o texto, qual é o risco associado ao uso indevido da operação que cria um histórico linear?",
+                options: ["Ela gera conflitos automáticos que impedem a criação de novos branches no repositório.", "Se aplicada em branches compartilhados, reescreve o histórico e pode causar conflitos graves para a equipe.", "Ela apaga permanentemente todos os commits anteriores do branch main, comprometendo o histórico.", "Impede a utilização de Pull Requests, obrigando a equipe a trabalhar exclusivamente de forma local."],
+                correct: 1,
+                explanation: "Fazer rebase em branches compartilhados reescreve o histórico local, o que pode causar conflitos graves e duplicação de commits para a equipe."
+            },
+            {
+                id: 7, type: 'multiple',
+                text: "A automação de processos é um dos pilares para o crescimento e a manutenção da qualidade do software em startups. O texto menciona uma funcionalidade da plataforma web que permite a criação de workflows configurados através de arquivos YAML. Essa ferramenta é amplamente utilizada para executar rotinas repetitivas, garantindo que certas verificações sejam realizadas automaticamente sempre que novas alterações são submetidas ao repositório.\n\nQual é a principal finalidade dessa ferramenta de automação mencionada no texto?",
+                options: ["Substituir a necessidade de testes manuais, compilando o código em linguagem de máquina automaticamente.", "Gerenciar o banco de dados da startup, criando backups a cada novo commit realizado pelos desenvolvedores.", "Automatizar testes, deploy e notificações, integrando-se ao fluxo de trabalho de CI/CD.", "Controlar o acesso dos membros da equipe ao repositório, bloqueando pushes não autorizados."],
+                correct: 2,
+                explanation: "Ferramentas como GitHub Actions automatizam testes, deploy e notificações, integrando-se perfeitamente ao fluxo de CI/CD."
+            },
+            {
+                id: 8, type: 'multiple',
+                text: "A manutenção de software frequentemente envolve a melhoria da estrutura interna do código sem alterar seu comportamento externo. O texto utiliza uma analogia com a reforma de uma casa para ilustrar os perigos de realizar esse processo sem a devida preparação. Segundo o material, a ausência de uma 'rede de segurança' pode tornar qualquer mudança arriscada, causando danos invisíveis que só serão percebidos quando o sistema já estiver em funcionamento.\n\nDe acordo com o texto, qual é a condição indispensável para que a refatoração de classes complexas seja realizada com segurança?",
+                options: ["A utilização de linguagens de programação tipadas estaticamente, como Java ou C++.", "A existência de testes automatizados que validem o comportamento do código.", "A reescrita completa do código legado utilizando a metodologia de desenvolvimento ágil Scrum.", "A documentação detalhada de cada linha de código antes de qualquer modificação na estrutura."],
+                correct: 1,
+                explanation: "Testes automatizados fornecem a 'rede de segurança' necessária para modificar código com confiança, validando o comportamento a cada alteração."
+            },
+            {
+                id: 9, type: 'multiple',
+                text: "Ao lidar com código legado que não possui testes automatizados, os desenvolvedores enfrentam o desafio de entender o comportamento atual do sistema antes de tentar melhorá-lo. O texto introduz um tipo específico de teste cujo objetivo não é necessariamente validar se o código está 'correto' segundo uma especificação, mas sim capturar e documentar como o sistema se comporta no presente momento, permitindo a identificação de bugs e comportamentos inesperados.\n\nComo o texto denomina esses testes essenciais para o mapeamento de uma classe existente antes da refatoração?",
+                options: ["Testes de integração.", "Testes de caracterização.", "Testes de carga.", "Testes unitários isolados."],
+                correct: 1,
+                explanation: "Testes de caracterização capturam o comportamento atual do sistema, servindo como base para identificar bugs antes de iniciar a refatoração."
+            },
+            {
+                id: 10, type: 'multiple',
+                text: "Após estabelecer uma rede de segurança com testes, a refatoração pode ser guiada por princípios de design e desenvolvimento. O texto destaca uma técnica específica que consiste em identificar blocos de código complexos dentro de um método extenso e movê-los para uma nova função ou método, atribuindo-lhes nomes descritivos que expliquem claramente sua finalidade. Essa prática melhora a legibilidade e a reutilização do código.\n\nQual é o nome da técnica de refatoração descrita no texto?",
+                options: ["Inverter condição.", "Extrair Método.", "Substituir algoritmo.", "Consolidar expressões condicionais."],
+                correct: 1,
+                explanation: "A técnica 'Extrair Método' move blocos complexos para novas funções com nomes descritivos, melhorando legibilidade e reutilização."
+            },
+            {
+                id: 11, type: 'multiple',
+                text: "A escrita de testes pode se tornar repetitiva quando é necessário validar o mesmo comportamento sob diferentes condições ou com diferentes conjuntos de dados. Para evitar a duplicação de código de teste e manter a suíte de testes organizada, o texto recomenda o uso de um decorador específico da biblioteca pytest. Esse recurso permite que um único teste seja executado múltiplas vezes, variando apenas os parâmetros de entrada e os resultados esperados.\n\nQual é o recurso do pytest mencionado no texto para testar múltiplos cenários com um único teste?",
+                options: ["@pytest.fixture", "@pytest.mark.parametrize", "@pytest.mock", "@pytest.coverage"],
+                correct: 1,
+                explanation: "O decorador @pytest.mark.parametrize permite executar um único teste múltiplas vezes com diferentes parâmetros de entrada."
+            },
+            {
+                id: 12, type: 'multiple',
+                text: "Durante a execução de testes automatizados, é comum que o código dependa de fatores externos ou imprevisíveis, como a entrada de dados pelo usuário, a geração de números aleatórios ou a consulta a APIs de terceiros. O texto aborda a necessidade de isolar essas dependências para que os testes sejam determinísticos e executados de forma confiável. Para isso, recomenda-se o uso de uma ferramenta que simula o comportamento desses componentes externos.\n\nSegundo o texto, qual é a finalidade do uso de mocks (com pytest-mock) durante a refatoração e a criação de testes?",
+                options: ["Aumentar a cobertura de testes, garantindo que 100% das linhas de código sejam executadas.", "Isolar dependências externas, como input e random, para controlar o comportamento durante os testes.", "Substituir a necessidade de testes de caracterização em código legado.", "Automatizar o processo de deploy do código refatorado para o ambiente de produção."],
+                correct: 1,
+                explanation: "Mocks simulam o comportamento de componentes externos (input, random, APIs) para que os testes sejam determinísticos e confiáveis."
+            },
+            {
+                id: 13, type: 'multiple',
+                text: "A métrica de cobertura de testes é frequentemente utilizada pelas equipes de desenvolvimento para avaliar a extensão em que o código-fonte foi exercido pela suíte de testes automatizados. O texto apresenta ferramentas que geram relatórios detalhados, destacando métricas como 'Stmts' (comandos), 'Miss' (linhas faltantes), 'Cover' (porcentagem de cobertura) e 'Branch' (cobertura de desvios). No entanto, o material faz uma ressalva importante sobre a interpretação desses dados.\n\nDe acordo com o texto, qual é a limitação da métrica de cobertura de testes?",
+                options: ["Ela não é uma métrica perfeita, mas ajuda a identificar áreas do código que não estão sendo testadas.", "Ela exige que o desenvolvedor escreva testes manuais para validar as áreas marcadas como 'Miss'.", "Ela só pode ser calculada corretamente se o código estiver escrito exclusivamente em Python.", "Ela impede a integração contínua, pois o processo de geração do relatório torna o build excessivamente lento."],
+                correct: 0,
+                explanation: "A cobertura não é uma métrica perfeita, mas é útil para identificar áreas do código que ainda não estão sendo testadas."
+            },
+            {
+                id: 14, type: 'multiple',
+                text: "A integração contínua (CI) é uma prática que visa automatizar a verificação da saúde do projeto a cada nova alteração. O texto descreve a configuração de um workflow em uma plataforma de hospedagem de código para que uma suíte de testes seja executada automaticamente. Esse processo garante que qualquer novo commit ou Pull Request seja validado antes de ser integrado ao branch principal, prevenindo a introdução de erros no ambiente estável.\n\nQual evento, segundo o exemplo de workflow YAML apresentado no texto, aciona a execução automática dos testes?",
+                options: ["A criação de um novo branch de funcionalidade.", "A aprovação de um Pull Request por um revisor sênior.", "A ocorrência de um push ou a abertura de um pull_request.", "O agendamento diário da rotina de manutenção do repositório."],
+                correct: 2,
+                explanation: "O workflow YAML é configurado para acionar testes automaticamente em eventos de push ou abertura de pull_request."
+            },
+            {
+                id: 15, type: 'multiple',
+                text: "Considere a seguinte situação: Uma equipe de desenvolvimento está trabalhando em um projeto utilizando o Git. Um dos desenvolvedores, para manter o histórico de commits o mais limpo e linear possível, decide executar um comando que reescreve o histórico do branch feature/login, que já havia sido publicado no repositório remoto e está sendo utilizado por outros dois colegas de equipe para desenvolver testes de integração.\n\nCom base nas orientações do texto sobre 'Merge vs Rebase', qual é o risco dessa ação e qual a recomendação para a equipe?",
+                options: ["A ação é recomendada, pois o Rebase limpa o histórico e facilita a leitura do código pelos demais desenvolvedores.", "A ação é perigosa, pois fazer Rebase em branches compartilhados reescreve o histórico e pode causar conflitos graves para a equipe.", "A ação é inofensiva, desde que o desenvolvedor utilize o comando git push --force imediatamente após o Rebase.", "A ação é recomendada apenas se o branch feature/login for fundido diretamente no branch main sem Pull Request."],
+                correct: 1,
+                explanation: "Nunca se deve fazer rebase em branches compartilhados, pois isso reescreve o histórico e causa conflitos graves para a equipe."
+            },
+            {
+                id: 16, type: 'multiple',
+                text: "Uma startup de tecnologia contratou um novo desenvolvedor para atuar na manutenção de um sistema legado escrito em Python. A principal tarefa desse profissional é refatorar uma classe complexa que possui múltiplas responsabilidades e dependências de leitura de arquivos locais. O desenvolvedor, ansioso para entregar resultado, começa a alterar a estrutura da classe imediatamente, sem escrever nenhuma linha de código de teste.\n\nConsiderando os conceitos de manutenção de software apresentados no texto, qual é a principal falha na abordagem desse desenvolvedor?",
+                options: ["Ele deveria ter utilizado a técnica de 'Extrair Método' antes de alterar qualquer dependência.", "Ele não configurou o GitHub Actions para rodar os testes automaticamente antes de começar a refatoração.", "Ele iniciou a refatoração sem criar testes de caracterização, trabalhando sem a necessária 'rede de segurança'.", "Ele deveria ter usado mocks para isolar a leitura de arquivos antes de começar a escrever o código."],
+                correct: 2,
+                explanation: "Iniciar a refatoração sem testes de caracterização significa trabalhar sem a 'rede de segurança' necessária para validar as mudanças."
+            },
+            {
+                id: 17, type: 'discursive',
+                title: "Questão 17 – Git vs GitHub e GitHub Flow",
+                situation: "Uma startup em fase de crescimento decidiu adotar o controle de versão para organizar o trabalho de sua equipe multidisciplinar, composta por desenvolvedores, designers e gerentes de produto. Durante o treinamento da equipe, surgiu uma confusão conceitual: alguns membros acreditavam que 'Git' e 'GitHub' eram sinônimos e que bastava criar uma conta na plataforma web para ter o controle de versão funcionando localmente em suas máquinas, mesmo sem conexão com a internet. Além disso, a equipe não sabia como estruturar o fluxo de trabalho para as novas funcionalidades, gerando conflitos frequentes ao enviarem alterações diretamente para o branch principal.",
+                texts: [
+                    "Texto I: 'Git: Ferramenta de linha de comando instalada localmente que gerencia versões de arquivos. Funciona offline e é extremamente rápida para operações locais. Armazena snapshots do seu projeto e permite criar branches para experimentação.'",
+                    "Texto II: 'GitHub: Plataforma web que hospeda repositórios Git e adiciona ferramentas de colaboração social. Repositórios públicos e privados, Pull Requests para revisão de código, Issues para gerenciamento de tarefas.'",
+                    "Texto III: 'GitHub Flow: Fluxo simplificado: main <- feature branches <- Pull Requests <- Code Review. Passos: 1. Crie um branch para cada nova funcionalidade; 2. Faça commits frequentes; 3. Abra um Pull Request; 4. Discuta e revise; 5. Faça deploy após aprovação.'"
+                ],
+                axes: "Diferencie claramente as ferramentas Git e GitHub, explicando a função de cada uma e esclarecendo o equívoco da equipe sobre o funcionamento offline. Proponha a adoção do fluxo de trabalho 'GitHub Flow', detalhando os passos que a equipe deve seguir para implementar novas funcionalidades de forma segura e colaborativa.",
+                limit: 30,
+                suggestedAnswer: "O candidato deve esclarecer que Git e GitHub não são sinônimos. O Git é a ferramenta de controle de versão instalada localmente na máquina do usuário, responsável por armazenar snapshots do projeto, gerenciar branches e permitir que o trabalho seja versionado mesmo offline. O GitHub, por sua vez, é a plataforma web que hospeda esses repositórios Git remotos, adicionando camadas de colaboração social, como Pull Requests e Issues. Portanto, ter uma conta no GitHub não substitui a instalação do Git local.\n\nAlém disso, o candidato deve propor a adoção do GitHub Flow para evitar conflitos no branch principal. O fluxo deve seguir os passos: 1) Criar um branch isolado (feature branch) para cada nova funcionalidade; 2) Realizar commits frequentes e descritivos; 3) Abrir um Pull Request quando a funcionalidade estiver pronta; 4) Discutir e revisar o código com a equipe (Code Review); 5) Realizar o merge e o deploy apenas após a aprovação da equipe."
+            },
+            {
+                id: 18, type: 'discursive',
+                title: "Questão 18 – Merge vs Rebase",
+                situation: "Durante uma revisão de código (Code Review) em uma startup, dois desenvolvedores discutem a melhor forma de integrar um branch de funcionalidade (feature/nova) ao branch principal (main). O Desenvolvedor A sugere o uso de git merge, argumentando que é a prática padrão para Pull Requests e preserva o contexto histórico das alterações. O Desenvolvedor B, preocupado com a estética do histórico, sugere que todos os desenvolvedores utilizem git rebase no branch feature/nova antes de cada push, para manter o histórico linear. No entanto, o branch feature/nova já é compartilhado e utilizado por outros membros da equipe para testes.",
+                texts: [
+                    "Texto I: 'Merge vs Rebase: Merge preserva histórico completo de branches, ideal para Pull Requests em equipe. Rebase cria histórico linear e limpo, ideal para limpar commits locais antes de push.'",
+                    "Texto II: 'Aviso: Nunca faça rebase em branches compartilhados com outros membros da equipe. Isso reescreve o histórico e pode causar conflitos graves.'"
+                ],
+                axes: "Explique a diferença fundamental entre as operações de Merge e Rebase no que tange à preservação do histórico do projeto. Analise a sugestão do Desenvolvedor B à luz das boas práticas apresentadas no texto, justificando os riscos de sua proposta para a equipe.",
+                limit: 30,
+                suggestedAnswer: "O candidato deve explicar que a operação de Merge preserva o histórico completo do projeto, incluindo os pontos de bifurcação e o contexto dos branches, sendo a prática recomendada para Pull Requests em equipe. Em contrapartida, o Rebase reescreve o histórico de commits para torná-lo linear e limpo, sendo útil apenas para organizar commits locais antes de enviá-los ao repositório remoto.\n\nAo analisar a sugestão do Desenvolvedor B, o candidato deve concluir que ela é extremamente perigosa e contraindicada. O texto alerta explicitamente que nunca se deve fazer Rebase em branches compartilhados (como o feature/nova do cenário). Como a operação reescreve o histórico local, ao tentar sincronizar essas alterações com o repositório remoto onde outros colegas já basearam seu trabalho, a equipe enfrentará conflitos graves de histórico e duplicação de commits, comprometendo a integridade do trabalho colaborativo."
+            },
+            {
+                id: 19, type: 'discursive',
+                title: "Questão 19 – Refatoração e Testes de Caracterização",
+                situation: "Uma equipe de manutenção de software foi designada para modernizar um sistema legado em Python. O sistema possui uma classe central complexa, com métodos extensos e dependências de entradas aleatórias, que nunca foi testada anteriormente. O gerente do projeto, pressionado por prazos, sugere que a equipe comece imediatamente a refatorar o código para torná-lo mais legível, dividindo os métodos em funções menores. A desenvolvedora sênior da equipe, no entanto, vetou a proposta, afirmando que 'refatorar sem testes é como reformar uma casa sem alicerces' e propôs uma etapa preliminar antes de qualquer alteração estrutural.",
+                texts: [
+                    "Texto I: 'A refatoração sem testes é como reformar uma casa sem alicerces: qualquer mudança pode causar danos invisíveis. Testes automatizados fornecem a rede de segurança necessária para modificar código com confiança.'",
+                    "Texto II: 'Testes de caracterização: Quando enfrentamos código legado sem testes, o primeiro passo é criar testes de caracterização. Eles capturam o comportamento atual do sistema, permitindo que identifiquemos bugs e comportamentos inesperados antes de começar a refatorar.'"
+                ],
+                axes: "Justifique a posição da desenvolvedora sênior, explicando o conceito de 'rede de segurança' no contexto de manutenção de software. Descreva o que são 'testes de caracterização' e qual é o seu papel no processo de refatoração de código legado.",
+                limit: 30,
+                suggestedAnswer: "O candidato deve justificar a posição da desenvolvedora sênior explicando que refatorar código sem testes automatizados é uma prática arriscada, comparável a 'reformar uma casa sem alicerces'. Os testes atuam como uma 'rede de segurança' essencial, pois validam o comportamento do código a cada alteração, garantindo que a melhoria estrutural não introduza 'danos invisíveis' ou quebre funcionalidades existentes que só seriam notadas em produção.\n\nEm seguida, o candidato deve definir os 'testes de caracterização' como o primeiro passo obrigatório ao lidar com código legado sem testes. Esses testes não buscam validar se o código está 'correto' idealmente, mas sim capturar e documentar rigorosamente o comportamento atual do sistema. Eles permitem que a equipe identifique bugs e comportamentos inesperados antes de iniciar a refatoração, servindo como base confiável para as mudanças."
+            },
+            {
+                id: 20, type: 'discursive',
+                title: "Questão 20 – Cobertura de Testes e Mocks",
+                situation: "Após a implementação de uma suíte de testes automatizados com pytest em um módulo legado, a equipe de desenvolvimento decidiu analisar a cobertura de testes para identificar áreas que ainda precisavam de atenção. O relatório gerado apresentou uma cobertura de 90% em comandos (Stmts), mas apenas 40% em desvios (Branch). Além disso, um dos testes falhava intermitentemente porque dependia da geração de um número aleatório e da leitura de uma entrada externa, o que tornava o resultado do teste imprevisível a cada execução.",
+                texts: [
+                    "Texto I: 'Cobertura de testes: A cobertura mede qual porcentagem do seu código é exercida pelos testes. Não é uma métrica perfeita, mas ajuda a identificar áreas não testadas. Métricas: Stmts, Miss, Cover, Branch.'",
+                    "Texto II: 'Usando Mocks com pytest-mock: Isolar dependências externas (input, random, etc.).'"
+                ],
+                axes: "Interprete a discrepância entre a alta cobertura de comandos (Stmts) e a baixa cobertura de desvios (Branch) no relatório de cobertura. Explique como o uso de mocks (com pytest-mock) pode resolver o problema da intermitência nos testes, detalhando a importância do isolamento de dependências externas.",
+                limit: 30,
+                suggestedAnswer: "O candidato deve interpretar que a discrepância entre as métricas indica que, embora a maioria das linhas de código esteja sendo executada durante os testes (alta cobertura de Stmts), os testes não estão explorando os diferentes caminhos lógicos e condicionais do programa (baixa cobertura de Branch). Isso significa que estruturas como if/else ou loops possuem ramificações que nunca são testadas, deixando lacunas na validação do comportamento do software.\n\nPara resolver a intermitência do teste, o candidato deve explicar que o uso de mocks (através do pytest-mock) é fundamental para isolar dependências externas e imprevisíveis, como a geração de números aleatórios (random) ou entradas de usuário (input). Ao simular o comportamento dessas dependências e retornar valores fixos e controlados, o mock garante que o teste seja determinístico, executando sempre da mesma forma e validando apenas a lógica interna da unidade em questão, sem interferências do ambiente externo."
+            }
+        ];
+
+        let currentQuestion = 0;
+        let userAnswers = new Array(20).fill(null);
+        let userDiscursiveAnswers = new Array(20).fill('');
+        let answeredQuestions = new Set();
+
+        function formatText(text) {
+            return text.replace(/\n\n/g, '</p><p class="mt-4">').replace(/\n/g, '<br>');
+        }
+
+        function renderQuestion() {
+            const container = document.getElementById('quiz-container');
+            const q = questionsData[currentQuestion];
+            const letters = ['A', 'B', 'C', 'D'];
+            
+            container.innerHTML = '';
+            container.className = 'fade-in';
+
+            // Badge de tipo
+            const typeBadge = q.type === 'multiple' 
+                ? '<span class="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/20 text-blue-300 border border-blue-500/30 mb-4">Múltipla Escolha</span>'
+                : '<span class="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-purple-500/20 text-purple-300 border border-purple-500/30 mb-4">Discursiva</span>';
+
+            let html = `
+                <div class="mb-6">
+                    ${typeBadge}
+                    <h2 class="text-lg md:text-xl font-bold text-white mb-4">${q.type === 'discursive' ? q.title : `Questão ${q.id}`}</h2>
+                    <div class="text-slate-300 leading-relaxed text-sm md:text-base">
+                        <p>${formatText(q.text || q.situation)}</p>
+                    </div>
+                </div>
+            `;
+
+            if (q.type === 'multiple') {
+                html += `<div class="space-y-3">`;
+                q.options.forEach((opt, idx) => {
+                    const isSelected = userAnswers[currentQuestion] === idx;
+                    const isAnswered = answeredQuestions.has(currentQuestion);
+                    let btnClass = 'option-btn w-full text-left p-4 rounded-lg border-2 border-slate-700 bg-slate-800/50 flex items-start gap-3';
+                    
+                    if (isAnswered) {
+                        if (idx === q.correct) btnClass += ' correct';
+                        else if (isSelected && idx !== q.correct) btnClass += ' wrong';
+                    } else if (isSelected) {
+                        btnClass += ' selected';
+                    }
+
+                    html += `
+                        <button class="${btnClass}" onclick="selectOption(${idx})" ${isAnswered ? 'disabled' : ''}>
+                            <span class="letter-badge bg-slate-700 text-amber-400 ${isAnswered && idx === q.correct ? 'bg-emerald-600 text-white' : ''} ${isAnswered && isSelected && idx !== q.correct ? 'bg-red-600 text-white' : ''}">${letters[idx]}</span>
+                            <span class="pt-1">${opt}</span>
+                        </button>
+                    `;
+                });
+                html += `</div>`;
+
+                // Botão confirmar
+                if (!answeredQuestions.has(currentQuestion) && userAnswers[currentQuestion] !== null) {
+                    html += `
+                        <button onclick="confirmAnswer()" class="mt-6 w-full py-3 rounded-lg font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition-colors">
+                            Confirmar Resposta
+                        </button>
+                    `;
+                }
+
+                // Explicação
+                if (answeredQuestions.has(currentQuestion)) {
+                    const isCorrect = userAnswers[currentQuestion] === q.correct;
+                    html += `
+                        <div class="mt-6 p-4 rounded-lg border ${isCorrect ? 'bg-emerald-900/30 border-emerald-500/50' : 'bg-red-900/30 border-red-500/50'}">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="text-xl">${isCorrect ? '✅' : '❌'}</span>
+                                <span class="font-bold ${isCorrect ? 'text-emerald-400' : 'text-red-400'}">${isCorrect ? 'Correto!' : 'Incorreto'}</span>
+                            </div>
+                            <p class="text-slate-300 text-sm">${q.explanation}</p>
+                        </div>
+                    `;
+                }
+            } else {
+                // Discursiva
+                if (q.texts) {
+                    html += `<div class="mt-6 space-y-3">`;
+                    q.texts.forEach((t, i) => {
+                        html += `
+                            <div class="p-4 rounded-lg bg-slate-800/50 border border-slate-700">
+                                <p class="text-slate-300 text-sm italic">${t}</p>
+                            </div>
+                        `;
+                    });
+                    html += `</div>`;
+                }
+
+                html += `
+                    <div class="mt-6 p-4 rounded-lg bg-amber-500/10 border border-amber-500/30">
+                        <p class="text-amber-300 text-sm font-semibold mb-1">📝 Eixos a desenvolver:</p>
+                        <p class="text-slate-300 text-sm">${q.axes}</p>
+                        <p class="text-slate-400 text-xs mt-2">Limite: máximo de ${q.limit} linhas.</p>
+                    </div>
+
+                    <textarea 
+                        id="discursive-answer" 
+                        class="discursive-textarea w-full mt-4 p-4 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 transition-colors"
+                        placeholder="Escreva sua resposta dissertativa aqui..."
+                        oninput="saveDiscursiveAnswer(this.value)"
+                    >${userDiscursiveAnswers[currentQuestion] || ''}</textarea>
+                `;
+
+                // Botão ver sugestão
+                const answerBoxId = `answer-box-${currentQuestion}`;
+                const isOpen = answeredQuestions.has(currentQuestion);
+                html += `
+                    <button onclick="toggleAnswer('${answerBoxId}')" class="mt-4 w-full py-3 rounded-lg font-medium bg-purple-600 hover:bg-purple-500 text-white transition-colors flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                        ${isOpen ? 'Ocultar Sugestão de Resposta' : 'Ver Sugestão de Resposta'}
+                    </button>
+                    <div id="${answerBoxId}" class="answer-box ${isOpen ? 'open' : ''} mt-4 p-4 rounded-lg bg-purple-900/20 border border-purple-500/30">
+                        <p class="text-purple-300 font-semibold text-sm mb-2">📖 Sugestão de Resposta:</p>
+                        <p class="text-slate-300 text-sm leading-relaxed whitespace-pre-line">${q.suggestedAnswer}</p>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+            updateProgress();
+            updateNavButtons();
+        }
+
+        function selectOption(idx) {
+            if (answeredQuestions.has(currentQuestion)) return;
+            userAnswers[currentQuestion] = idx;
+            renderQuestion();
+        }
+
+        function confirmAnswer() {
+            if (userAnswers[currentQuestion] === null) return;
+            answeredQuestions.add(currentQuestion);
+            renderQuestion();
+        }
+
+        function saveDiscursiveAnswer(value) {
+            userDiscursiveAnswers[currentQuestion] = value;
+        }
+
+        function toggleAnswer(boxId) {
+            const box = document.getElementById(boxId);
+            box.classList.toggle('open');
+            if (box.classList.contains('open')) {
+                answeredQuestions.add(currentQuestion);
+            }
+            renderQuestion();
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestion + 1) / questionsData.length) * 100;
+            document.getElementById('progress-bar').style.width = progress + '%';
+            document.getElementById('progress-text').textContent = `Questão ${currentQuestion + 1} de ${questionsData.length}`;
+        }
+
+        function updateNavButtons() {
+            const btnPrev = document.getElementById('btn-prev');
+            const btnNext = document.getElementById('btn-next');
+            
+            btnPrev.disabled = currentQuestion === 0;
+            
+            if (currentQuestion === questionsData.length - 1) {
+                btnNext.textContent = 'Finalizar ✓';
+            } else {
+                btnNext.textContent = 'Próxima →';
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < questionsData.length - 1) {
+                currentQuestion++;
+                renderQuestion();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                showResults();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                renderQuestion();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        function showResults() {
+            let correctCount = 0;
+            for (let i = 0; i < 16; i++) {
+                if (userAnswers[i] === questionsData[i].correct) correctCount++;
+            }
+            document.getElementById('final-score').textContent = `${correctCount}/16`;
+            document.getElementById('result-modal').classList.remove('hidden');
+        }
+
+        function resetQuiz() {
+            currentQuestion = 0;
+            userAnswers = new Array(20).fill(null);
+            userDiscursiveAnswers = new Array(20).fill('');
+            answeredQuestions = new Set();
+            document.getElementById('result-modal').classList.add('hidden');
+            renderQuestion();
+        }
+
+        // Initialize
+        renderQuestion();
+    </script>
+</body>
+</html>
+
