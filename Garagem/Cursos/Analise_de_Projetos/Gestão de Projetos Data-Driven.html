@@ -1,0 +1,3109 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de Projetos Data-Driven - Aula Interativa</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/inter-ui@3.19.3/inter.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/firacode@6.2.0/distr/fira_code.css">
+    <style>
+        :root {
+            --primary-blue: #0066CC;
+            --dark-blue: #003366;
+            --navy-blue: #001F4D;
+            --orange: #FF8C00;
+            --dark-purple: #2D1B4E;
+            --light-purple: #4A3B6B;
+            --pink: #FF6B9D;
+            --green: #50FA7B;
+            --yellow: #F1FA8C;
+            --white: #FFFFFF;
+            --black: #000000;
+            --gray-light: #F5F5F5;
+            --gray-medium: #E0E0E0;
+            --text-dark: #1A1A1A;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--white);
+            color: var(--text-dark);
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--gray-medium);
+            z-index: 1000;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-blue), var(--orange));
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .slides-container {
+            width: 100%;
+            height: 100vh;
+            position: relative;
+        }
+
+        .slide {
+            width: 100%;
+            height: 100vh;
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+            overflow-y: auto;
+            padding: 60px 20px 100px;
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .slide-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            color: var(--navy-blue);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            line-height: 1.3;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            border-bottom: 3px solid var(--orange);
+            padding-bottom: 0.5rem;
+        }
+
+        h2 { font-size: 2rem; margin-top: 2rem; }
+        h3 { font-size: 1.5rem; color: var(--primary-blue); }
+        h4 { font-size: 1.25rem; color: var(--dark-blue); }
+
+        p {
+            color: var(--black);
+            line-height: 1.8;
+            margin-bottom: 1rem;
+            font-size: 1.05rem;
+        }
+
+        pre {
+            background: var(--dark-purple);
+            border-radius: 8px;
+            padding: 1.5rem;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            border-left: 4px solid var(--orange);
+            position: relative;
+        }
+
+        code {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: var(--white);
+        }
+
+        .code-keyword { color: var(--pink); }
+        .code-string { color: var(--yellow); }
+        .code-comment { color: #6272A4; font-style: italic; }
+        .code-function { color: var(--green); }
+        .code-variable { color: #BD93F9; }
+        .code-number { color: var(--pink); }
+
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--light-purple);
+            color: var(--white);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: var(--primary-blue);
+            transform: scale(1.05);
+        }
+
+        .card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            border: 2px solid var(--gray-medium);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0, 102, 204, 0.2);
+            border-color: var(--primary-blue);
+        }
+
+        .info-box {
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-left: 5px solid;
+        }
+
+        .info-box.success {
+            background: #E8F5E9;
+            border-color: #4CAF50;
+            color: #1B5E20;
+        }
+
+        .info-box.warning {
+            background: #FFF3E0;
+            border-color: var(--orange);
+            color: #E65100;
+        }
+
+        .info-box.info {
+            background: #E3F2FD;
+            border-color: var(--primary-blue);
+            color: var(--navy-blue);
+        }
+
+        .info-box.danger {
+            background: #FFEBEE;
+            border-color: #D32F2F;
+            color: #B71C1C;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background: var(--white);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        th {
+            background: var(--primary-blue);
+            color: var(--white);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--gray-medium);
+            color: var(--black);
+        }
+
+        tr:hover { background: var(--gray-light); }
+
+        .tabs { margin: 2rem 0; }
+
+        .tab-buttons {
+            display: flex;
+            gap: 0.5rem;
+            border-bottom: 2px solid var(--gray-medium);
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            font-size: 1rem;
+            color: var(--dark-blue);
+            font-weight: 600;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            color: var(--primary-blue);
+            border-bottom-color: var(--orange);
+        }
+
+        .tab-content { display: none; }
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin: 0.25rem;
+        }
+
+        .badge-blue { background: var(--primary-blue); color: var(--white); }
+        .badge-orange { background: var(--orange); color: var(--white); }
+        .badge-purple { background: var(--dark-purple); color: var(--white); }
+        .badge-green { background: #4CAF50; color: var(--white); }
+        .badge-pink { background: var(--pink); color: var(--white); }
+
+        .nav-dots {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 999;
+            background: var(--white);
+            padding: 10px 16px;
+            border-radius: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            max-width: 90%;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .nav-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--gray-medium);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .nav-dot.active {
+            background: var(--primary-blue);
+            transform: scale(1.3);
+            border-color: var(--orange);
+        }
+
+        .nav-arrows {
+            position: fixed;
+            top: 50%;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 998;
+            pointer-events: none;
+        }
+
+        .nav-arrow {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--white);
+            border: 2px solid var(--primary-blue);
+            color: var(--primary-blue);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+            pointer-events: all;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-arrow:hover {
+            background: var(--primary-blue);
+            color: var(--white);
+            transform: scale(1.1);
+        }
+
+        .nav-arrow:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 2rem 0;
+        }
+
+        .hero-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+            margin: 2rem 0;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Simulações */
+        .simulation-container {
+            background: linear-gradient(135deg, #E3F2FD 0%, #F3E5F5 100%);
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 2rem 0;
+            border: 2px solid var(--primary-blue);
+        }
+
+        .scenario-card {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border: 2px solid var(--gray-medium);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .scenario-card:hover {
+            border-color: var(--orange);
+            transform: translateX(5px);
+        }
+
+        .scenario-card.selected {
+            border-color: var(--primary-blue);
+            background: #E3F2FD;
+        }
+
+        .scenario-card.correct {
+            border-color: #4CAF50;
+            background: #E8F5E9;
+        }
+
+        .scenario-card.incorrect {
+            border-color: #D32F2F;
+            background: #FFEBEE;
+        }
+
+        .scenario-feedback {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .scenario-feedback.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        /* Pipeline Visualization */
+        .pipeline-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .pipeline-step {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border-left: 6px solid var(--primary-blue);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .pipeline-step:hover {
+            transform: translateX(10px);
+            box-shadow: 0 4px 15px rgba(0, 102, 204, 0.2);
+        }
+
+        .pipeline-step.active {
+            border-left-color: var(--orange);
+            background: #FFF3E0;
+        }
+
+        .pipeline-step-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .pipeline-step-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-blue);
+            color: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .pipeline-step.active .pipeline-step-number {
+            background: var(--orange);
+        }
+
+        .pipeline-step-details {
+            display: none;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px dashed var(--gray-medium);
+        }
+
+        .pipeline-step.active .pipeline-step-details {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        /* Blocos de Arquitetura */
+        .block-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .block-card {
+            border-radius: 16px;
+            padding: 2rem;
+            color: var(--white);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .block-card.backend {
+            background: linear-gradient(135deg, var(--dark-purple) 0%, var(--light-purple) 100%);
+        }
+
+        .block-card.business {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--dark-blue) 100%);
+        }
+
+        .block-card h3, .block-card h4 {
+            color: var(--white);
+        }
+
+        .block-card p {
+            color: var(--white);
+        }
+
+        .block-card ul {
+            color: var(--white);
+            margin-left: 1.5rem;
+        }
+
+        .block-card li {
+            color: var(--white);
+            margin: 0.5rem 0;
+        }
+
+        /* Maturity Meter */
+        .maturity-meter {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .maturity-levels {
+            display: flex;
+            justify-content: space-between;
+            margin: 2rem 0;
+            position: relative;
+        }
+
+        .maturity-levels::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gray-medium);
+            z-index: 0;
+        }
+
+        .maturity-level {
+            text-align: center;
+            flex: 1;
+            position: relative;
+            z-index: 1;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .maturity-level:hover {
+            transform: translateY(-5px);
+        }
+
+        .maturity-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--gray-medium);
+            margin: 0 auto 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: var(--white);
+            transition: all 0.3s ease;
+        }
+
+        .maturity-level.active .maturity-circle {
+            background: var(--orange);
+            transform: scale(1.3);
+            box-shadow: 0 0 20px rgba(255, 140, 0, 0.5);
+        }
+
+        .maturity-level.reached .maturity-circle {
+            background: var(--primary-blue);
+        }
+
+        .maturity-label {
+            font-size: 0.85rem;
+            color: var(--dark-blue);
+            font-weight: 600;
+        }
+
+        .maturity-description {
+            background: var(--gray-light);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-top: 1rem;
+            border-left: 4px solid var(--primary-blue);
+        }
+
+        /* 30-60-90 Plan */
+        .plan-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .plan-card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border-top: 6px solid;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .plan-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .plan-card.period-30 { border-color: var(--orange); }
+        .plan-card.period-60 { border-color: var(--primary-blue); }
+        .plan-card.period-90 { border-color: var(--dark-purple); }
+
+        .plan-card h4 {
+            font-size: 1.8rem;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        /* RACI Matrix */
+        .raci-matrix {
+            overflow-x: auto;
+        }
+
+        .raci-R { background: #E8F5E9; color: #1B5E20; font-weight: 700; }
+        .raci-A { background: #E3F2FD; color: var(--navy-blue); font-weight: 700; }
+        .raci-C { background: #FFF3E0; color: #E65100; font-weight: 700; }
+        .raci-I { background: #F3E5F5; color: var(--dark-purple); font-weight: 700; }
+
+        /* Tech Stack Builder */
+        .stack-builder {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .stack-question {
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background: var(--gray-light);
+            border-radius: 8px;
+        }
+
+        .stack-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .stack-option {
+            padding: 0.5rem 1rem;
+            background: var(--white);
+            border: 2px solid var(--gray-medium);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .stack-option:hover {
+            border-color: var(--primary-blue);
+        }
+
+        .stack-option.selected {
+            background: var(--primary-blue);
+            color: var(--white);
+            border-color: var(--primary-blue);
+        }
+
+        .stack-result {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #E3F2FD 0%, #F3E5F5 100%);
+            border-radius: 12px;
+            display: none;
+        }
+
+        .stack-result.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        /* Team Builder */
+        .team-builder {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .role-card {
+            background: var(--gray-light);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .role-card.hired {
+            background: #E8F5E9;
+            border-color: #4CAF50;
+        }
+
+        .role-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .hire-btn {
+            background: var(--primary-blue);
+            color: var(--white);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .hire-btn:hover {
+            background: var(--orange);
+        }
+
+        .hire-btn.hired {
+            background: #4CAF50;
+        }
+
+        .role-details {
+            display: none;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px dashed var(--gray-medium);
+        }
+
+        .role-card.expanded .role-details {
+            display: block;
+        }
+
+        .slide::-webkit-scrollbar { width: 8px; }
+        .slide::-webkit-scrollbar-track { background: var(--gray-light); }
+        .slide::-webkit-scrollbar-thumb { background: var(--primary-blue); border-radius: 4px; }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 1.8rem; }
+            h2 { font-size: 1.5rem; }
+            .slide { padding: 50px 15px 90px; }
+            .nav-arrows { padding: 0 10px; }
+            .nav-arrow { width: 40px; height: 40px; font-size: 1.2rem; }
+            .grid { grid-template-columns: 1fr; }
+            .block-container { grid-template-columns: 1fr; }
+            .plan-container { grid-template-columns: 1fr; }
+            .maturity-levels { flex-direction: column; gap: 1rem; }
+            .maturity-levels::before { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+
+    <div class="nav-arrows">
+        <button class="nav-arrow" id="prevBtn" onclick="previousSlide()">‹</button>
+        <button class="nav-arrow" id="nextBtn" onclick="nextSlide()">›</button>
+    </div>
+
+    <div class="nav-dots" id="navDots"></div>
+
+    <div class="slides-container">
+        <!-- SLIDE 1: CAPA -->
+        <div class="slide active">
+            <div class="slide-content">
+                <div class="hero">
+                    <h1>Gestão de Projetos e Liderança Data-Driven</h1>
+                    <h3>Transformando Dados em Estratégia de Negócios</h3>
+                    <img src="https://www.sapicua.com.br/sites/default/files/styles/large/public/articles/01%20UniSenai%20MT%20tem%20mais%20de%20700%20vagas%20abertas%20para%2018%20cursos%20de%20n%C3%ADvel%20superior.jpeg?itok=NuczrSXd" 
+                         alt="UniSenai - Ambiente de aprendizado" 
+                         class="hero-image">
+                </div>
+
+                <div class="info-box info">
+                    <h4>🎯 Nossa Proposta de Valor</h4>
+                    <p>Desenvolvido para líderes com foco 100% <strong>estratégico em gestão, governança e arquitetura</strong>, sem a necessidade de operação técnica ou desenvolvimento de código. Você vai aprender a <strong>liderar a transformação</strong>, não a programar.</p>
+                </div>
+
+                <div class="grid">
+                    <div class="card">
+                        <h3>📊 O Que Você Vai Aprender</h3>
+                        <ul style="margin-left: 1.5rem; color: var(--black);">
+                            <li style="margin: 0.5rem 0;">Arquiteturas modernas de dados (Lake, Warehouse, Mesh, Lakehouse)</li>
+                            <li style="margin: 0.5rem 0;">Pipeline completo de Big Data (da fonte ao dashboard)</li>
+                            <li style="margin: 0.5rem 0;">Governança, LGPD e Privacy by Design</li>
+                            <li style="margin: 0.5rem 0;">Como montar e dimensionar um Data Squad</li>
+                            <li style="margin: 0.5rem 0;">Transição cultural do "achismo" para data-driven</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <h3>🎓 Para Quem é Este Curso</h3>
+                        <ul style="margin-left: 1.5rem; color: var(--black);">
+                            <li style="margin: 0.5rem 0;"><strong>Diretores</strong> e C-Level</li>
+                            <li style="margin: 0.5rem 0;"><strong>Gerentes</strong> de RH, Financeiro, Logística, Operações</li>
+                            <li style="margin: 0.5rem 0;"><strong>Líderes Comerciais</strong> e de Negócios</li>
+                            <li style="margin: 0.5rem 0;"><strong>Gestores</strong> em transição para áreas de dados</li>
+                        </ul>
+                        <p style="margin-top: 1rem;"><em>Nenhum pré-requisito técnico. Foco total em decisão executiva.</em></p>
+                    </div>
+                </div>
+
+                <div class="info-box warning">
+                    <h4>💬 Frase Guia do Curso</h4>
+                    <p style="font-size: 1.2rem; text-align: center;"><strong>"Decidir sem olhar os dados é ser imprudente com o resultado."</strong> — Vitório Netto</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 2: ESTRUTURA DO CURSO -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>📅 Estrutura e Cronograma (12h Totais)</h1>
+                <h3>Metodologia PBL — Problem-Based Learning</h3>
+
+                <div class="grid">
+                    <div class="card">
+                        <span class="badge badge-blue">Pré-Projeto</span>
+                        <h4>4h — Atividade Online</h4>
+                        <p>Elaboração da <strong>Versão 1 (V1)</strong> da proposta de projeto de forma autônoma.</p>
+                        <p><strong>Entregáveis:</strong></p>
+                        <ul style="margin-left: 1.5rem; color: var(--black);">
+                            <li>Documento de Visão</li>
+                            <li>PM Canvas</li>
+                            <li>Roadmap Inicial</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <span class="badge badge-orange">Dia 29/08 — 08h</span>
+                        <h4>Presencial — UniSENAI</h4>
+                        <p>Apresentação do diagnóstico com Visão, Canvas e Roadmap.</p>
+                        <p><strong>Refinamento (V2):</strong></p>
+                        <ul style="margin-left: 1.5rem; color: var(--black);">
+                            <li>Arquitetura de Dados</li>
+                            <li>Governança</li>
+                            <li>Plano LGPD</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <span class="badge badge-purple">Pitch Final</span>
+                        <h4>Versão 3 (V3)</h4>
+                        <p>Entrega consolidada com Roadmap em 3 fases e Plano de Equipes.</p>
+                        <p><strong>Apresentação executiva pronta para diretoria com ROI projetado.</strong></p>
+                    </div>
+                </div>
+
+                <h3>🧭 Os 4 Módulos da Jornada</h3>
+                <div class="grid">
+                    <div class="card">
+                        <span class="badge badge-blue">Módulo 1 — 3h</span>
+                        <h4>Tipologia e Arquitetura</h4>
+                        <p>Onde e como armazenar os dados. Escolha da arquitetura certa para cada problema de negócio.</p>
+                    </div>
+                    <div class="card">
+                        <span class="badge badge-orange">Módulo 2 — 3h</span>
+                        <h4>Big Data, Governança e LGPD</h4>
+                        <p>Como os dados viajam da fonte ao dashboard. Compliance, segurança e linhagem.</p>
+                    </div>
+                    <div class="card">
+                        <span class="badge badge-purple">Módulo 3 — 3h</span>
+                        <h4>Estratégia e Cultura</h4>
+                        <p>Como sair do "achismo" e construir uma cultura data-driven com quick wins.</p>
+                    </div>
+                    <div class="card">
+                        <span class="badge badge-green">Módulo 4 — 3h</span>
+                        <h4>Pessoas e Times</h4>
+                        <p>Quem contratar, quando contratar e como estruturar o Data Squad.</p>
+                    </div>
+                </div>
+
+                <div class="info-box success">
+                    <h4>✅ Metodologia PBL na Prática</h4>
+                    <p>Ao invés de apenas teoria, você evoluirá seu <strong>Pré-Projeto (V1)</strong> aplicando conceitos de arquitetura, LGPD e times em tempo real, culminando em um <strong>Pitch Executivo final (V3)</strong> pronto para ser apresentado à diretoria da sua empresa.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 3: MÓDULO 1 - TIPOLOGIA -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>🗄️ Módulo 1: Tipologia e Arquitetura de Dados</h1>
+                <h3>Antes da tecnologia, o problema de negócio</h3>
+
+                <div class="info-box info">
+                    <h4>🎯 Princípio do Gestor</h4>
+                    <p><strong>Nunca escolha tecnologia antes de entender o problema.</strong> Cada tipo de dado tem um propósito estratégico. Sua função é mapear o território antes de comprar a ferramenta.</p>
+                </div>
+
+                <div class="grid">
+                    <div class="card">
+                        <span class="badge badge-blue">Dados Relacionais</span>
+                        <h4>📊 Perfeitos para RH e Finanças</h4>
+                        <p>Dados altamente estruturados, organizados em <strong>linhas e colunas</strong> (como planilhas). Garantem integridade e precisão exata.</p>
+                        <p><strong>Casos de uso:</strong></p>
+                        <ul style="margin-left: 1.5rem; color: var(--black);">
+                            <li>Folha de pagamento</li>
+                            <li>Controle de estoque</li>
+                            <li>Contas a pagar/receber</li>
+                            <li>Cadastro de funcionários</li>
+                        </ul>
+                        <p style="margin-top: 1rem;"><strong>Extensões:</strong> <code style="background: var(--dark-purple); color: var(--white); padding: 2px 6px; border-radius: 4px;">.sql .mdb .accdb .dbf .sqlite .mdf .siard</code></p>
+                    </div>
+
+                    <div class="card">
+                        <span class="badge badge-orange">Dados Não-Relacionais</span>
+                        <h4>🌐 Ideais para Logística e E-commerce</h4>
+                        <p>Lidam com grandes volumes de dados <strong>não estruturados ou semi-estruturados</strong>. Flexíveis e escaláveis.</p>
+                        <p><strong>Casos de uso:</strong></p>
+                        <ul style="margin-left: 1.5rem; color: var(--black);">
+                            <li>Rotas de GPS de frotas em tempo real</li>
+                            <li>Avaliações de clientes</li>
+                            <li>Catálogos de produtos</li>
+                            <li>Interações em redes sociais</li>
+                        </ul>
+                        <p style="margin-top: 1rem;"><strong>Extensões:</strong> <code style="background: var(--dark-purple); color: var(--white); padding: 2px 6px; border-radius: 4px;">.json .csv .xlsx .parquet</code></p>
+                    </div>
+                </div>
+
+                <h3>🧰 Ecossistema de Ferramentas — O Que Cada Uma Faz</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Categoria</th>
+                            <th>Ferramentas</th>
+                            <th>Uso Estratégico</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Planilhas</strong></td>
+                            <td>Excel, Google Sheets</td>
+                            <td>Análises rápidas, protótipos, pequenas bases</td>
+                        </tr>
+                        <tr>
+                            <td><strong>BI / Visualização</strong></td>
+                            <td>Power BI, Tableau, Qlik Sense, Looker Studio</td>
+                            <td>Dashboards executivos, KPIs, storytelling com dados</td>
+                        </tr>
+                        <tr>
+                            <td><strong>SGBDs Relacionais</strong></td>
+                            <td>MySQL, PostgreSQL, SQL Server, Oracle</td>
+                            <td>Bases transacionais, dados estruturados críticos</td>
+                        </tr>
+                        <tr>
+                            <td><strong>NoSQL</strong></td>
+                            <td>MongoDB, Cassandra, DynamoDB</td>
+                            <td>Catálogos, logs, dados semi-estruturados</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- SLIDE 4: MÓDULO 1 - EVOLUÇÃO DA ARQUITETURA -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>🏛️ Evolução da Arquitetura de Dados</h1>
+                <h3>Do Data Lake ao Data Mesh — Qual escolher?</h3>
+
+                <div class="tabs">
+                    <div class="tab-buttons">
+                        <button class="tab-btn active" onclick="openTab(event, 'arch1')">Data Lake</button>
+                        <button class="tab-btn" onclick="openTab(event, 'arch2')">Data Warehouse</button>
+                        <button class="tab-btn" onclick="openTab(event, 'arch3')">Data Lakehouse</button>
+                        <button class="tab-btn" onclick="openTab(event, 'arch4')">Data Mesh</button>
+                    </div>
+
+                    <div id="arch1" class="tab-content active">
+                        <div class="card">
+                            <span class="badge badge-blue">Repositório Bruto</span>
+                            <h3>🏊 Data Lake</h3>
+                            <p>Como um <strong>grande lago</strong> que recebe todos os rios (dados) da empresa — estruturados ou não — sem tratamento prévio. Você armazena tudo em bruto e processa depois.</p>
+                            <p><strong>Analogia executiva:</strong> É o depósito central de "matéria-prima bruta" da empresa. Antes de transformar em produto final (insights), você guarda tudo.</p>
+                            <p><strong>Quando usar:</strong></p>
+                            <ul style="margin-left: 1.5rem; color: var(--black);">
+                                <li>Grandes volumes de dados não estruturados</li>
+                                <li>Machine Learning e análises exploratórias</li>
+                                <li>Custo de armazenamento baixo (ex: Amazon S3)</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div id="arch2" class="tab-content">
+                        <div class="card">
+                            <span class="badge badge-orange">Repositório Refinado</span>
+                            <h3>🏢 Data Warehouse</h3>
+                            <p>Como um <strong>armazém organizado</strong> onde os dados já chegaram limpos, estruturados e prontos para consulta. Otimizado para BI e relatórios rápidos.</p>
+                            <p><strong>Analogia executiva:</strong> É a "prateleira de produtos prontos" — tudo já está etiquetado, organizado e pronto para o diretor consumir.</p>
+                            <p><strong>Quando usar:</strong></p>
+                            <ul style="margin-left: 1.5rem; color: var(--black);">
+                                <li>Dados estruturados para BI</li>
+                                <li>Consultas SQL rápidas e previsíveis</li>
+                                <li>Ferramentas modernas: BigQuery, Snowflake, Redshift</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div id="arch3" class="tab-content">
+                        <div class="card">
+                            <span class="badge badge-purple">Fusão Moderna</span>
+                            <h3>🏠 Data Lakehouse</h3>
+                            <p>A <strong>fusão do melhor dos dois mundos</strong>: a flexibilidade e baixo custo do Data Lake com a performance e governança do Data Warehouse.</p>
+                            <p><strong>Analogia executiva:</strong> É como ter um depósito gigante (Lake) com uma área VIP já organizada (Warehouse) dentro dele. Você decide o que refinar.</p>
+                            <p><strong>Quando usar:</strong></p>
+                            <ul style="margin-left: 1.5rem; color: var(--black);">
+                                <li>Empresas que querem flexibilidade E performance</li>
+                                <li>Reduzir duplicação de dados</li>
+                                <li>Plataformas: Databricks, Delta Lake</li>
+                            </ul>
+                            <div class="info-box success">
+                                <h4>💡 Tendência de Mercado</h4>
+                                <p>O Lakehouse é a arquitetura que mais cresce em 2024/2025. Se sua empresa está começando do zero, considere seriamente este caminho.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="arch4" class="tab-content">
+                        <div class="card">
+                            <span class="badge badge-green">Descentralização</span>
+                            <h3>🕸️ Data Mesh</h3>
+                            <p>Uma <strong>mudança organizacional</strong>, não apenas técnica. Cada área de negócio (RH, Finanças, Logística) é dona dos seus próprios dados e os disponibiliza como "produtos" para o resto da empresa.</p>
+                            <p><strong>Analogia executiva:</strong> É como transformar cada departamento em uma "mini empresa de dados" que vende seus produtos para as outras áreas.</p>
+                            <p><strong>Quando usar:</strong></p>
+                            <ul style="margin-left: 1.5rem; color: var(--black);">
+                                <li>Empresas grandes e complexas</li>
+                                <li>Maturidade data-driven avançada</li>
+                                <li>Quando um time central de dados vira gargalo</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>📊 Quadro Comparativo Executivo</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Arquitetura</th>
+                            <th>Custo</th>
+                            <th>Complexidade</th>
+                            <th>Maturidade Necessária</th>
+                            <th>Melhor Para</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Data Lake</strong></td>
+                            <td>Baixo</td>
+                            <td>Média</td>
+                            <td>Média</td>
+                            <td>ML e dados brutos</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Data Warehouse</strong></td>
+                            <td>Médio-Alto</td>
+                            <td>Baixa</td>
+                            <td>Baixa</td>
+                            <td>BI e relatórios</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Lakehouse</strong></td>
+                            <td>Médio</td>
+                            <td>Média</td>
+                            <td>Média</td>
+                            <td>Uso geral moderno</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Data Mesh</strong></td>
+                            <td>Alto</td>
+                            <td>Alta</td>
+                            <td>Alta</td>
+                            <td>Empresas grandes</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- SLIDE 5: MÓDULO 1 - DADOS FRIOS/QUENTES E STREAMING -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>🌡️ Otimização de Custos e Tempo Real</h1>
+                <h3>Dados Frios vs. Quentes e Ingestão em Streaming</h3>
+
+                <div class="grid">
+                    <div class="card">
+                        <span class="badge badge-orange">🔥 Dados Quentes</span>
+                        <h4>Hot Storage</h4>
+                        <p>Dados <strong>acessados frequentemente</strong> e que precisam de resposta imediata.</p>
+                        <p><strong>Exemplos:</strong></p>
+                        <ul style="margin-left: 1.5rem; color: var(--black);">
+                            <li>Transações do dia</li>
+                            <li>Dashboards em tempo real</li>
+                            <li>Dados da última semana</li>
+                        </ul>
+                        <p><strong>Custo:</strong> Alto (armazenamento SSD, memória RAM)</p>
+                        <p><strong>Velocidade:</strong> Milissegundos</p>
+                    </div>
+
+                    <div class="card">
+                        <span class="badge badge-blue">❄️ Dados Frios</span>
+                        <h4>Cold Storage</h4>
+                        <p>Dados <strong>raramente acessados</strong>, mantidos por compliance ou histórico.</p>
+                        <p><strong>Exemplos:</strong></p>
+                        <ul style="margin-left: 1.5rem; color: var(--black);">
+                            <li>Notas fiscais de 5 anos atrás</li>
+                            <li>Logs de auditoria antigos</li>
+                            <li>Backups históricos</li>
+                        </ul>
+                        <p><strong>Custo:</strong> Muito baixo (até 80% mais barato)</p>
+                        <p><strong>Velocidade:</strong> Minutos ou horas para recuperar</p>
+                    </div>
+                </div>
+
+                <div class="info-box warning">
+                    <h4>💰 Dica de ROI para o Gestor</h4>
+                    <p>Uma política de <strong>lifecycle de dados</strong> (mover automaticamente dados antigos para cold storage) pode reduzir sua conta de nuvem em <strong>40-60%</strong>. Questione sempre sua equipe: "Quanto do que pagamos hoje são dados que ninguém acessa há 6 meses?"</p>
+                </div>
+
+                <h3>⚡ Ingestão em Tempo Real (Streaming)</h3>
+                <div class="card">
+                    <h4>O que é e quando vale o investimento?</h4>
+                    <p><strong>Batch (lotes):</strong> Os dados são processados em intervalos — ex: "todo dia às 2h da manhã, puxamos as vendas de ontem". Mais barato, adequado para 80% dos casos.</p>
+                    <p><strong>Streaming (tempo real):</strong> Os dados são processados no momento em que acontecem — ex: "cada transação de cartão é analisada em milissegundos para detectar fraude".</p>
+                    
+                    <h4 style="margin-top: 1.5rem;">🎯 Quando investir em Streaming?</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Cenário</th>
+                                <th>Batch serve?</th>
+                                <th>Streaming necessário?</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Balancete mensal financeiro</td>
+                                <td>✅ Sim</td>
+                                <td>❌ Não</td>
+                            </tr>
+                            <tr>
+                                <td>Relatório de vendas diário</td>
+                                <td>✅ Sim</td>
+                                <td>❌ Não</td>
+                            </tr>
+                            <tr>
+                                <td>Detecção de fraude em cartão</td>
+                                <td>❌ Não</td>
+                                <td>✅ Sim</td>
+                            </tr>
+                            <tr>
+                                <td>Rastreamento de frota em tempo real</td>
+                                <td>❌ Não</td>
+                                <td>✅ Sim</td>
+                            </tr>
+                            <tr>
+                                <td>Alerta de ruptura de estoque</td>
+                                <td>⚠️ Depende</td>
+                                <td>✅ Recomendado</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 6: MÓDULO 1 - MATRIZ DE ACESSO -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>🔐 Matriz de Acesso e Responsabilidades</h1>
+                <h3>Quem acessa o quê — e onde</h3>
+
+                <div class="info-box info">
+                    <h4>🎯 Princípio de Governança</h4>
+                    <p>Cada perfil profissional tem um <strong>território de atuação</strong>. Como gestor, você precisa saber quem é responsável por cada camada da arquitetura para cobrar resultados e evitar sobreposições.</p>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Perfil</th>
+                            <th>Camada de Atuação</th>
+                            <th>O Que Faz</th>
+                            <th>Ferramenta Principal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="badge badge-blue">Engenheiro de Dados</span></td>
+                            <td>Data Lake / Ingestão</td>
+                            <td>Extrai, limpa e transporta dados brutos</td>
+                            <td>Spark, Airflow, Python</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge badge-purple">Cientista de Dados</span></td>
+                            <td>Data Lake / Experimentação</td>
+                            <td>Cria modelos preditivos e estatísticos</td>
+                            <td>Python, Jupyter, Spark</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge badge-orange">Analista de Dados</span></td>
+                            <td>Data Warehouse</td>
+                            <td>Transforma dados em métricas de negócio</td>
+                            <td>SQL, Python, Excel</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge badge-green">Analista de BI</span></td>
+                            <td>Dashboard / Visualização</td>
+                            <td>Cria painéis executivos e relatórios</td>
+                            <td>Power BI, Tableau, Looker</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge badge-pink">Tradutor Analítico</span></td>
+                            <td>Transversal (todos)</td>
+                            <td>Ponte entre negócio e técnica — É VOCÊ!</td>
+                            <td>Visão 360°</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>🗺️ Mapa Visual da Esteira de Valor</h3>
+                <div class="card">
+                    <div style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: center; margin: 2rem 0;">
+                        <div style="background: var(--dark-purple); color: var(--white); padding: 1rem 1.5rem; border-radius: 12px; text-align: center;">
+                            <strong>🗃️ Fontes</strong><br><small>ERP, CRM, Site</small>
+                        </div>
+                        <div style="font-size: 2rem; color: var(--orange);">→</div>
+                        <div style="background: var(--primary-blue); color: var(--white); padding: 1rem 1.5rem; border-radius: 12px; text-align: center;">
+                            <strong>🏊 Data Lake</strong><br><small>Engenheiro</small>
+                        </div>
+                        <div style="font-size: 2rem; color: var(--orange);">→</div>
+                        <div style="background: var(--light-purple); color: var(--white); padding: 1rem 1.5rem; border-radius: 12px; text-align: center;">
+                            <strong>🔬 Experimentação</strong><br><small>Cientista</small>
+                        </div>
+                        <div style="font-size: 2rem; color: var(--orange);">→</div>
+                        <div style="background: var(--dark-blue); color: var(--white); padding: 1rem 1.5rem; border-radius: 12px; text-align: center;">
+                            <strong>🏢 Data Warehouse</strong><br><small>Analista</small>
+                        </div>
+                        <div style="font-size: 2rem; color: var(--orange);">→</div>
+                        <div style="background: var(--orange); color: var(--white); padding: 1rem 1.5rem; border-radius: 12px; text-align: center;">
+                            <strong>📊 Dashboard</strong><br><small>BI + Diretor</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-box success">
+                    <h4>✅ Lição para o Gestor</h4>
+                    <p>Se o dashboard não está entregando valor, <strong>não culpe o analista de BI</strong>. Suba a cadeia: o problema pode estar na fonte, na ingestão ou na modelagem. Seu papel é saber <strong>onde cobrar</strong>.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 7: SIMULAÇÃO 1 - DESAFIO DE ARQUITETURA -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>🎮 Simulação 1: Desafio de Seleção de Arquitetura</h1>
+                <h3>Você é o gestor. Escolha a arquitetura ideal para cada cenário.</h3>
+
+                <div class="simulation-container">
+                    <div class="info-box info">
+                        <h4>📋 Instruções</h4>
+                        <p>Leia cada cenário de negócio abaixo e clique na arquitetura que você considera mais adequada. Ao final, você receberá feedback executivo sobre sua decisão.</p>
+                    </div>
+
+                    <div id="scenario1" class="scenario-card" onclick="selectScenario(1, 'lakehouse')">
+                        <h4>🎯 Cenário 1 — Varejo Nacional</h4>
+                        <p>Sua empresa tem 200 lojas, um ERP legado (SQL Server) e quer começar a usar dados. O CEO quer dashboards de vendas por loja até o fim do trimestre. O orçamento é limitado e a equipe de TI tem 2 pessoas.</p>
+                        <div class="stack-options">
+                            <div class="stack-option" onclick="event.stopPropagation(); checkScenario(1, 'warehouse', this)">Data Warehouse (BigQuery)</div>
+                            <div class="stack-option" onclick="event.stopPropagation(); checkScenario(1, 'lakehouse', this)">Data Lakehouse (Databricks)</div>
+                            <div class="stack-option" onclick="event.stopPropagation(); checkScenario(1, 'mesh', this)">Data Mesh</div>
+                            <div class="stack-option" onclick="event.stopPropagation(); checkScenario(1, 'lake', this)">Data Lake puro (S3)</div>
+                        </div>
+                        <div class="scenario-feedback" id="feedback1"></div>
+                    </div>
+
+                    <div id="scenario2" class="scenario-card" onclick="selectScenario(2, 'lake')">
+                        <h4>🎯 Cenário 2 — Fintech de Pagamentos</h4>
+                        <p>Sua fintech processa 10 milhões de transações/dia. Precisa detectar fraudes em <strong>tempo real</strong> (milissegundos) e também rodar modelos de machine learning para prever inadimplência. Tem equipe de 15 engenheiros e cientistas.</p>
+                        <div class="stack-options">
+                            <div class="stack-option" onclick="event.stopPropagation(); checkScenario(2, 'warehouse', this)">Data Warehouse (Snowflake)</div>
+                            <div class="stack-option" onclick="event.stopPropagation(); checkScenario(2, 'lakehouse', this)">Data Lakehouse (Databricks)</div>
+                            <div class="stack-option" onclick="event.stopPropagation(); checkScenario(2, 'mesh', this)">Data Mesh</div>
+                            <div class="stack-option" onclick="event.stopPropagation(); checkScenario(2, 'lake', this)">Data Lake + Streaming</div>
+                        </div>
+                        <div class="scenario-feedback" id="feedback2"></div>
+                    </div>
+
+                    <div id="scenario3" class="scenario-card" onclick="selectScenario(3, 'mesh')">
+                        <h4>🎯 Cenário 3 — Multinacional com 50+ Unidades de Negócio</h4>
+                        <p>Empresa global com RH, Finanças, Logística e Comercial em 12 países. Cada área tem seus próprios dados e o time central de dados (8 pessoas) virou gargalo. Cada projeto demora 6 meses para sair do papel.</p>
+                        <div class="stack-options">
+                            <div class="stack-option" onclick="event.stopPropagation(); checkScenario(3, 'warehouse', this)">Data Warehouse centralizado</div>
+                            <div class="stack-option" onclick="event.stopPropagation(); checkScenario(3, 'lakehouse', this)">Data Lakehouse</div>
+                            <div class="stack-option" onclick="event.stopPropagation(); checkScenario(3, 'mesh', this)">Data Mesh</div>
+                            <div class="stack-option" onclick="event.stopPropagation(); checkScenario(3, 'lake', this)">Data Lake puro</div>
+                        </div>
+                        <div class="scenario-feedback" id="feedback3"></div>
+                    </div>
+
+                    <div id="simulation1Result" style="display: none; margin-top: 2rem; padding: 1.5rem; background: var(--white); border-radius: 12px; border: 2px solid var(--primary-blue);">
+                        <h3>🏆 Resultado da Simulação</h3>
+                        <p id="scoreText"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 8: MÓDULO 2 - PIPELINE DE DADOS (SIMULAÇÃO PRÉ-GOVERNANÇA) -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>🚰 Módulo 2: O Pipeline de Dados</h1>
+                <h3>Da fonte bruta ao dashboard do diretor — a analogia do tratamento de água</h3>
+
+                <div class="info-box info">
+                    <h4>💧 Analogia Executiva</h4>
+                    <p>Uma estrutura de Big Data funciona como o <strong>sistema de tratamento de água de uma cidade</strong>: a água bruta é captada na natureza, filtrada, armazenada em reservatórios e distribuída limpa para as casas. Em dados, o caminho vai desde a coleta dos dados brutos até o painel que os diretores usam para tomar decisões.</p>
+                </div>
+
+                <p><strong>Clique em cada etapa para ver os detalhes e as ferramentas envolvidas:</strong></p>
+
+                <div class="pipeline-container">
+                    <div class="pipeline-step active" onclick="togglePipeline(this)">
+                        <div class="pipeline-step-header">
+                            <div class="pipeline-step-number">1</div>
+                            <div>
+                                <h4 style="margin: 0;">🌊 Origem dos Dados (As Fontes)</h4>
+                                <small style="color: var(--dark-blue);">Onde os dados nascem</small>
+                            </div>
+                        </div>
+                        <div class="pipeline-step-details">
+                            <p>Tudo começa onde os dados são criados. Eles podem vir de:</p>
+                            <ul style="margin-left: 1.5rem; color: var(--black);">
+                                <li><strong>Bancos de dados de aplicativos</strong> — MySQL, PostgreSQL (ERP, CRM)</li>
+                                <li><strong>Cliques de usuários</strong> em sites ou redes sociais</li>
+                                <li><strong>Arquivos perdidos</strong> em planilhas, PDFs, e-mails</li>
+                                <li><strong>Sensores IoT</strong> — GPS de frotas, máquinas, temperatura</li>
+                            </ul>
+                            <div class="info-box warning">
+                                <h4>🎯 Papel do Gestor</h4>
+                                <p>Mapeie <strong>todas as fontes</strong> da sua empresa. A maioria dos líderes não sabe quantos "rios de dados" entram na organização — e quantos se perdem pelo caminho.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pipeline-step" onclick="togglePipeline(this)">
+                        <div class="pipeline-step-header">
+                            <div class="pipeline-step-number">2</div>
+                            <div>
+                                <h4 style="margin: 0;">📥 Ingestão e Coleta (A Captação)</h4>
+                                <small style="color: var(--dark-blue);">Puxar os dados para dentro do ambiente</small>
+                            </div>
+                        </div>
+                        <div class="pipeline-step-details">
+                            <p>Nesta etapa, o objetivo é "puxar" os dados da origem e levá-los para dentro do ambiente de Big Data.</p>
+                            <ul style="margin-left: 1.5rem; color: var(--black);">
+                                <li><strong>Apache Kafka:</strong> Captura dados em tempo real (transações bancárias, GPS)</li>
+                                <li><strong>Apache Airflow:</strong> Agenda e controla o momento exato em que os dados devem ser puxados (ex: "busque vendas todo dia às 2h")</li>
+                            </ul>
+                            <div class="info-box info">
+                                <h4>💰 Decisão Executiva</h4>
+                                <p>Kafka é caro e complexo. Só justifica se você precisa de <strong>tempo real</strong>. Para 80% das empresas, Airflow + batch é suficiente e muito mais barato.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pipeline-step" onclick="togglePipeline(this)">
+                        <div class="pipeline-step-header">
+                            <div class="pipeline-step-number">3</div>
+                            <div>
+                                <h4 style="margin: 0;">🏊 Armazenamento Bruto (O Data Lake)</h4>
+                                <small style="color: var(--dark-blue);">Guardar tudo, barato e em grande volume</small>
+                            </div>
+                        </div>
+                        <div class="pipeline-step-details">
+                            <p>Os dados chegam misturados, pesados e sem tratamento. Precisam ser guardados em lugar barato e gigante.</p>
+                            <ul style="margin-left: 1.5rem; color: var(--black);">
+                                <li><strong>Apache Hadoop (HDFS):</strong> Sistema clássico que divide arquivos gigantes em pedaços menores espalhados por vários computadores</li>
+                                <li><strong>Amazon S3 / Google Cloud Storage:</strong> Hoje, muitas empresas trocam o Hadoop por nuvem — mais fácil de manter</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="pipeline-step" onclick="togglePipeline(this)">
+                        <div class="pipeline-step-header">
+                            <div class="pipeline-step-number">4</div>
+                            <div>
+                                <h4 style="margin: 0;">⚙️ Processamento e Limpeza (O Motor)</h4>
+                                <small style="color: var(--dark-blue);">Onde a mágica do Big Data acontece</small>
+                            </div>
+                        </div>
+                        <div class="pipeline-step-details">
+                            <p>Os dados brutos são limpos, filtrados e transformados em tabelas úteis. Como são gigantescos, um computador sozinho travaria — é preciso <strong>processamento distribuído</strong>.</p>
+                            <ul style="margin-left: 1.5rem; color: var(--black);">
+                                <li><strong>Apache Spark:</strong> O rei do processamento. Faz contas diretamente na memória RAM, em vez do disco — incrivelmente rápido</li>
+                                <li><strong>Python:</strong> A linguagem usada para dizer ao Spark o que fazer (bibliotecas PySpark, Pandas)</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="pipeline-step" onclick="togglePipeline(this)">
+                        <div class="pipeline-step-header">
+                            <div class="pipeline-step-number">5</div>
+                            <div>
+                                <h4 style="margin: 0;">🔬 Análise e Experimentação (O Laboratório)</h4>
+                                <small style="color: var(--dark-blue);">Testar ideias antes do gráfico final</small>
+                            </div>
+                        </div>
+                        <div class="pipeline-step-details">
+                            <p>Antes do dashboard final, cientistas e analistas testam ideias, fazem cálculos matemáticos e exploram os dados.</p>
+                            <ul style="margin-left: 1.5rem; color: var(--black);">
+                                <li><strong>Jupyter Notebook:</strong> Página web onde o profissional mistura blocos de código Python com textos e gráficos temporários — um "caderno de rascunho digital inteligente"</li>
+                                <li><strong>Anaconda:</strong> Pacote instalador que baixa Python, Jupyter e centenas de bibliotecas de forma organizada</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="pipeline-step" onclick="togglePipeline(this)">
+                        <div class="pipeline-step-header">
+                            <div class="pipeline-step-number">6</div>
+                            <div>
+                                <h4 style="margin: 0;">🏢 Armazenamento Refinado (O Armazém Pronto)</h4>
+                                <small style="color: var(--dark-blue);">Dados limpos, prontos para consumo</small>
+                            </div>
+                        </div>
+                        <div class="pipeline-step-details">
+                            <p>Depois que o Spark limpou tudo, os dados organizados são salvos em bancos ultrarrápidos, prontos para serem lidos pelas ferramentas de relatório.</p>
+                            <ul style="margin-left: 1.5rem; color: var(--black);">
+                                <li><strong>Databricks (camada Lakehouse)</strong></li>
+                                <li><strong>Google BigQuery</strong></li>
+                                <li><strong>Snowflake</strong></li>
+                            </ul>
+                            <p><em>São os Data Warehouses modernos — caros, mas extremamente rápidos para consultas de BI.</em></p>
+                        </div>
+                    </div>
+
+                    <div class="pipeline-step" onclick="togglePipeline(this)">
+                        <div class="pipeline-step-header">
+                            <div class="pipeline-step-number">7</div>
+                            <div>
+                                <h4 style="margin: 0;">📊 Visualização (O Dashboard)</h4>
+                                <small style="color: var(--dark-blue);">A última ponta da linha — onde o diretor decide</small>
+                            </div>
+                        </div>
+                        <div class="pipeline-step-details">
+                            <p>A última ponta da linha. É aqui que o usuário final (como o diretor) consome a informação sem precisar entender nada de código.</p>
+                            <ul style="margin-left: 1.5rem; color: var(--black);">
+                                <li><strong>Power BI</strong></li>
+                                <li><strong>Tableau</strong></li>
+                                <li><strong>Looker Studio</strong></li>
+                                <li><strong>Qlik Sense</strong></li>
+                            </ul>
+                            <p>Elas se conectam ao armazenamento refinado e transformam as tabelas em gráficos de pizza, barras, mapas e indicadores que piscam em vermelho ou verde.</p>
+                            <div class="info-box success">
+                                <h4>🎯 Mensagem Final ao Gestor</h4>
+                                <p>Você <strong>não precisa operar</strong> nenhuma dessas 7 etapas. Mas precisa <strong>entender o fluxo</strong> para saber onde está o gargalo, onde investir e como cobrar cada time.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 9: MÓDULO 2 - BLOCOS 1 E 2 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>🧩 Os Dois Blocos do Ecossistema de Dados</h1>
+                <h3>Programação/Limpeza vs. Negócios/Design — onde cada perfil atua</h3>
+
+                <div class="info-box info">
+                    <h4>🎯 Por que isso importa para o gestor?</h4>
+                    <p>Entender os dois blocos ajuda você a <strong>dimensionar a equipe certa</strong>, cobrar as entregas certas e evitar o erro clássico de contratar um analista de BI para fazer trabalho de engenheiro (ou vice-versa).</p>
+                </div>
+
+                <div class="block-container">
+                    <div class="block-card backend">
+                        <span class="badge badge-pink">💻 BLOCO 1</span>
+                        <h3>Programação e Limpeza</h3>
+                        <h4 style="color: var(--yellow);">O Trabalho de Bastidores</h4>
+                        <p>Foca em código, infraestrutura e matemática. É onde o dado bruto é transformado em ouro.</p>
+                        
+                        <h4 style="margin-top: 1.5rem;">📦 Anaconda</h4>
+                        <p>Ponto de partida do programador. Funciona como uma "caixa de ferramentas" instalada no computador, trazendo Python e Jupyter de forma organizada.</p>
+                        
+                        <h4>🔬 Jupyter Notebook</h4>
+                        <p>O laboratório. O profissional usa essa tela para escrever rascunhos de código e testar a limpeza em pequenas amostras.</p>
+                        
+                        <h4>🐍 Python (com PySpark)</h4>
+                        <p>A linguagem de comando. Escreve-se o código para dizer exatamente quais regras aplicar: "remova linhas vazias", "padronize datas".</p>
+                        
+                        <h4>⚡ Apache Spark</h4>
+                        <p>O músculo. Quando o código em Python vai para produção, o Spark executa em bilhões de linhas ao mesmo tempo, dividindo o trabalho entre dezenas de servidores usando memória RAM.</p>
+                    </div>
+
+                    <div class="block-card business">
+                        <span class="badge badge-orange">📊 BLOCO 2</span>
+                        <h3>Negócios e Design</h3>
+                        <h4 style="color: var(--yellow);">A Entrega de Valor</h4>
+                        <p>Foca na estratégia da empresa, em responder perguntas de negócio e na experiência visual do usuário.</p>
+                        
+                        <h4 style="margin-top: 1.5rem;">🏢 Tabelas Tratadas (Data Warehouse)</h4>
+                        <p>Resultado final do trabalho do Spark. São tabelas perfeitamente limpas, com nomes fáceis de entender (ex: Data_Venda, Valor_Total).</p>
+                        
+                        <h4>🔗 Power BI — Modelagem de Negócio</h4>
+                        <p>O profissional de BI conecta o Power BI às tabelas. Cria relacionamentos (ligando Clientes a Vendas) e regras de negócio usando fórmulas DAX (ex: meta de crescimento do mês).</p>
+                        
+                        <h4>🎨 Power BI — Design de Relatórios</h4>
+                        <p>A arte final. O analista planeja cores, escolhe os melhores gráficos (linhas para tendência, barras para comparação) e organiza a tela para que o diretor entenda a saúde da empresa em menos de 5 segundos.</p>
+                    </div>
+                </div>
+
+                <div class="info-box warning">
+                    <h4>⚠️ Erro Comum de Gestão</h4>
+                    <p>Contratar um analista de BI caro para fazer trabalho de engenheiro de dados (ou vice-versa) é como contratar um <strong>arquiteto para pedreirar</strong>. Ambos entendem de construção, mas o resultado será ruim e caro.</p>
+                </div>
+
+                <h3>🔄 Como os Blocos Conversam</h3>
+                <div class="card">
+                    <div style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: center; margin: 1rem 0;">
+                        <div style="background: var(--dark-purple); color: var(--white); padding: 1rem; border-radius: 12px; text-align: center; flex: 1; min-width: 200px;">
+                            <strong>💻 BLOCO 1</strong><br>
+                            <small>Anaconda → Jupyter → Python → Spark</small><br>
+                            <em>"Limpa e processa"</em>
+                        </div>
+                        <div style="font-size: 2rem; color: var(--orange);">→</div>
+                        <div style="background: var(--primary-blue); color: var(--white); padding: 1rem; border-radius: 12px; text-align: center; flex: 1; min-width: 200px;">
+                            <strong>📊 BLOCO 2</strong><br>
+                            <small>Data Warehouse → Power BI Modelagem → Design</small><br>
+                            <em>"Modela e apresenta"</em>
+                        </div>
+                        <div style="font-size: 2rem; color: var(--orange);">→</div>
+                        <div style="background: var(--orange); color: var(--white); padding: 1rem; border-radius: 12px; text-align: center; flex: 1; min-width: 200px;">
+                            <strong>🎯 DECISÃO</strong><br>
+                            <small>Diretor consome em 5 segundos</small><br>
+                            <em>"Age com base no dado"</em>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 10: MÓDULO 2 - GOVERNANÇA E LGPD -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>🔒 Governança e LGPD Aplicada</h1>
+                <h3>Sua maior responsabilidade como gestor</h3>
+
+                <div class="info-box danger">
+                    <h4>⚠️ Atenção Máxima</h4>
+                    <p><strong>"Um projeto Data-Driven sem conformidade com a LGPD é um passivo jurídico, não um ativo de negócios."</strong></p>
+                    <p style="margin-top: 0.5rem;">Como gestor, sua maior responsabilidade não é criar o dado, mas garantir que ele seja usado de forma <strong>segura e ética</strong>.</p>
+                </div>
+
+                <div class="grid">
+                    <div class="card">
+                        <span class="badge badge-blue">Administração e RH</span>
+                        <h4>👥 Desafios de Governança</h4>
+                        <ul style="margin-left: 1.5rem; color: var(--black);">
+                            <li>Quem pode ver os salários?</li>
+                            <li>Como anonimizar dados de performance?</li>
+                            <li>Políticas de acesso por nível hierárquico</li>
+                            <li>Proteção de dados sensíveis (saúde, sindical)</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <span class="badge badge-orange">Logística</span>
+                        <h4>🚚 Desafios de Governança</h4>
+                        <ul style="margin-left: 1.5rem; color: var(--black);">
+                            <li>Utilizar dados de rotas sem expor endereços</li>
+                            <li>Proteger dados de clientes finais</li>
+                            <li>Balancear eficiência e privacidade</li>
+                            <li>Reter dados pelo tempo necessário</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <span class="badge badge-purple">Financeiro</span>
+                        <h4>💰 Desafios de Governança</h4>
+                        <ul style="margin-left: 1.5rem; color: var(--black);">
+                            <li>Dados bancários de fornecedores</li>
+                            <li>Informações fiscais sensíveis</li>
+                            <li>Controle de acesso a DRE e balanços</li>
+                            <li>Auditoria de quem acessou o quê</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>🛡️ Técnicas de Proteção</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Técnica</th>
+                            <th>O Que Faz</th>
+                            <th>Exemplo Prático</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Anonimização</strong></td>
+                            <td>Remove identificação permanentemente</td>
+                            <td>Nome "João Silva" → "Usuário_8472"</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Mascaramento</strong></td>
+                            <td>Esconde parte do dado</td>
+                            <td>CPF: "***.456.789-**"</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Pseudonimização</strong></td>
+                            <td>Substitui por código reversível</td>
+                            <td>Chave criptografada guardada separadamente</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Privacy by Design</strong></td>
+                            <td>Privacidade desde a concepção</td>
+                            <td>Projeto já nasce com LGPD embutida</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>📜 Princípios da LGPD que Todo Gestor Deve Conhecer</h3>
+                <div class="grid">
+                    <div class="card">
+                        <h4>🎯 Finalidade</h4>
+                        <p>Dados coletados apenas para propósitos específicos e legítimos.</p>
+                    </div>
+                    <div class="card">
+                        <h4>📉 Minimização</h4>
+                        <p>Coletar apenas o estritamente necessário.</p>
+                    </div>
+                    <div class="card">
+                        <h4>🔒 Segurança</h4>
+                        <p>Proteção contra acessos não autorizados.</p>
+                    </div>
+                    <div class="card">
+                        <h4>👁️ Transparência</h4>
+                        <p>Clareza sobre uso dos dados com o titular.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 11: MÓDULO 2 - DATA LINEAGE E RBAC -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>🔍 Data Lineage e RBAC</h1>
+                <h3>Conceitos avançados de governança para o gestor</h3>
+
+                <div class="card">
+                    <span class="badge badge-purple">Conceito Essencial</span>
+                    <h3>🧬 Data Lineage (Linhagem do Dado)</h3>
+                    <p>Saber <strong>a origem e o caminho</strong> que o dado percorreu até chegar ao relatório. É o "histórico de vida" do dado.</p>
+                    
+                    <h4 style="margin-top: 1.5rem;">🎯 Por que o gestor deve se importar?</h4>
+                    <ul style="margin-left: 1.5rem; color: var(--black);">
+                        <li><strong>Auditoria:</strong> Se o dado está errado, você rastreia onde começou o erro</li>
+                        <li><strong>Compliance:</strong> LGPD exige que você saiba de onde veio cada dado pessoal</li>
+                        <li><strong>Confiança:</strong> O diretor só confia no dashboard se souber a linhagem</li>
+                        <li><strong>Impact analysis:</strong> Se mudar uma fonte, você sabe quais relatórios são afetados</li>
+                    </ul>
+
+                    <div style="background: var(--gray-light); padding: 1.5rem; border-radius: 12px; margin-top: 1.5rem;">
+                        <h4>📊 Exemplo de Linhagem</h4>
+                        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; justify-content: center; margin: 1rem 0;">
+                            <div style="background: var(--dark-purple); color: var(--white); padding: 0.5rem 1rem; border-radius: 8px;">ERP (Fonte)</div>
+                            <span style="color: var(--orange);">→</span>
+                            <div style="background: var(--primary-blue); color: var(--white); padding: 0.5rem 1rem; border-radius: 8px;">Kafka</div>
+                            <span style="color: var(--orange);">→</span>
+                            <div style="background: var(--light-purple); color: var(--white); padding: 0.5rem 1rem; border-radius: 8px;">Data Lake</div>
+                            <span style="color: var(--orange);">→</span>
+                            <div style="background: var(--dark-blue); color: var(--white); padding: 0.5rem 1rem; border-radius: 8px;">Spark</div>
+                            <span style="color: var(--orange);">→</span>
+                            <div style="background: var(--primary-blue); color: var(--white); padding: 0.5rem 1rem; border-radius: 8px;">BigQuery</div>
+                            <span style="color: var(--orange);">→</span>
+                            <div style="background: var(--orange); color: var(--white); padding: 0.5rem 1rem; border-radius: 8px;">Power BI</div>
+                        </div>
+                        <p style="text-align: center;"><em>Se o número de vendas no dashboard está errado, você sabe exatamente onde investigar.</em></p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <span class="badge badge-orange">Controle de Acesso</span>
+                    <h3>🔐 RBAC — Role-Based Access Control</h3>
+                    <p>Controle de acesso baseado em <strong>papéis (roles)</strong>. Cada pessoa acessa apenas o que precisa para seu trabalho.</p>
+
+                    <h4 style="margin-top: 1.5rem;">🎯 Princípio do Privilégio Mínimo</h4>
+                    <p>Cada colaborador deve ter acesso <strong>apenas aos dados necessários</strong> para sua função — nem mais, nem menos.</p>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Role (Papel)</th>
+                                <th>Acesso a Salários</th>
+                                <th>Acesso a Vendas</th>
+                                <th>Acesso a Dados Pessoais</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Diretor Geral</strong></td>
+                                <td>✅ Total</td>
+                                <td>✅ Total</td>
+                                <td>⚠️ Anonimizado</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Gerente RH</strong></td>
+                                <td>✅ Sua área</td>
+                                <td>❌ Não</td>
+                                <td>✅ Com justificativa</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Gerente Comercial</strong></td>
+                                <td>❌ Não</td>
+                                <td>✅ Sua equipe</td>
+                                <td>❌ Não</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Analista de BI</strong></td>
+                                <td>⚠️ Anonimizado</td>
+                                <td>✅ Total</td>
+                                <td>❌ Não</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Estagiário</strong></td>
+                                <td>❌ Não</td>
+                                <td>⚠️ Somente leitura</td>
+                                <td>❌ Não</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="info-box success">
+                    <h4>✅ Checklist do Gestor para Governança</h4>
+                    <p>✅ Mapeou todas as fontes de dados pessoais?<br>
+                    ✅ Definiu quem pode acessar o quê (RBAC)?<br>
+                    ✅ Implementou anonimização onde necessário?<br>
+                    ✅ Consegue rastrear a linhagem dos dados críticos?<br>
+                    ✅ Tem um DPO (Encarregado de Dados) designado?<br>
+                    ✅ Revisa acessos trimestralmente?</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 12: SIMULAÇÃO 2 - MATRIZ TECH STACK -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>🎮 Simulação 2: Matriz de Escolha de Tech Stack & Compliance</h1>
+                <h3>Monte a pilha de ferramentas respeitando LGPD e custos</h3>
+
+                <div class="simulation-container">
+                    <div class="info-box info">
+                        <h4>📋 Estudo de Caso</h4>
+                        <p>Você é o novo Diretor de Dados de uma <strong>rede de farmácias com 150 lojas</strong>. A empresa quer implantar um projeto data-driven para: (1) prever ruptura de estoque, (2) personalizar promoções por cliente e (3) otimizar rotas de entrega. Orçamento anual de R$ 800 mil. Precisa estar 100% em conformidade com a LGPD (dados de saúde dos clientes).</p>
+                    </div>
+
+                    <div class="stack-builder">
+                        <h3>🏗️ Monte sua arquitetura</h3>
+                        <p>Selecione uma opção em cada categoria:</p>
+
+                        <div class="stack-question">
+                            <h4>1️⃣ Onde armazenar os dados brutos?</h4>
+                            <div class="stack-options">
+                                <div class="stack-option" onclick="selectStack('storage', 's3', this)">Amazon S3 (Data Lake)</div>
+                                <div class="stack-option" onclick="selectStack('storage', 'bigquery', this)">Google BigQuery</div>
+                                <div class="stack-option" onclick="selectStack('storage', 'databricks', this)">Databricks Lakehouse</div>
+                                <div class="stack-option" onclick="selectStack('storage', 'excel', this)">Excel + Servidor local</div>
+                            </div>
+                        </div>
+
+                        <div class="stack-question">
+                            <h4>2️⃣ Como processar os dados?</h4>
+                            <div class="stack-options">
+                                <div class="stack-option" onclick="selectStack('process', 'spark', this)">Apache Spark (distribuído)</div>
+                                <div class="stack-option" onclick="selectStack('process', 'python', this)">Python + Pandas (single machine)</div>
+                                <div class="stack-option" onclick="selectStack('process', 'sql', this)">SQL puro no banco</div>
+                                <div class="stack-option" onclick="selectStack('process', 'manual', this)">Planilhas manuais</div>
+                            </div>
+                        </div>
+
+                        <div class="stack-question">
+                            <h4>3️⃣ Como visualizar os resultados?</h4>
+                            <div class="stack-options">
+                                <div class="stack-option" onclick="selectStack('viz', 'powerbi', this)">Power BI</div>
+                                <div class="stack-option" onclick="selectStack('viz', 'tableau', this)">Tableau</div>
+                                <div class="stack-option" onclick="selectStack('viz', 'looker', this)">Looker Studio (grátis)</div>
+                                <div class="stack-option" onclick="selectStack('viz', 'excel', this)">Excel com gráficos</div>
+                            </div>
+                        </div>
+
+                        <div class="stack-question">
+                            <h4>4️⃣ Como garantir conformidade LGPD?</h4>
+                            <div class="stack-options">
+                                <div class="stack-option" onclick="selectStack('lgpd', 'design', this)">Privacy by Design + RBAC + DPO</div>
+                                <div class="stack-option" onclick="selectStack('lgpd', 'basic', this)">Apenas senha nos sistemas</div>
+                                <div class="stack-option" onclick="selectStack('lgpd', 'term', this)">Termo de uso no site</div>
+                                <div class="stack-option" onclick="selectStack('lgpd', 'none', this)">Vamos ver depois</div>
+                            </div>
+                        </div>
+
+                        <button class="hire-btn" style="margin-top: 1.5rem; padding: 1rem 2rem; font-size: 1rem;" onclick="evaluateStack()">🎯 Avaliar Minha Arquitetura</button>
+
+                        <div class="stack-result" id="stackResult"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 13: MÓDULO 3 - CULTURA DATA-DRIVEN -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>🚀 Módulo 3: Estratégia e Cultura Data-Driven</h1>
+                <h3>O fim do "achismo" e o início da decisão baseada em evidências</h3>
+
+                <div class="card">
+                    <h3>🎯 A Transição Cultural</h3>
+                    <p>A transição de uma cultura baseada em <strong style="color: var(--orange);">intuição</strong> para uma orientada a <strong style="color: var(--primary-blue);">dados</strong> reduz significativamente os erros operacionais de uma empresa.</p>
+                    <p style="margin-top: 1rem; font-size: 1.2rem; text-align: center; color: var(--navy-blue);"><strong>"A cultura é o motor da transformação."</strong></p>
+                </div>
+
+                <h3>📊 Diagnóstico de Maturidade — Onde sua empresa está?</h3>
+                <div class="maturity-meter">
+                    <div class="maturity-levels">
+                        <div class="maturity-level reached" onclick="showMaturity(1)">
+                            <div class="maturity-circle">1</div>
+                            <div class="maturity-label">Intuitivo</div>
+                        </div>
+                        <div class="maturity-level" onclick="showMaturity(2)">
+                            <div class="maturity-circle">2</div>
+                            <div class="maturity-label">Híbrido</div>
+                        </div>
+                        <div class="maturity-level" onclick="showMaturity(3)">
+                            <div class="maturity-circle">3</div>
+                            <div class="maturity-label">Data-Driven</div>
+                        </div>
+                    </div>
+
+                    <div class="maturity-description" id="maturityDesc">
+                        <h4>🎲 Nível 1 — Intuitivo</h4>
+                        <p><strong>Características:</strong> Decisões baseadas em "feeling", experiência pessoal e "sempre fizemos assim". Planilhas isoladas por departamento. Sem dashboards oficiais.</p>
+                        <p><strong>Sinais na empresa:</strong></p>
+                        <ul style="margin-left: 1.5rem; color: var(--black);">
+                            <li>"Eu acho que vamos vender mais no mês que vem"</li>
+                            <li>Cada gerente tem sua própria planilha</li>
+                            <li>Números diferentes em reuniões diferentes</li>
+                            <li>Reuniões de 2h para decidir qual versão do Excel está certa</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>🎯 Roadmap de Implantação — Quick Wins de Baixo Custo</h3>
+                <div class="card">
+                    <h4>Não tente resolver tudo no dia 1. Comece pequeno, escale rápido.</h4>
+                    <div class="grid">
+                        <div style="background: var(--gray-light); padding: 1.5rem; border-radius: 12px; border-left: 4px solid var(--orange);">
+                            <h4 style="color: var(--orange);">Semana 1-2</h4>
+                            <p><strong>Mapeamento de fontes:</strong> Liste de onde vêm os dados críticos da sua área.</p>
+                            <p><strong>Custo:</strong> Zero (apenas tempo)</p>
+                        </div>
+                        <div style="background: var(--gray-light); padding: 1.5rem; border-radius: 12px; border-left: 4px solid var(--primary-blue);">
+                            <h4 style="color: var(--primary-blue);">Semana 3-4</h4>
+                            <p><strong>1 dashboard simples:</strong> Escolha 1 KPI crítico e crie um painel no Power BI ou Looker Studio.</p>
+                            <p><strong>Custo:</strong> Baixo (ferramentas gratuitas/baratas)</p>
+                        </div>
+                        <div style="background: var(--gray-light); padding: 1.5rem; border-radius: 12px; border-left: 4px solid var(--dark-purple);">
+                            <h4 style="color: var(--dark-purple);">Mês 2-3</h4>
+                            <p><strong>Quick win visível:</strong> Entregue 1 insight que gerou economia ou receita mensurável.</p>
+                            <p><strong>Custo:</strong> Médio (talvez 1 analista)</p>
+                        </div>
+                        <div style="background: var(--gray-light); padding: 1.5rem; border-radius: 12px; border-left: 4px solid #4CAF50;">
+                            <h4 style="color: #4CAF50;">Mês 4-6</h4>
+                            <p><strong>Comunique o ROI:</strong> Apresente os resultados à diretoria e peça orçamento para escalar.</p>
+                            <p><strong>Custo:</strong> Variável (depende do sucesso)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-box success">
+                    <h4>💡 Princípio do Gestor Pragmático</h4>
+                    <p><strong>Não venda "transformação digital" para a diretoria. Venda "economia de R$ X" ou "aumento de Y% em conversão".</strong> Projetos data-driven são aprovados com números, não com buzzwords.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 14: MÓDULO 3 - GIGO E MÉTRICAS -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>🗑️ Garbage In, Garbage Out (GIGO)</h1>
+                <h3>A qualidade do dado começa na ponta — e a liderança é responsável</h3>
+
+                <div class="card" style="background: linear-gradient(135deg, #FFEBEE 0%, #FFF3E0 100%); border: 2px solid #D32F2F;">
+                    <h3 style="color: #B71C1C;">🚨 O Princípio GIGO</h3>
+                    <p style="font-size: 1.2rem;"><strong>"Se entra lixo, sai lixo."</strong></p>
+                    <p>Não adianta ter o melhor Data Lake, o Spark mais rápido e o Power BI mais bonito se o dado que entra na ponta está <strong>errado, incompleto ou enviesado</strong>.</p>
+                    <p style="margin-top: 1rem;"><strong>E adivinha quem é responsável pela qualidade do dado na ponta?</strong> O gestor da área operacional — não o time de dados.</p>
+                </div>
+
+                <div class="grid">
+                    <div class="card">
+                        <h4>📝 Exemplo 1 — RH</h4>
+                        <p>O sistema de ponto permite que o gestor "ajuste" marcações manualmente sem justificativa.</p>
+                        <p><strong>Resultado:</strong> Dashboard de horas extras totalmente falso. Decisões de contratação baseadas em dados errados.</p>
+                        <p><strong>Culpa:</strong> Do gestor que permitiu a prática, não do time de dados.</p>
+                    </div>
+
+                    <div class="card">
+                        <h4>📦 Exemplo 2 — Estoque</h4>
+                        <p>Operários registram "perda de mercadoria" como categoria genérica para não preencher o motivo real.</p>
+                        <p><strong>Resultado:</strong> Impossível identificar se é roubo, validade ou avaria. Prejuízo invisível.</p>
+                        <p><strong>Culpa:</strong> Do gestor que não treinou e não cobrou preenchimento correto.</p>
+                    </div>
+
+                    <div class="card">
+                        <h4>💳 Exemplo 3 — Vendas</h4>
+                        <p>Vendedores cadastram clientes com CPF inválido para "bater meta de cadastro".</p>
+                        <p><strong>Resultado:</strong> Impossível fazer marketing segmentado. LGPD em risco.</p>
+                        <p><strong>Culpa:</strong> Do gestor comercial que premiou quantidade em vez de qualidade.</p>
+                    </div>
+                </div>
+
+                <div class="info-box warning">
+                    <h4>🎯 Ação do Gestor</h4>
+                    <p><strong>Torne a qualidade do dado um KPI operacional.</strong> Inclua no feedback dos colaboradores a precisão do preenchimento. Premie quem registra bem, não só quem vende mais.</p>
+                </div>
+
+                <h3>📈 Métricas de Sucesso da Cultura Data-Driven</h3>
+                <p>Como medir se a cultura está realmente mudando?</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Métrica</th>
+                            <th>O Que Mede</th>
+                            <th>Meta Saudável</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Taxa de uso de dashboards</strong></td>
+                            <td>% de decisões apoiadas em BI vs. relatórios estáticos em PDF</td>
+                            <td>> 70% em dashboards</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Tempo de decisão</strong></td>
+                            <td>Tempo médio entre a pergunta e a resposta baseada em dado</td>
+                            <td>< 24h (era semanas)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Alfabetização em dados</strong></td>
+                            <td>% de colaboradores que sabem ler um dashboard</td>
+                            <td>> 80%</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Qualidade na ponta</strong></td>
+                            <td>% de registros sem erros de preenchimento</td>
+                            <td>> 95%</td>
+                        </tr>
+                        <tr>
+                            <td><strong>ROI de projetos data</strong></td>
+                            <td>Retorno financeiro gerado por iniciativas data-driven</td>
+                            <td>> 3x o investimento</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="info-box info">
+                    <h4>💡 Democracia dos Dados com Acesso Controlado</h4>
+                    <p>Todos devem ter acesso aos dados — mas não aos mesmos dados. <strong>Democratize a informação, mas mantenha o RBAC.</strong> O operador de estoque não precisa ver salários; o diretor não precisa ver logs de sistema.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 15: ATIVIDADE 3 - PLANO 30-60-90 -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>🎯 Atividade Prática 3: Plano de Mudança de Cultura 30-60-90 Dias</h1>
+                <h3>Monte um plano real para uma equipe operacional fictícia</h3>
+
+                <div class="simulation-container">
+                    <div class="info-box info">
+                        <h4>📋 Contexto</h4>
+                        <p>Você assumiu como <strong>Gerente de Operações de uma distribuidora com 80 colaboradores</strong>. A empresa tem 15 anos de mercado, cultura familiar, decisões no "feeling" do dono. Você tem 90 dias para começar a virar a chave para data-driven — com orçamento limitado.</p>
+                    </div>
+
+                    <h3>🗓️ Estrutura do Plano 30-60-90</h3>
+                    <div class="plan-container">
+                        <div class="plan-card period-30">
+                            <h4 style="color: var(--orange);">30 Dias</h4>
+                            <p style="text-align: center; font-weight: 600;">🔍 Diagnóstico e Quick Wins</p>
+                            <ul style="margin-left: 1.5rem; color: var(--black);">
+                                <li>Mapear todas as fontes de dados</li>
+                                <li>Identificar 3 dores críticas mensuráveis</li>
+                                <li>Implantar 1 dashboard simples (vendas/dia)</li>
+                                <li>Treinar 5 "embaixadores de dados"</li>
+                                <li>Eliminar 1 relatório em PDF redundante</li>
+                            </ul>
+                            <p style="margin-top: 1rem;"><strong>KPI de sucesso:</strong> 1 dashboard em uso diário</p>
+                        </div>
+
+                        <div class="plan-card period-60">
+                            <h4 style="color: var(--primary-blue);">60 Dias</h4>
+                            <p style="text-align: center; font-weight: 600;">🚀 Expansão e Engajamento</p>
+                            <ul style="margin-left: 1.5rem; color: var(--black);">
+                                <li>Ampliar para 3 dashboards (vendas, estoque, financeiro)</li>
+                                <li>Reuniões semanais com dados na tela</li>
+                                <li>Capacitar 30 colaboradores em leitura de BI</li>
+                                <li>Apresentar 1 quick win financeiro ao dono</li>
+                                <li>Criar política de preenchimento de dados</li>
+                            </ul>
+                            <p style="margin-top: 1rem;"><strong>KPI de sucesso:</strong> 1 economia mensurável (R$)</p>
+                        </div>
+
+                        <div class="plan-card period-90">
+                            <h4 style="color: var(--dark-purple);">90 Dias</h4>
+                            <p style="text-align: center; font-weight: 600;">🎯 Consolidação e Escala</p>
+                            <ul style="margin-left: 1.5rem; color: var(--black);">
+                                <li>Apresentar ROI à diretoria</li>
+                                <li>Solicitar orçamento para 1 analista de dados</li>
+                                <li>Implantar política de governança básica</li>
+                                <li>Iniciar projeto piloto de previsão de demanda</li>
+                                <li>Documentar processos data-driven</li>
+                            </ul>
+                            <p style="margin-top: 1rem;"><strong>KPI de sucesso:</strong> Aprovação de orçamento para escalar</p>
+                        </div>
+                    </div>
+
+                    <h3>🛠️ Monte Seu Próprio Plano</h3>
+                    <div class="card">
+                        <p><strong>Escolha sua área e monte um plano personalizado:</strong></p>
+                        <div class="stack-options" style="margin: 1rem 0;">
+                            <div class="stack-option" onclick="selectArea('rh')">👥 RH</div>
+                            <div class="stack-option" onclick="selectArea('financeiro')">💰 Financeiro</div>
+                            <div class="stack-option" onclick="selectArea('logistica')">🚚 Logística</div>
+                            <div class="stack-option" onclick="selectArea('comercial')">💼 Comercial</div>
+                        </div>
+                        <div id="areaPlan" style="display: none; margin-top: 1.5rem; padding: 1.5rem; background: var(--gray-light); border-radius: 12px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 16: MÓDULO 4 - DATA LITERACY -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>👥 Módulo 4: Data Literacy e Políticas de Input</h1>
+                <h3>Alfabetizando a empresa em dados — do operacional ao estratégico</h3>
+
+                <div class="card">
+                    <h3>📚 O Que é Data Literacy?</h3>
+                    <p><strong>Data Literacy (Alfabetização em Dados)</strong> é a capacidade de <strong>ler, entender, criar e comunicar</strong> informações a partir de dados. Não é saber programar — é saber <strong>interpretar um gráfico</strong>, fazer uma pergunta inteligente e tomar uma decisão baseada em evidência.</p>
+                    <p style="margin-top: 1rem;"><strong>Quem precisa ser alfabetizado?</strong> TODA a empresa. Do operacional ao C-Level.</p>
+                </div>
+
+                <h3>🎯 Data Literacy por Área</h3>
+                <div class="grid">
+                    <div class="card">
+                        <span class="badge badge-blue">Financeiro</span>
+                        <h4>💰 O Que Precisa Saber</h4>
+                        <ul style="margin-left: 1.5rem; color: var(--black);">
+                            <li>Ler um DRE e um fluxo de caixa projetado</li>
+                            <li>Entender margem, EBITDA, ROI</li>
+                            <li>Interpretar tendências em gráficos</li>
+                            <li>Fazer perguntas como: "Qual a sazonalidade?"</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <span class="badge badge-orange">Estoque / Operações</span>
+                        <h4>📦 O Que Precisa Saber</h4>
+                        <ul style="margin-left: 1.5rem; color: var(--black);">
+                            <li>Ler curva ABC de produtos</li>
+                            <li>Entender giro de estoque e ruptura</li>
+                            <li>Interpretar lead time e serviço</li>
+                            <li>Saber preencher corretamente os sistemas</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <span class="badge badge-purple">RH</span>
+                        <h4>👥 O Que Precisa Saber</h4>
+                        <ul style="margin-left: 1.5rem; color: var(--black);">
+                            <li>Ler turnover, absenteísmo, clima</li>
+                            <li>Entender correlação (não causalidade)</li>
+                            <li>Interpretar pesquisas de engajamento</li>
+                            <li>Comunicar dados sensíveis com ética</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <span class="badge badge-green">Comercial</span>
+                        <h4>💼 O Que Precisa Saber</h4>
+                        <ul style="margin-left: 1.5rem; color: var(--black);">
+                            <li>Ler funil de vendas e conversão</li>
+                            <li>Entender CAC, LTV, ticket médio</li>
+                            <li>Interpretar segmentação de clientes</li>
+                            <li>Usar CRM como ferramenta de decisão</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>📋 Criação de Políticas de Input e Geração de Dados</h3>
+                <div class="card">
+                    <h4>🎯 Regras de Ouro do Input de Dados</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Regra</th>
+                                <th>Exemplo Prático</th>
+                                <th>Responsável</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Padronização</strong></td>
+                                <td>Datas sempre no formato DD/MM/AAAA</td>
+                                <td>Gestor da área</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Obrigatoriedade</strong></td>
+                                <td>Campos críticos não podem ficar vazios</td>
+                                <td>TI + Gestor</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Validação</strong></td>
+                                <td>CPF com 11 dígitos, e-mail com @</td>
+                                <td>Sistema (automático)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Auditoria</strong></td>
+                                <td>Quem alterou o quê e quando</td>
+                                <td>Governança</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Treinamento</strong></td>
+                                <td>Onboarding com foco em qualidade de dado</td>
+                                <td>RH + Gestor</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="info-box success">
+                    <h4>💡 Dica de Implementação</h4>
+                    <p>Comece pelo <strong>topo</strong>. Se o diretor não usa dados, ninguém vai usar. Promova <strong>"Data Fridays"</strong> — reuniões semanais onde TODAS as decisões devem ser justificadas com um dashboard na tela.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 17: MÓDULO 4 - ESQUADRÃO DE DADOS -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>🦸 O Esquadrão de Dados (Data Squad)</h1>
+                <h3>Quem contratar, quando contratar e por quê</h3>
+
+                <div class="info-box info">
+                    <h4>🎯 Princípio do Dimensionamento</h4>
+                    <p><strong>Não contrate antes da hora.</strong> Cada perfil tem gatilhos específicos. Contratar um cientista de dados quando você precisa de um analista de BI é jogar dinheiro fora — e frustrar o profissional.</p>
+                </div>
+
+                <div class="grid">
+                    <div class="card">
+                        <span class="badge badge-blue">O Encanador</span>
+                        <h4>🔧 Engenheiro de Dados</h4>
+                        <p><strong>O que faz:</strong> Extrai, limpa e transporta dados dos sistemas (ERP, CRM) até o repositório central de forma segura.</p>
+                        <p><strong>Gatilhos para contratar:</strong></p>
+                        <ul style="margin-left: 1.5rem; color: var(--black);">
+                            <li>+ de 5 fontes de dados diferentes</li>
+                            <li>Processos manuais de extração (planilhas)</li>
+                            <li>Mais de 100GB de dados</li>
+                            <li>Time de BI reclamando da qualidade</li>
+                        </ul>
+                        <p style="margin-top: 1rem;"><strong>Quando:</strong> Fase de estruturação da infraestrutura</p>
+                    </div>
+
+                    <div class="card">
+                        <span class="badge badge-orange">O Navegador</span>
+                        <h4>🧭 Cientista de Dados</h4>
+                        <p><strong>O que faz:</strong> Aplica matemática e estatística avançada para prever o futuro (picos de contratação, demandas de frota).</p>
+                        <p><strong>Gatilhos para contratar:</strong></p>
+                        <ul style="margin-left: 1.5rem; color: var(--black);">
+                            <li>Precisa prever (não só relatar)</li>
+                            <li>Dados já estão organizados</li>
+                            <li>Problemas complexos de otimização</li>
+                            <li>ROI claro de modelos preditivos</li>
+                        </ul>
+                        <p style="margin-top: 1rem;"><strong>Quando:</strong> Após ter dados organizados</p>
+                    </div>
+
+                    <div class="card">
+                        <span class="badge badge-purple">O Tradutor</span>
+                        <h4>🌉 Analytics Translator</h4>
+                        <p><strong>O que faz:</strong> Perfil misto (Business + Data). Traduz problemas de negócio para a equipe técnica e converte modelos em ROI. <strong style="color: var(--orange);">É VOCÊ!</strong></p>
+                        <p><strong>Gatilhos para atuar:</strong></p>
+                        <ul style="margin-left: 1.5rem; color: var(--black);">
+                            <li>Desde o início do projeto</li>
+                            <li>Sempre que houver área de negócio + TI</li>
+                            <li>Em toda reunião de priorização</li>
+                            <li>Na comunicação com a diretoria</li>
+                        </ul>
+                        <p style="margin-top: 1rem;"><strong>Quando:</strong> Desde o dia 1</p>
+                    </div>
+
+                    <div class="card">
+                        <span class="badge badge-green">O Visualizador</span>
+                        <h4>📊 Analista de BI / Dados</h4>
+                        <p><strong>O que faz:</strong> Transforma dados em dashboards e insights acionáveis. Responde perguntas de negócio.</p>
+                        <p><strong>Gatilhos para contratar:</strong></p>
+                        <ul style="margin-left: 1.5rem; color: var(--black);">
+                            <li>Primeiro perfil a contratar</li>
+                            <li>Precisa de dashboards executivos</li>
+                            <li>Muitas perguntas "quanto foi?", "por que?"</li>
+                            <li>Relatórios manuais consomem muito tempo</li>
+                        </ul>
+                        <p style="margin-top: 1rem;"><strong>Quando:</strong> Desde o início (quick wins)</p>
+                    </div>
+                </div>
+
+                <h3>📈 Esteira Completa de Valor — Do ERP ao Dashboard</h3>
+                <div class="card">
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; justify-content: center;">
+                        <div style="background: var(--dark-purple); color: var(--white); padding: 0.8rem; border-radius: 8px; text-align: center; flex: 1; min-width: 120px;">
+                            <strong>ERP / CRM</strong><br><small>Fonte</small>
+                        </div>
+                        <div style="color: var(--orange); font-size: 1.5rem;">→</div>
+                        <div style="background: var(--primary-blue); color: var(--white); padding: 0.8rem; border-radius: 8px; text-align: center; flex: 1; min-width: 120px;">
+                            <strong>Engenheiro</strong><br><small>Ingestão</small>
+                        </div>
+                        <div style="color: var(--orange); font-size: 1.5rem;">→</div>
+                        <div style="background: var(--light-purple); color: var(--white); padding: 0.8rem; border-radius: 8px; text-align: center; flex: 1; min-width: 120px;">
+                            <strong>Cientista</strong><br><small>Modelos</small>
+                        </div>
+                        <div style="color: var(--orange); font-size: 1.5rem;">→</div>
+                        <div style="background: var(--dark-blue); color: var(--white); padding: 0.8rem; border-radius: 8px; text-align: center; flex: 1; min-width: 120px;">
+                            <strong>Analista BI</strong><br><small>Dashboard</small>
+                        </div>
+                        <div style="color: var(--orange); font-size: 1.5rem;">→</div>
+                        <div style="background: var(--orange); color: var(--white); padding: 0.8rem; border-radius: 8px; text-align: center; flex: 1; min-width: 120px;">
+                            <strong>Diretor</strong><br><small>Decisão</small>
+                        </div>
+                    </div>
+                    <p style="text-align: center; margin-top: 1rem;"><em>O <strong>Tradutor Analítico</strong> atua transversalmente em TODAS as etapas, garantindo que o valor de negócio seja preservado.</em></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 18: MÓDULO 4 - ESTRUTURAS ORGANIZACIONAIS E RACI -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>🏛️ Estruturas Organizacionais e Matriz RACI</h1>
+                <h3>Como organizar o time de dados na empresa</h3>
+
+                <h3>📊 Modelos de Estrutura de Dados</h3>
+                <div class="grid">
+                    <div class="card">
+                        <span class="badge badge-blue">Centralizado</span>
+                        <h4>🎯 Time Único de Dados</h4>
+                        <p>Um único departamento central atende toda a empresa.</p>
+                        <p><strong>Vantagens:</strong></p>
+                        <ul style="margin-left: 1.5rem; color: var(--black);">
+                            <li>Padronização total</li>
+                            <li>Economia de escala</li>
+                            <li>Governança simplificada</li>
+                        </ul>
+                        <p><strong>Desvantagens:</strong></p>
+                        <ul style="margin-left: 1.5rem; color: var(--black);">
+                            <li>Vira gargalo</li>
+                            <li>Distante do negócio</li>
+                            <li>Lento para demandas específicas</li>
+                        </ul>
+                        <p><strong>Indicado para:</strong> Empresas pequenas/médias</p>
+                    </div>
+
+                    <div class="card">
+                        <span class="badge badge-orange">Descentralizado</span>
+                        <h4>🕸️ Dados em Cada Área</h4>
+                        <p>Cada departamento tem seu próprio time de dados.</p>
+                        <p><strong>Vantagens:</strong></p>
+                        <ul style="margin-left: 1.5rem; color: var(--black);">
+                            <li>Próximo do negócio</li>
+                            <li>Rápido para demandas</li>
+                            <li>Especialização setorial</li>
+                        </ul>
+                        <p><strong>Desvantagens:</strong></p>
+                        <ul style="margin-left: 1.5rem; color: var(--black);">
+                            <li>Duplicação de esforços</li>
+                            <li>Padrões diferentes</li>
+                            <li>Governança difícil</li>
+                        </ul>
+                        <p><strong>Indicado para:</strong> Multinacionais maduras</p>
+                    </div>
+
+                    <div class="card">
+                        <span class="badge badge-purple">Híbrido (Hub & Spoke)</span>
+                        <h4>🎯 Modelo Recomendado</h4>
+                        <p>Um <strong>hub central</strong> (padrões, infraestrutura, governança) com <strong>spokes</strong> (analistas) dentro de cada área.</p>
+                        <p><strong>Vantagens:</strong></p>
+                        <ul style="margin-left: 1.5rem; color: var(--black);">
+                            <li>Melhor dos dois mundos</li>
+                            <li>Padronização + proximidade</li>
+                            <li>Escalável</li>
+                        </ul>
+                        <p><strong>Desvantagens:</strong></p>
+                        <ul style="margin-left: 1.5rem; color: var(--black);">
+                            <li>Exige boa comunicação</li>
+                            <li>Modelo de reporte duplo</li>
+                        </ul>
+                        <p><strong>Indicado para:</strong> Empresas em crescimento</p>
+                    </div>
+                </div>
+
+                <h3>📋 Matriz RACI — Quem Faz o Quê</h3>
+                <div class="card">
+                    <p><strong>R</strong> = Responsible (Executa) | <strong>A</strong> = Accountable (Responsável final) | <strong>C</strong> = Consulted (Consultado) | <strong>I</strong> = Informed (Informado)</p>
+                    <div class="raci-matrix">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Atividade</th>
+                                    <th>Diretor</th>
+                                    <th>Gestor Negócio</th>
+                                    <th>Tradutor</th>
+                                    <th>Engenheiro</th>
+                                    <th>Cientista</th>
+                                    <th>Analista BI</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Definir estratégia de dados</td>
+                                    <td class="raci-A">A</td>
+                                    <td class="raci-C">C</td>
+                                    <td class="raci-R">R</td>
+                                    <td class="raci-I">I</td>
+                                    <td class="raci-I">I</td>
+                                    <td class="raci-I">I</td>
+                                </tr>
+                                <tr>
+                                    <td>Mapear fontes de dados</td>
+                                    <td class="raci-I">I</td>
+                                    <td class="raci-R">R</td>
+                                    <td class="raci-A">A</td>
+                                    <td class="raci-C">C</td>
+                                    <td class="raci-I">I</td>
+                                    <td class="raci-C">C</td>
+                                </tr>
+                                <tr>
+                                    <td>Construir pipeline de dados</td>
+                                    <td class="raci-I">I</td>
+                                    <td class="raci-I">I</td>
+                                    <td class="raci-C">C</td>
+                                    <td class="raci-R">R</td>
+                                    <td class="raci-C">C</td>
+                                    <td class="raci-I">I</td>
+                                </tr>
+                                <tr>
+                                    <td>Criar modelo preditivo</td>
+                                    <td class="raci-I">I</td>
+                                    <td class="raci-C">C</td>
+                                    <td class="raci-A">A</td>
+                                    <td class="raci-C">C</td>
+                                    <td class="raci-R">R</td>
+                                    <td class="raci-I">I</td>
+                                </tr>
+                                <tr>
+                                    <td>Construir dashboard</td>
+                                    <td class="raci-I">I</td>
+                                    <td class="raci-C">C</td>
+                                    <td class="raci-A">A</td>
+                                    <td class="raci-I">I</td>
+                                    <td class="raci-I">I</td>
+                                    <td class="raci-R">R</td>
+                                </tr>
+                                <tr>
+                                    <td>Garantir conformidade LGPD</td>
+                                    <td class="raci-A">A</td>
+                                    <td class="raci-R">R</td>
+                                    <td class="raci-C">C</td>
+                                    <td class="raci-C">C</td>
+                                    <td class="raci-I">I</td>
+                                    <td class="raci-I">I</td>
+                                </tr>
+                                <tr>
+                                    <td>Tomar decisão de negócio</td>
+                                    <td class="raci-A">A</td>
+                                    <td class="raci-R">R</td>
+                                    <td class="raci-C">C</td>
+                                    <td class="raci-I">I</td>
+                                    <td class="raci-I">I</td>
+                                    <td class="raci-I">I</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="info-box warning">
+                    <h4>⚠️ Erro Comum</h4>
+                    <p>Colocar o <strong>Engenheiro de Dados como "A" (Accountable)</strong> em decisões de negócio. Ele é responsável pela execução técnica — a decisão final é sempre do gestor de negócio ou do diretor.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 19: EXERCÍCIO FINAL - MONTAGEM DE TIME -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>🎯 Exercício Final: Montagem de Time e Pitch Executivo (V3)</h1>
+                <h3>Defina o orçamento, gatilhos de contratação e ROI para a diretoria</h3>
+
+                <div class="simulation-container">
+                    <div class="info-box info">
+                        <h4>📋 Contexto do Exercício</h4>
+                        <p>Você foi contratado como <strong>Tradutor Analítico</strong> de uma empresa de médio porte (500 colaboradores, R$ 200M de faturamento). A diretoria aprovou um orçamento inicial de <strong>R$ 1,5 milhão para o primeiro ano</strong> de implantação do programa data-driven. Sua missão: montar o time, definir os gatilhos de contratação e preparar o pitch de ROI.</p>
+                    </div>
+
+                    <h3>👥 Monte Seu Data Squad</h3>
+                    <p>Clique em "Contratar" para cada perfil e veja os gatilhos e custos:</p>
+
+                    <div class="team-builder">
+                        <div class="role-card" id="role-analista">
+                            <div class="role-card-header" onclick="toggleRole('analista')">
+                                <div>
+                                    <span class="badge badge-green">Analista de BI</span>
+                                    <h4 style="display: inline; margin-left: 0.5rem;">Primeiro a contratar</h4>
+                                    <p style="margin: 0.5rem 0 0;">Salário: R$ 8-12k/mês | Foco: dashboards e quick wins</p>
+                                </div>
+                                <button class="hire-btn" onclick="event.stopPropagation(); hireRole('analista')">Contratar</button>
+                            </div>
+                            <div class="role-details">
+                                <p><strong>Quando contratar:</strong> Mês 1 — é o primeiro perfil necessário</p>
+                                <p><strong>Gatilhos:</strong> Muitas perguntas sem resposta, relatórios manuais, diretor quer "ver números"</p>
+                                <p><strong>Entregáveis esperados:</strong> 3 dashboards em 90 dias, economia identificada de R$ 200k/ano</p>
+                            </div>
+                        </div>
+
+                        <div class="role-card" id="role-engenheiro">
+                            <div class="role-card-header" onclick="toggleRole('engenheiro')">
+                                <div>
+                                    <span class="badge badge-blue">Engenheiro de Dados</span>
+                                    <h4 style="display: inline; margin-left: 0.5rem;">Quando o volume cresce</h4>
+                                    <p style="margin: 0.5rem 0 0;">Salário: R$ 12-18k/mês | Foco: infraestrutura e pipelines</p>
+                                </div>
+                                <button class="hire-btn" onclick="event.stopPropagation(); hireRole('engenheiro')">Contratar</button>
+                            </div>
+                            <div class="role-details">
+                                <p><strong>Quando contratar:</strong> Mês 4-6 — quando o analista reclama da qualidade dos dados</p>
+                                <p><strong>Gatilhos:</strong> +5 fontes, processos manuais de extração, +100GB de dados</p>
+                                <p><strong>Entregáveis esperados:</strong> Pipeline automatizado, Data Lake/Warehouse estruturado</p>
+                            </div>
+                        </div>
+
+                        <div class="role-card" id="role-cientista">
+                            <div class="role-card-header" onclick="toggleRole('cientista')">
+                                <div>
+                                    <span class="badge badge-orange">Cientista de Dados</span>
+                                    <h4 style="display: inline; margin-left: 0.5rem;">Quando precisa prever</h4>
+                                    <p style="margin: 0.5rem 0 0;">Salário: R$ 15-25k/mês | Foco: modelos preditivos</p>
+                                </div>
+                                <button class="hire-btn" onclick="event.stopPropagation(); hireRole('cientista')">Contratar</button>
+                            </div>
+                            <div class="role-details">
+                                <p><strong>Quando contratar:</strong> Mês 8-12 — só depois que os dados estão organizados</p>
+                                <p><strong>Gatilhos:</strong> Precisa prever demanda, otimizar rotas, detectar fraudes</p>
+                                <p><strong>Entregáveis esperados:</strong> Modelos com ROI mensurável (ex: redução de 15% em ruptura)</p>
+                            </div>
+                        </div>
+
+                        <div class="role-card" id="role-governanca">
+                            <div class="role-card-header" onclick="toggleRole('governanca')">
+                                <div>
+                                    <span class="badge badge-purple">Especialista em Governança/DPO</span>
+                                    <h4 style="display: inline; margin-left: 0.5rem;">Compliance</h4>
+                                    <p style="margin: 0.5rem 0 0;">Salário: R$ 12-20k/mês | Foco: LGPD e políticas</p>
+                                </div>
+                                <button class="hire-btn" onclick="event.stopPropagation(); hireRole('governanca')">Contratar</button>
+                            </div>
+                            <div class="role-details">
+                                <p><strong>Quando contratar:</strong> Mês 3-6 — antes de escalar</p>
+                                <p><strong>Gatilhos:</strong> Dados pessoais sensíveis, auditorias, expansão para novos mercados</p>
+                                <p><strong>Entregáveis esperados:</strong> Política de dados, RBAC implementado, conformidade LGPD</p>
+                            </div>
+                        </div>
+
+                        <div id="teamSummary" style="margin-top: 2rem; padding: 1.5rem; background: var(--gray-light); border-radius: 12px; display: none;">
+                            <h3>📊 Resumo do Seu Time</h3>
+                            <div id="teamDetails"></div>
+                        </div>
+                    </div>
+
+                    <h3 style="margin-top: 2rem;">🎤 Prepare Seu Pitch Executivo</h3>
+                    <div class="card">
+                        <h4>Estrutura do Pitch (5-10 minutos)</h4>
+                        <div class="grid">
+                            <div style="background: var(--gray-light); padding: 1rem; border-radius: 8px;">
+                                <h4 style="color: var(--orange);">1. Problema</h4>
+                                <p>"Hoje perdemos R$ X por ano por decisões sem dados"</p>
+                            </div>
+                            <div style="background: var(--gray-light); padding: 1rem; border-radius: 8px;">
+                                <h4 style="color: var(--primary-blue);">2. Solução</h4>
+                                <p>"Programa data-driven em 3 fases com time enxuto"</p>
+                            </div>
+                            <div style="background: var(--gray-light); padding: 1rem; border-radius: 8px;">
+                                <h4 style="color: var(--dark-purple);">3. Investimento</h4>
+                                <p>"R$ 1,5M no ano 1 — retorna R$ 4,5M em 3 anos"</p>
+                            </div>
+                            <div style="background: var(--gray-light); padding: 1rem; border-radius: 8px;">
+                                <h4 style="color: #4CAF50;">4. ROI</h4>
+                                <p>"Payback em 18 meses, ROI de 3x em 3 anos"</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="info-box success">
+                        <h4>✅ Checklist do Pitch Perfeito</h4>
+                        <p>✅ Problema de negócio claramente definido<br>
+                        ✅ Solução data-driven proposta<br>
+                        ✅ ROI projetado (economia ou receita)<br>
+                        ✅ Roadmap em 3 fases com marcos claros<br>
+                        ✅ Conformidade LGPD demonstrada<br>
+                        ✅ Equipe e investimentos detalhados<br>
+                        ✅ Riscos e mitigação apresentados<br>
+                        ✅ Próximos passos acionáveis</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 20: RESUMO FINAL -->
+        <div class="slide">
+            <div class="slide-content">
+                <h1>📝 Resumo Final e Próximos Passos</h1>
+
+                <div class="card">
+                    <h3>🎯 O Que Você Aprendeu</h3>
+                    <div class="grid">
+                        <div>
+                            <h4>✅ Módulo 1 — Arquitetura</h4>
+                            <ul style="margin-left: 1.5rem; color: var(--black);">
+                                <li>Tipologia: relacional vs. não-relacional</li>
+                                <li>Evolução: Lake → Warehouse → Lakehouse → Mesh</li>
+                                <li>Dados frios vs. quentes (otimização de custos)</li>
+                                <li>Streaming vs. batch</li>
+                                <li>Matriz de acesso por perfil</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4>✅ Módulo 2 — Pipeline e Governança</h4>
+                            <ul style="margin-left: 1.5rem; color: var(--black);">
+                                <li>7 etapas do pipeline (fonte → dashboard)</li>
+                                <li>2 blocos: Programação vs. Negócios</li>
+                                <li>LGPD, anonimização, Privacy by Design</li>
+                                <li>Data Lineage e RBAC</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4>✅ Módulo 3 — Cultura</h4>
+                            <ul style="margin-left: 1.5rem; color: var(--black);">
+                                <li>Diagnóstico de maturidade</li>
+                                <li>Roadmap de quick wins</li>
+                                <li>GIGO e qualidade na ponta</li>
+                                <li>Métricas de sucesso cultural</li>
+                                <li>Plano 30-60-90 dias</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4>✅ Módulo 4 — Pessoas</h4>
+                            <ul style="margin-left: 1.5rem; color: var(--black);">
+                                <li>Data Literacy por área</li>
+                                <li>Políticas de input</li>
+                                <li>Data Squad: 4 perfis essenciais</li>
+                                <li>Estruturas: Centralizado, Descentralizado, Hub & Spoke</li>
+                                <li>Matriz RACI</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>🚀 Próximos Passos</h3>
+                <div class="grid">
+                    <div class="card">
+                        <span class="badge badge-blue">Imediato</span>
+                        <h4>Finalize seu Pré-Projeto</h4>
+                        <ul style="margin-left: 1.5rem; color: var(--black);">
+                            <li>Complete as 3 versões (V1, V2, V3)</li>
+                            <li>Aplique arquitetura, LGPD e time</li>
+                            <li>Prepare seu pitch executivo</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <span class="badge badge-orange">Curto Prazo</span>
+                        <h4>Aplique na Prática</h4>
+                        <ul style="margin-left: 1.5rem; color: var(--black);">
+                            <li>Apresente à diretoria</li>
+                            <li>Inicie plano 30-60-90</li>
+                            <li>Contrate primeiro analista de BI</li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <span class="badge badge-purple">Longo Prazo</span>
+                        <h4>Escale com Governança</h4>
+                        <ul style="margin-left: 1.5rem; color: var(--black);">
+                            <li>Construa pipeline robusto</li>
+                            <li>Alfabetize a empresa</li>
+                            <li>Meça ROI trimestralmente</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="info-box success">
+                    <h4>🎉 Parabéns!</h4>
+                    <p>Você está pronto para liderar a transformação data-driven na sua organização. Lembre-se:</p>
+                    <p style="margin-top: 1rem; text-align: center; font-size: 1.2rem;"><strong>"Decidir sem olhar os dados é ser imprudente com o resultado."</strong></p>
+                </div>
+
+                <div class="card" style="text-align: center; background: linear-gradient(135deg, var(--primary-blue), var(--dark-purple)); color: var(--white);">
+                    <h2 style="color: var(--white);">Prontos para o Desafio?</h2>
+                    <p style="color: var(--white);">Aproveitem a elaboração do pré-projeto. Estejam prontos para um dia de muita troca, prática e aprendizado executivo!</p>
+                    <p style="color: var(--white); margin-top: 1rem;"><strong>Nos vemos no dia 29/08, às 08h, na UniSENAI!</strong></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        const progressFill = document.getElementById('progressFill');
+        const navDotsContainer = document.getElementById('navDots');
+
+        // Create navigation dots
+        for (let i = 0; i < totalSlides; i++) {
+            const dot = document.createElement('div');
+            dot.className = 'nav-dot';
+            if (i === 0) dot.className += ' active';
+            dot.onclick = () => goToSlide(i);
+            dot.title = `Slide ${i + 1}`;
+            navDotsContainer.appendChild(dot);
+        }
+
+        function updateSlide() {
+            slides.forEach((slide, index) => {
+                slide.classList.remove('active');
+                slide.scrollTop = 0;
+                if (index === currentSlide) {
+                    slide.classList.add('active');
+                }
+            });
+
+            const dots = document.querySelectorAll('.nav-dot');
+            dots.forEach((dot, index) => {
+                dot.classList.remove('active');
+                if (index === currentSlide) {
+                    dot.classList.add('active');
+                }
+            });
+
+            const progress = ((currentSlide + 1) / totalSlides) * 100;
+            progressFill.style.width = progress + '%';
+
+            document.getElementById('prevBtn').disabled = currentSlide === 0;
+            document.getElementById('nextBtn').disabled = currentSlide === totalSlides - 1;
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides - 1) {
+                currentSlide++;
+                updateSlide();
+            }
+        }
+
+        function previousSlide() {
+            if (currentSlide > 0) {
+                currentSlide--;
+                updateSlide();
+            }
+        }
+
+        function goToSlide(index) {
+            currentSlide = index;
+            updateSlide();
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                previousSlide();
+            }
+        });
+
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+
+        document.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+
+        function handleSwipe() {
+            const swipeThreshold = 50;
+            if (touchEndX < touchStartX - swipeThreshold) nextSlide();
+            if (touchEndX > touchStartX + swipeThreshold) previousSlide();
+        }
+
+        function openTab(evt, tabName) {
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => content.classList.remove('active'));
+
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            tabButtons.forEach(button => button.classList.remove('active'));
+
+            document.getElementById(tabName).classList.add('active');
+            evt.currentTarget.classList.add('active');
+        }
+
+        // Pipeline toggle
+        function togglePipeline(element) {
+            const wasActive = element.classList.contains('active');
+            document.querySelectorAll('.pipeline-step').forEach(step => {
+                step.classList.remove('active');
+            });
+            if (!wasActive) {
+                element.classList.add('active');
+            }
+        }
+
+        // Simulação 1 - Cenários
+        const scenarioAnswers = {
+            1: {
+                correct: 'warehouse',
+                feedback: {
+                    warehouse: '✅ <strong>Correto!</strong> Para varejo com orçamento limitado e necessidade de dashboards rápidos, o Data Warehouse (BigQuery) é ideal: baixo custo inicial, setup rápido e perfeito para BI.',
+                    lakehouse: '⚠️ <strong>Quase!</strong> Lakehouse seria ótimo, mas para uma empresa começando com orçamento limitado e equipe pequena, é over-engineering. BigQuery resolve mais rápido.',
+                    mesh: '❌ <strong>Incorreto.</strong> Data Mesh é para empresas grandes e maduras. Com 2 pessoas de TI, seria impossível implementar.',
+                    lake: '⚠️ <strong>Incorreto.</strong> Data Lake puro exigiria equipe para processar os dados. Sem time técnico, o CEO não teria dashboards no trimestre.'
+                }
+            },
+            2: {
+                correct: 'lake',
+                feedback: {
+                    warehouse: '❌ <strong>Incorreto.</strong> Warehouse não suporta bem streaming em tempo real nem machine learning pesado. Fintech precisa de mais flexibilidade.',
+                    lakehouse: '⚠️ <strong>Poderia funcionar,</strong> mas para tempo real com 10M transações/dia, você precisa de uma camada de streaming dedicada (Kafka) + Lake.',
+                    mesh: '❌ <strong>Incorreto.</strong> Mesh é organizacional, não resolve o problema técnico de tempo real e ML.',
+                    lake: '✅ <strong>Correto!</strong> Data Lake + Streaming (Kafka) é a arquitetura padrão de fintechs: suporta tempo real, ML e grandes volumes.'
+                }
+            },
+            3: {
+                correct: 'mesh',
+                feedback: {
+                    warehouse: '❌ <strong>Incorreto.</strong> Warehouse centralizado já é o gargalo atual. Mais centralização = mais demora.',
+                    lakehouse: '⚠️ <strong>Melhoraria,</strong> mas não resolve o problema organizacional. O gargalo é o time central de 8 pessoas.',
+                    mesh: '✅ <strong>Correto!</strong> Data Mesh é a solução clássica para este cenário: cada área vira dona dos seus dados, o time central vira plataforma. Elimina o gargalo.',
+                    lake: '❌ <strong>Incorreto.</strong> Lake puro não resolve o problema de governança e velocidade entre 50+ unidades de negócio.'
+                }
+            }
+        };
+
+        let scenarioResults = {};
+
+        function checkScenario(scenarioNum, answer, element) {
+            event.stopPropagation();
+            
+            // Reset options
+            const card = document.getElementById(`scenario${scenarioNum}`);
+            card.querySelectorAll('.stack-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            element.classList.add('selected');
+
+            const feedback = document.getElementById(`feedback${scenarioNum}`);
+            const isCorrect = scenarioAnswers[scenarioNum].correct === answer;
+            
+            feedback.innerHTML = scenarioAnswers[scenarioNum].feedback[answer];
+            feedback.style.background = isCorrect ? '#E8F5E9' : '#FFEBEE';
+            feedback.style.color = isCorrect ? '#1B5E20' : '#B71C1C';
+            feedback.classList.add('show');
+
+            card.classList.remove('correct', 'incorrect');
+            card.classList.add(isCorrect ? 'correct' : 'incorrect');
+
+            scenarioResults[scenarioNum] = isCorrect;
+            updateSimulation1Result();
+        }
+
+        function updateSimulation1Result() {
+            if (Object.keys(scenarioResults).length === 3) {
+                const correct = Object.values(scenarioResults).filter(r => r).length;
+                const resultDiv = document.getElementById('simulation1Result');
+                const scoreText = document.getElementById('scoreText');
+                
+                resultDiv.style.display = 'block';
+                
+                if (correct === 3) {
+                    scoreText.innerHTML = `<strong style="color: #4CAF50;">🏆 Excelente! ${correct}/3 acertos!</strong><br>Você demonstra visão executiva avançada em arquitetura de dados. Está pronto para liderar projetos complexos.`;
+                } else if (correct === 2) {
+                    scoreText.innerHTML = `<strong style="color: var(--primary-blue);">👍 Muito bom! ${correct}/3 acertos.</strong><br>Você tem boa noção estratégica. Revise o cenário que errou para consolidar o aprendizado.`;
+                } else {
+                    scoreText.innerHTML = `<strong style="color: var(--orange);">📚 ${correct}/3 acertos.</strong><br>Releia os módulos de arquitetura e pipeline. Lembre-se: cada problema tem uma arquitetura ideal — não existe bala de prata.`;
+                }
+            }
+        }
+
+        // Simulação 2 - Tech Stack
+        let stackSelections = {};
+
+        function selectStack(category, value, element) {
+            const parent = element.parentElement;
+            parent.querySelectorAll('.stack-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            element.classList.add('selected');
+            stackSelections[category] = value;
+        }
+
+        function evaluateStack() {
+            const result = document.getElementById('stackResult');
+            
+            if (Object.keys(stackSelections).length < 4) {
+                result.innerHTML = '<h4 style="color: #D32F2F;">⚠️ Responda todas as 4 perguntas antes de avaliar!</h4>';
+                result.classList.add('show');
+                return;
+            }
+
+            let score = 0;
+            let feedback = '<h3>📊 Avaliação da Sua Arquitetura</h3>';
+            
+            // Storage evaluation
+            if (stackSelections.storage === 'databricks') {
+                score += 2;
+                feedback += '<p>✅ <strong>Armazenamento:</strong> Databricks Lakehouse é excelente para este cenário — flexível, suporta ML e dados de saúde.</p>';
+            } else if (stackSelections.storage === 's3') {
+                score += 1;
+                feedback += '<p>⚠️ <strong>Armazenamento:</strong> S3 é bom, mas para farmácia com dados sensíveis, avalie se a região atende LGPD.</p>';
+            } else if (stackSelections.storage === 'bigquery') {
+                score += 1;
+                feedback += '<p>⚠️ <strong>Armazenamento:</strong> BigQuery é ótimo para BI, mas pode ser caro para dados brutos de 150 lojas.</p>';
+            } else {
+                feedback += '<p>❌ <strong>Armazenamento:</strong> Excel + servidor local é inviável para 150 lojas. Risco de segurança altíssimo.</p>';
+            }
+
+            // Process evaluation
+            if (stackSelections.process === 'spark') {
+                score += 2;
+                feedback += '<p>✅ <strong>Processamento:</strong> Spark é ideal para o volume de uma rede de 150 lojas.</p>';
+            } else if (stackSelections.process === 'python') {
+                score += 1;
+                feedback += '<p>⚠️ <strong>Processamento:</strong> Python + Pandas funciona para começar, mas vai travar com o volume.</p>';
+            } else {
+                feedback += '<p>❌ <strong>Processamento:</strong> Escolha inadequada para o volume e complexidade do cenário.</p>';
+            }
+
+            // Viz evaluation
+            if (stackSelections.viz === 'powerbi' || stackSelections.viz === 'tableau') {
+                score += 2;
+                feedback += `<p>✅ <strong>Visualização:</strong> ${stackSelections.viz === 'powerbi' ? 'Power BI' : 'Tableau'} é excelente para dashboards executivos.</p>`;
+            } else if (stackSelections.viz === 'looker') {
+                score += 1;
+                feedback += '<p>⚠️ <strong>Visualização:</strong> Looker Studio é grátis, mas limitado para dados sensíveis de saúde.</p>';
+            } else {
+                feedback += '<p>❌ <strong>Visualização:</strong> Excel não escala para 150 lojas com dados em tempo real.</p>';
+            }
+
+            // LGPD evaluation
+            if (stackSelections.lgpd === 'design') {
+                score += 3;
+                feedback += '<p>✅ <strong>LGPD:</strong> Privacy by Design + RBAC + DPO é o padrão ouro. Aprovado!</p>';
+            } else if (stackSelections.lgpd === 'basic') {
+                score += 0;
+                feedback += '<p>❌ <strong>LGPD:</strong> Apenas senha é insuficiente para dados de saúde. Multa pode chegar a 2% do faturamento.</p>';
+            } else if (stackSelections.lgpd === 'term') {
+                score += 0;
+                feedback += '<p>❌ <strong>LGPD:</strong> Termo de uso não substitui Privacy by Design. Risco jurídico altíssimo.</p>';
+            } else {
+                score -= 2;
+                feedback += '<p>🚨 <strong>LGPD:</strong> "Vamos ver depois" é a receita para um passivo jurídico milionário.</p>';
+            }
+
+            feedback += `<h4 style="margin-top: 1.5rem;">📊 Pontuação: ${score}/9</h4>`;
+            
+            if (score >= 7) {
+                feedback += '<p style="color: #4CAF50;"><strong>🏆 Excelente!</strong> Sua arquitetura está aprovada pela diretoria.</p>';
+            } else if (score >= 4) {
+                feedback += '<p style="color: var(--primary-blue);"><strong>👍 Razoável.</strong> Precisa ajustes antes de aprovar orçamento.</p>';
+            } else {
+                feedback += '<p style="color: #D32F2F;"><strong>⚠️ Insuficiente.</strong> Revise os módulos de arquitetura e governança.</p>';
+            }
+
+            result.innerHTML = feedback;
+            result.classList.add('show');
+        }
+
+        // Maturidade
+        const maturityData = {
+            1: {
+                title: '🎲 Nível 1 — Intuitivo',
+                content: `<p><strong>Características:</strong> Decisões baseadas em "feeling", experiência pessoal e "sempre fizemos assim". Planilhas isoladas por departamento. Sem dashboards oficiais.</p>
+                <p><strong>Sinais na empresa:</strong></p>
+                <ul style="margin-left: 1.5rem; color: var(--black);">
+                    <li>"Eu acho que vamos vender mais no mês que vem"</li>
+                    <li>Cada gerente tem sua própria planilha</li>
+                    <li>Números diferentes em reuniões diferentes</li>
+                    <li>Reuniões de 2h para decidir qual versão do Excel está certa</li>
+                </ul>`
+            },
+            2: {
+                title: '⚖️ Nível 2 — Híbrido',
+                content: `<p><strong>Características:</strong> Alguns dashboards existem, mas convivem com planilhas manuais. A diretoria "fala" que quer dados, mas volta ao feeling na pressão.</p>
+                <p><strong>Sinais na empresa:</strong></p>
+                <ul style="margin-left: 1.5rem; color: var(--black);">
+                    <li>Existe Power BI, mas ninguém abre</li>
+                    <li>Diretor pede "me manda o número no WhatsApp"</li>
+                    <li>Áreas diferentes reportam números diferentes</li>
+                    <li>Time de dados existe, mas é visto como "custo"</li>
+                </ul>`
+            },
+            3: {
+                title: '📊 Nível 3 — Data-Driven',
+                content: `<p><strong>Características:</strong> Toda decisão importante passa por dados. Dashboards são abertos diariamente. O time de dados é estratégico.</p>
+                <p><strong>Sinais na empresa:</strong></p>
+                <ul style="margin-left: 1.5rem; color: var(--black);">
+                    <li>Reuniões começam com dashboard na tela</li>
+                    <li>"Me mostra o dado" é frase comum</li>
+                    <li>Time de dados participa de decisões estratégicas</li>
+                    <li>ROI de projetos data é medido trimestralmente</li>
+                </ul>`
+            }
+        };
+
+        function showMaturity(level) {
+            document.querySelectorAll('.maturity-level').forEach((el, idx) => {
+                el.classList.remove('active');
+                if (idx + 1 < level) el.classList.add('reached');
+                else el.classList.remove('reached');
+            });
+            document.querySelectorAll('.maturity-level')[level - 1].classList.add('active');
+            
+            const desc = document.getElementById('maturityDesc');
+            desc.innerHTML = `<h4>${maturityData[level].title}</h4>${maturityData[level].content}`;
+        }
+
+        // Área do plano 30-60-90
+        const areaPlans = {
+            rh: {
+                title: '👥 Plano para RH',
+                content: `<p><strong>30 dias:</strong> Mapear fontes de dados de RH (folha, ponto, pesquisas). Criar dashboard de turnover e absenteísmo.</p>
+                <p><strong>60 dias:</strong> Identificar correlações (ex: absenteísmo x distância). Treinar gestores de área em leitura de people analytics.</p>
+                <p><strong>90 dias:</strong> Apresentar insight sobre custo de turnover à diretoria. Solicitar orçamento para analista de people analytics.</p>
+                <p><strong>ROI esperado:</strong> Redução de 15% no turnover = economia de R$ 300k/ano.</p>`
+            },
+            financeiro: {
+                title: '💰 Plano para Financeiro',
+                content: `<p><strong>30 dias:</strong> Consolidar DRE, fluxo de caixa e contas em 1 dashboard. Eliminar 3 planilhas manuais.</p>
+                <p><strong>60 dias:</strong> Criar projeção de fluxo de caixa com base em sazonalidade. Identificar clientes inadplacentes por perfil.</p>
+                <p><strong>90 dias:</strong> Apresentar economia gerada por melhor previsão de caixa. Solicitar cientista de dados para modelagem de inadimplência.</p>
+                <p><strong>ROI esperado:</strong> Redução de 20% na inadimplência = economia de R$ 500k/ano.</p>`
+            },
+            logistica: {
+                title: '🚚 Plano para Logística',
+                content: `<p><strong>30 dias:</strong> Dashboard de nível de serviço, lead time e ruptura. Mapear causas de atraso.</p>
+                <p><strong>60 dias:</strong> Análise de curva ABC de produtos. Identificar SKUs com giro zero.</p>
+                <p><strong>90 dias:</strong> Piloto de previsão de demanda para 10 SKUs críticos. Apresentar economia de ruptura à diretoria.</p>
+                <p><strong>ROI esperado:</strong> Redução de 25% em ruptura = aumento de R$ 1M em vendas/ano.</p>`
+            },
+            comercial: {
+                title: '💼 Plano para Comercial',
+                content: `<p><strong>30 dias:</strong> Dashboard de funil de vendas, conversão e ticket médio. Integrar CRM com dados de vendas.</p>
+                <p><strong>60 dias:</strong> Segmentação de clientes por valor (curva ABC). Identificar clientes em risco de churn.</p>
+                <p><strong>90 dias:</strong> Piloto de ação de retenção para clientes em risco. Apresentar ROI da ação à diretoria.</p>
+                <p><strong>ROI esperado:</strong> Retenção de 10% dos clientes em risco = R$ 800k em receita preservada/ano.</p>`
+            }
+        };
+
+        function selectArea(area) {
+            const planDiv = document.getElementById('areaPlan');
+            planDiv.innerHTML = `<h4>${areaPlans[area].title}</h4>${areaPlans[area].content}`;
+            planDiv.style.display = 'block';
+        }
+
+        // Team Builder
+        let hiredRoles = {};
+        const roleCosts = {
+            analista: { salary: 10000, name: 'Analista de BI' },
+            engenheiro: { salary: 15000, name: 'Engenheiro de Dados' },
+            cientista: { salary: 20000, name: 'Cientista de Dados' },
+            governanca: { salary: 16000, name: 'Especialista Governança' }
+        };
+
+        function toggleRole(role) {
+            document.getElementById(`role-${role}`).classList.toggle('expanded');
+        }
+
+        function hireRole(role) {
+            const card = document.getElementById(`role-${role}`);
+            const btn = card.querySelector('.hire-btn');
+            
+            if (hiredRoles[role]) {
+                delete hiredRoles[role];
+                card.classList.remove('hired');
+                btn.classList.remove('hired');
+                btn.textContent = 'Contratar';
+            } else {
+                hiredRoles[role] = true;
+                card.classList.add('hired');
+                btn.classList.add('hired');
+                btn.textContent = '✓ Contratado';
+            }
+            
+            updateTeamSummary();
+        }
+
+        function updateTeamSummary() {
+            const summary = document.getElementById('teamSummary');
+            const details = document.getElementById('teamDetails');
+            
+            if (Object.keys(hiredRoles).length === 0) {
+                summary.style.display = 'none';
+                return;
+            }
+            
+            summary.style.display = 'block';
+            
+            let totalMonthly = 0;
+            let totalAnnual = 0;
+            let html = '<ul style="margin-left: 1.5rem; color: var(--black);">';
+            
+            Object.keys(hiredRoles).forEach(role => {
+                const cost = roleCosts[role];
+                totalMonthly += cost.salary;
+                html += `<li><strong>${cost.name}:</strong> R$ ${cost.salary.toLocaleString('pt-BR')}/mês</li>`;
+            });
+            
+            html += '</ul>';
+            totalAnnual = totalMonthly * 12;
+            
+            html += `<p style="margin-top: 1rem;"><strong>Custo mensal da folha:</strong> R$ ${totalMonthly.toLocaleString('pt-BR')}</p>`;
+            html += `<p><strong>Custo anual (com encargos ~80%):</strong> R$ ${(totalAnnual * 1.8).toLocaleString('pt-BR', {maximumFractionDigits: 0})}</p>`;
+            
+            if (hiredRoles.cientista && !hiredRoles.engenheiro) {
+                html += '<p style="color: #D32F2F; margin-top: 1rem;"><strong>⚠️ Atenção:</strong> Você contratou Cientista sem Engenheiro. O Cientista vai passar o tempo limpando dados em vez de modelar.</p>';
+            }
+            
+            if (!hiredRoles.analista) {
+                html += '<p style="color: var(--orange); margin-top: 1rem;"><strong>⚠️ Atenção:</strong> Sem Analista de BI, quem vai entregar dashboards para a diretoria?</p>';
+            }
+            
+            if (Object.keys(hiredRoles).length >= 3) {
+                html += '<p style="color: #4CAF50; margin-top: 1rem;"><strong>✅ Time robusto!</strong> Você tem a estrutura completa para um programa data-driven sério.</p>';
+            }
+            
+            details.innerHTML = html;
+        }
+
+        // Copy code functionality
+        function copyCode(button) {
+            const codeBlock = button.previousElementSibling;
+            const codeText = codeBlock.innerText;
+            
+            navigator.clipboard.writeText(codeText).then(() => {
+                const originalText = button.innerText;
+                button.innerText = 'Copiado!';
+                button.style.background = '#4CAF50';
+                
+                setTimeout(() => {
+                    button.innerText = originalText;
+                    button.style.background = '';
+                }, 2000);
+            });
+        }
+
+        updateSlide();
+    </script>
+</body>
+</html>
