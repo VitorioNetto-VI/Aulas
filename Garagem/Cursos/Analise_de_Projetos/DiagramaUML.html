@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apresentação sobre Diagramas UML</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #2f4f4f; /* Verde musgo escuro */
+            color: #ffffff; /* Texto branco */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            width: 100%;
+            max-width: 960px;
+            height: 600px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            border-radius: 20px;
+            overflow: hidden;
+            background-color: #0a0a2a; /* Azul bem escuro, quase preto */
+            display: flex;
+            flex-direction: column;
+        }
+        .slide {
+            display: none;
+            flex-grow: 1;
+            padding: 4rem;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            overflow-y: auto;
+            background-color: #0a0a2a;
+        }
+        .slide.active {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            opacity: 1;
+        }
+        .slide h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: #ffff00;
+        }
+        .slide h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+            color: #ffff00;
+            text-align: left;
+        }
+        .slide p {
+            font-size: 1.125rem;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+            text-align: left;
+            color: #ffffff;
+        }
+        .slide .list-item {
+            font-size: 1.125rem;
+            margin-bottom: 0.5rem;
+            text-align: left;
+            color: #ffffff;
+        }
+        .navigation-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            background-color: #4a5568;
+            border-top: 2px solid #2d3748;
+        }
+        .nav-button {
+            padding: 0.75rem 2rem;
+            font-size: 1rem;
+            font-weight: 700;
+            color: white;
+            background-color: #000000;
+            border: none;
+            border-radius: 9999px;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+        .nav-button:hover {
+            background-color: #1a202c;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3);
+        }
+        .nav-button:disabled {
+            background-color: #2d3748;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Slide 1: Título -->
+        <div class="slide active" id="slide1">
+            <h1>Diagramas UML</h1>
+            
+        </div>
+
+        <!-- Slide 2: Visão Geral -->
+        <div class="slide" id="slide2">
+            <h1>Visão Geral</h1>
+            <h2>Diagramas Estruturais</h2>
+            <p>Fornecem uma visão estática dos componentes de um sistema e de suas relações.</p>
+            <h2>Diagramas Comportamentais</h2>
+            <p>Descrevem o comportamento de um sistema e como seus componentes interagem ao longo do tempo.</p>
+        </div>
+
+        <!-- Slide 3: Diagrama de Classe -->
+        <div class="slide" id="slide3">
+            <h1>Diagramas Estruturais</h1>
+            <h2>Diagrama de Classe</h2>
+            <p>Mostra as classes do sistema, seus atributos, operações e os relacionamentos entre elas (associação, herança, etc.).</p>
+        </div>
+
+        <!-- Slide 4: Diagrama de Pacote -->
+        <div class="slide" id="slide4">
+            <h1>Diagramas Estruturais</h1>
+            <h2>Diagrama de Pacote</h2>
+            <p>Organiza os elementos do modelo em grupos lógicos (pacotes), mostrando a organização geral do sistema.</p>
+        </div>
+
+        <!-- Slide 5: Diagrama de Objeto -->
+        <div class="slide" id="slide5">
+            <h1>Diagramas Estruturais</h1>
+            <h2>Diagrama de Objeto</h2>
+            <p>Apresenta instâncias de classes e instâncias de relacionamentos em um momento específico, fornecendo um instantâneo de um sistema em execução.</p>
+        </div>
+
+        <!-- Slide 6: Diagrama de Componente -->
+        <div class="slide" id="slide6">
+            <h1>Diagramas Estruturais</h1>
+            <h2>Diagrama de Componente</h2>
+            <p>Detalha os componentes físicos do sistema, como módulos e bibliotecas, e suas interdependências.</p>
+        </div>
+
+        <!-- Slide 7: Diagrama de Implantação -->
+        <div class="slide" id="slide7">
+            <h1>Diagramas Estruturais</h1>
+            <h2>Diagrama de Implantação</h2>
+            <p>Representa a disposição do software em um ambiente de hardware, mostrando a arquitetura física do sistema.</p>
+        </div>
+
+        <!-- Slide 8: Diagrama de Caso de Uso -->
+        <div class="slide" id="slide8">
+            <h1>Diagramas Comportamentais</h1>
+            <h2>Diagrama de Caso de Uso</h2>
+            <p>Ilustra as interações entre os usuários (atores) e o sistema, descrevendo os objetivos que os usuários pretendem alcançar através do sistema.</p>
+        </div>
+
+        <!-- Slide 9: Diagrama de Sequência -->
+        <div class="slide" id="slide9">
+            <h1>Diagramas Comportamentais</h1>
+            <h2>Diagrama de Sequência</h2>
+            <p>Detalha a ordem das interações entre os objetos, mostrando a sequência das mensagens trocadas entre eles ao longo do tempo.</p>
+        </div>
+
+        <!-- Slide 10: Diagrama de Estado -->
+        <div class="slide" id="slide10">
+            <h1>Diagramas Comportamentais</h1>
+            <h2>Diagrama de Estado</h2>
+            <p>Representa as diferentes mudanças de estado que um objeto pode experimentar em resposta a eventos específicos.</p>
+        </div>
+
+        <!-- Slide 11: Diagrama de Comunicação -->
+        <div class="slide" id="slide11">
+            <h1>Diagramas Comportamentais</h1>
+            <h2>Diagrama de Comunicação</h2>
+            <p>Mostra as interações entre os objetos através de um sistema de mensagens, destacando as mensagens transmitidas entre os objetos para alcançar um objetivo.</p>
+        </div>
+
+        <!-- Botões de Navegação -->
+        <div class="navigation-buttons">
+            <button id="prevBtn" class="nav-button" disabled>Anterior</button>
+            <button id="nextBtn" class="nav-button">Próximo</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const slides = document.querySelectorAll('.slide');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            let currentSlide = 0;
+
+            function showSlide(index) {
+                slides.forEach((slide, i) => {
+                    slide.classList.remove('active');
+                    if (i === index) {
+                        slide.classList.add('active');
+                    }
+                });
+                updateButtons(index);
+            }
+
+            function updateButtons(index) {
+                prevBtn.disabled = (index === 0);
+                nextBtn.disabled = (index === slides.length - 1);
+            }
+
+            nextBtn.addEventListener('click', () => {
+                if (currentSlide < slides.length - 1) {
+                    currentSlide++;
+                    showSlide(currentSlide);
+                }
+            });
+
+            prevBtn.addEventListener('click', () => {
+                if (currentSlide > 0) {
+                    currentSlide--;
+                    showSlide(currentSlide);
+                }
+            });
+
+            showSlide(currentSlide);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apresentação de Visão do Produto</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #2f4f4f; /* Verde musgo escuro */
+            color: #ffffff; /* Texto branco */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            width: 100%;
+            max-width: 960px;
+            height: 600px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            border-radius: 20px;
+            overflow: hidden;
+            background-color: #0a0a2a; /* Azul bem escuro, quase preto */
+            display: flex;
+            flex-direction: column;
+        }
+        .slide {
+            display: none;
+            flex-grow: 1;
+            padding: 4rem;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            overflow-y: auto;
+            background-color: #0a0a2a; /* Fundo dos slides azul escuro */
+        }
+        .slide.active {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            opacity: 1;
+        }
+        .slide h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: #ffff00; /* Título amarelo */
+        }
+        .slide h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+            color: #ffff00; /* Subtítulos amarelos */
+            text-align: left;
+        }
+        .slide p {
+            font-size: 1.125rem;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+            text-align: left;
+            color: #ffffff; /* Texto branco */
+        }
+        .slide .list-item {
+            font-size: 1.125rem;
+            margin-bottom: 0.5rem;
+            text-align: left;
+            color: #ffffff; /* Texto branco */
+        }
+        .navigation-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            background-color: #4a5568; /* Cinza para o container de botões */
+            border-top: 2px solid #2d3748;
+        }
+        .nav-button {
+            padding: 0.75rem 2rem;
+            font-size: 1rem;
+            font-weight: 700;
+            color: white;
+            background-color: #000000; /* Botões pretos */
+            border: none;
+            border-radius: 9999px;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+        .nav-button:hover {
+            background-color: #1a202c; /* Levemente mais claro no hover */
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3);
+        }
+        .nav-button:disabled {
+            background-color: #2d3748;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Slide 1: Título e Introdução -->
+        <div class="slide active" id="slide1">
+            <h1>Documento de Visão</h1>
+            <p class="text-center mt-4">
+                Um documento de visão define o escopo e o propósito de um projeto, produto ou programa. Ele estabelece expectativas e reduz riscos, fornecendo uma visão clara do problema e da solução proposta.
+            </p>
+        </div>
+
+        <!-- Slide 2: Posicionamento -->
+        <div class="slide" id="slide2">
+            <h1>Posicionamento</h1>
+            <h2>Oportunidade de Negócio</h2>
+            <p>Descreva brevemente a oportunidade de negócio abordada neste projeto.</p>
+            <h2>Declaração do Problema</h2>
+            <p>
+                O problema de (descreva o problema) afeta (as partes interessadas afetadas pelo problema). O impacto é (qual é o impacto). Uma solução bem-sucedida incluiria (liste os benefícios).
+            </p>
+            <h2>Declaração de Posicionamento</h2>
+            <p>
+                Para o (cliente-alvo), que (necessidade). O (nome do produto) é um (categoria do produto) que (principal benefício). Ao contrário de (alternativa), nosso produto (diferenciação).
+            </p>
+        </div>
+
+        <!-- Slide 3: Descrições das Partes Interessadas e dos Usuários -->
+        <div class="slide" id="slide3"><br /><br /><br />
+            <h1>Partes Interessadas e Usuários</h1>
+            <h2>Dados Demográficos do Mercado</h2>
+            <p>Resumo dos principais dados demográficos que motivam as decisões sobre o produto.</p>
+            <h2>Resumo das Partes Interessadas</h2>
+            <p>Lista todas as partes interessadas identificadas, sua representação e sua função no projeto.</p>
+            <h2>Resumo do Usuário</h2>
+            <p>Lista os tipos de usuários, suas descrições e o relacionamento com o sistema em desenvolvimento.</p>
+            <h2>Ambiente do Usuário</h2>
+            <p>Detalhes sobre o ambiente de trabalho e os sistemas atuais.</p>
+        </div>
+        
+        <!-- Slide 4: Visão Geral do Produto -->
+        <div class="slide" id="slide4">
+            <h1>Visão Geral do Produto</h1>
+            <h2>Perspectiva do Produto</h2>
+            <p>Posicione o produto em relação a outros produtos ou sistemas no ambiente do usuário.</p>
+            <h2>Resumo das Funcionalidades</h2>
+            <p>
+                Lista os principais benefícios e funcionalidades do produto. Exemplo: "Novos funcionários de suporte podem aprender rapidamente a usar o produto" com o recurso "Uma base de conhecimento auxilia a equipe...".
+            </p>
+            <h2>Suposições e Dependências</h2>
+            <p>Fatores que afetam os recursos e que, se alterados, podem mudar a visão do projeto.</p>
+        </div>
+
+        <!-- Slide 5: Características do Produto e Restrições -->
+        <div class="slide" id="slide5">
+            <h1>Características e Restrições</h1>
+            <h2>Características do Produto</h2>
+            <p>Liste e descreva brevemente as capacidades de alto nível do sistema (cerca de 25 a 99 funcionalidades).</p>
+            <h2>Restrições</h2>
+            <p>Restrições de design, externas, operacionais ou regulatórias.</p>
+            <h2>Faixas de Qualidade</h2>
+            <p>Defina os intervalos de qualidade para desempenho, robustez, usabilidade, etc.</p>
+        </div>
+
+        <!-- Slide 6: Outros Requisitos do Produto -->
+        <div class="slide" id="slide6">
+            <h1>Outros Requisitos do Produto</h1>
+            <ul>
+                <li class="list-item"><strong>Normas Aplicáveis:</strong> Padrões legais, de comunicação e de qualidade.</li>
+                <li class="list-item"><strong>Requisitos do Sistema:</strong> Sistemas operacionais e configurações de hardware.</li>
+                <li class="list-item"><strong>Requisitos de Desempenho:</strong> Tempos de resposta e capacidade.</li>
+                <li class="list-item"><strong>Requisitos Ambientais:</strong> Condições de uso, tratamento de erros e recuperação.</li>
+            </ul>
+        </div>
+        
+        <!-- Slide 7: Requisitos de Documentação -->
+        <div class="slide" id="slide7">
+            <h1>Requisitos de Documentação</h1>
+            <ul>
+                <li class="list-item"><strong>Notas de Lançamento:</strong> "O que há de novo", compatibilidade, etc.</li>
+                <li class="list-item"><strong>Ajuda Online:</strong> Sistema de ajuda para o usuário.</li>
+                <li class="list-item"><strong>Guias de Instalação:</strong> Instruções de instalação e configuração.</li>
+                <li class="list-item"><strong>Rotulagem e Embalagem:</strong> Padrões de logotipos e ícones.</li>
+            </ul>
+        </div>
+
+        <!-- Slide 8: Atributos de Recursos (Apêndice 1) -->
+        <div class="slide" id="slide8">
+            <h1>Atributos de Recursos</h1>
+            <h2>Atributos para gerenciamento e priorização:</h2>
+            <ul>
+                <li class="list-item"><strong>Status:</strong> Proposto, Aprovado, Incorporado.</li>
+                <li class="list-item"><strong>Benefício:</strong> Crítico, Importante, Útil.</li>
+                <li class="list-item"><strong>Esforço:</strong> Estimativa de tempo e recursos.</li>
+                <li class="list-item"><strong>Risco:</strong> Alto, Médio, Baixo.</li>
+                <li class="list-item"><strong>Lançamento de Destino:</strong> Versão na qual o recurso será implementado.</li>
+            </ul>
+        </div>
+
+
+        <!-- Botões de Navegação -->
+        <div class="navigation-buttons">
+            <button id="prevBtn" class="nav-button" disabled>Anterior</button>
+            <button id="nextBtn" class="nav-button">Próximo</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const slides = document.querySelectorAll('.slide');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            let currentSlide = 0;
+
+            function showSlide(index) {
+                slides.forEach((slide, i) => {
+                    slide.classList.remove('active');
+                    if (i === index) {
+                        slide.classList.add('active');
+                    }
+                });
+                updateButtons(index);
+            }
+
+            function updateButtons(index) {
+                prevBtn.disabled = (index === 0);
+                nextBtn.disabled = (index === slides.length - 1);
+            }
+
+            nextBtn.addEventListener('click', () => {
+                if (currentSlide < slides.length - 1) {
+                    currentSlide++;
+                    showSlide(currentSlide);
+                }
+            });
+
+            prevBtn.addEventListener('click', () => {
+                if (currentSlide > 0) {
+                    currentSlide--;
+                    showSlide(currentSlide);
+                }
+            });
+
+            // Initial state
+            showSlide(currentSlide);
+        });
+    </script>
+</body>
+</html>
