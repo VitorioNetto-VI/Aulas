@@ -1,0 +1,1735 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulado Gamificado - Sistemas Distribuídos</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/press-start-2p@5.0.0/index.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.0/index.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+  :root {
+    --primary: #8b5cf6;
+    --secondary: #ec4899;
+    --success: #10b981;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --dark: #0f0f23;
+    --darker: #070716;
+  }
+  
+  * { font-family: 'Inter', sans-serif; }
+  
+  body {
+    background: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 50%, #2d1b4e 100%);
+    min-height: 100vh;
+    color: white;
+    overflow-x: hidden;
+  }
+  
+  .pixel-font { font-family: 'Press Start 2P', cursive; }
+  
+  .glass {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .neon-text {
+    text-shadow: 0 0 10px rgba(139, 92, 246, 0.8), 0 0 20px rgba(139, 92, 246, 0.5);
+  }
+  
+  .neon-pink {
+    text-shadow: 0 0 10px rgba(236, 72, 153, 0.8), 0 0 20px rgba(236, 72, 153, 0.5);
+  }
+  
+  .glow-purple {
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.5), 0 0 40px rgba(139, 92, 246, 0.3);
+  }
+  
+  .glow-pink {
+    box-shadow: 0 0 20px rgba(236, 72, 153, 0.5), 0 0 40px rgba(236, 72, 153, 0.3);
+  }
+  
+  .glow-green {
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.5), 0 0 40px rgba(16, 185, 129, 0.3);
+  }
+  
+  .glow-red {
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.5), 0 0 40px rgba(239, 68, 68, 0.3);
+  }
+  
+  .glow-gold {
+    box-shadow: 0 0 25px rgba(251, 191, 36, 0.6), 0 0 50px rgba(251, 191, 36, 0.3);
+  }
+  
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+  }
+  
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 20px rgba(139, 92, 246, 0.5); }
+    50% { box-shadow: 0 0 40px rgba(139, 92, 246, 0.9), 0 0 60px rgba(236, 72, 153, 0.5); }
+  }
+  
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    75% { transform: translateX(10px); }
+  }
+  
+  @keyframes bounce-in {
+    0% { transform: scale(0); opacity: 0; }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  
+  @keyframes confetti-fall {
+    0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+  }
+  
+  @keyframes xp-pop {
+    0% { transform: scale(0) translateY(0); opacity: 0; }
+    50% { transform: scale(1.5) translateY(-20px); opacity: 1; }
+    100% { transform: scale(1) translateY(-60px); opacity: 0; }
+  }
+  
+  @keyframes star-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  
+  @keyframes glow-pulse-gold {
+    0%, 100% { box-shadow: 0 0 25px rgba(251, 191, 36, 0.6), 0 0 50px rgba(251, 191, 36, 0.3); }
+    50% { box-shadow: 0 0 40px rgba(251, 191, 36, 0.9), 0 0 80px rgba(251, 191, 36, 0.5); }
+  }
+  
+  @keyframes trophy-bounce {
+    0%, 100% { transform: translateY(0) rotate(-5deg); }
+    50% { transform: translateY(-15px) rotate(5deg); }
+  }
+  
+  @keyframes shine {
+    0% { background-position: -200% center; }
+    100% { background-position: 200% center; }
+  }
+  
+  @keyframes card-flip-in {
+    0% { transform: perspective(1000px) rotateY(-90deg); opacity: 0; }
+    100% { transform: perspective(1000px) rotateY(0); opacity: 1; }
+  }
+  
+  @keyframes fadeOut {
+    to { opacity: 0; transform: translateY(-20px); }
+  }
+  
+  .animate-float { animation: float 3s ease-in-out infinite; }
+  .animate-pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
+  .animate-slide-in { animation: slideIn 0.5s ease-out; }
+  .animate-shake { animation: shake 0.5s; }
+  .animate-bounce-in { animation: bounce-in 0.6s ease-out; }
+  .animate-star-spin { animation: star-spin 10s linear infinite; }
+  .animate-glow-gold { animation: glow-pulse-gold 2s ease-in-out infinite; }
+  .animate-trophy { animation: trophy-bounce 2s ease-in-out infinite; }
+  .animate-card-flip { animation: card-flip-in 0.8s ease-out; }
+  
+  .shine-text {
+    background: linear-gradient(90deg, #fbbf24, #fff, #fbbf24);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shine 3s linear infinite;
+  }
+  
+  .option-btn {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .option-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    transition: left 0.5s;
+  }
+  
+  .option-btn:hover::before { left: 100%; }
+  .option-btn:hover { transform: translateX(8px); }
+  
+  .option-btn.selected {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(236, 72, 153, 0.3));
+    border-color: #8b5cf6;
+  }
+  
+  .option-btn.correct {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.3), rgba(16, 185, 129, 0.1));
+    border-color: #10b981;
+    animation: bounce-in 0.5s;
+  }
+  
+  .option-btn.incorrect {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.3), rgba(239, 68, 68, 0.1));
+    border-color: #ef4444;
+    animation: shake 0.5s;
+  }
+  
+  .xp-bar {
+    background: linear-gradient(90deg, #8b5cf6, #ec4899, #f59e0b);
+    background-size: 200% 100%;
+    animation: gradient-shift 3s ease infinite;
+  }
+  
+  @keyframes gradient-shift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+  
+  .star-bg {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+  
+  .star {
+    position: absolute;
+    background: white;
+    border-radius: 50%;
+    animation: twinkle 3s infinite;
+  }
+  
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.2; }
+    50% { opacity: 1; }
+  }
+  
+  .confetti {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    animation: confetti-fall 3s linear forwards;
+    z-index: 100;
+  }
+  
+  .xp-popup {
+    position: absolute;
+    font-weight: bold;
+    color: #fbbf24;
+    font-size: 1.5rem;
+    pointer-events: none;
+    animation: xp-pop 1.5s ease-out forwards;
+    text-shadow: 0 0 10px rgba(251, 191, 36, 0.8);
+  }
+  
+  .badge {
+    transition: all 0.3s;
+  }
+  
+  .badge:hover {
+    transform: scale(1.1) rotate(5deg);
+  }
+  
+  .badge.locked {
+    filter: grayscale(100%) opacity(0.4);
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar { width: 6px; }
+  .scrollbar-thin::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
+  .scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.5); border-radius: 3px; }
+  
+  .timer-ring {
+    transition: stroke-dashoffset 1s linear;
+  }
+  
+  .achievement-toast {
+    animation: slideIn 0.5s ease-out, fadeOut 0.5s ease-in 3.5s forwards;
+  }
+  
+  .level-badge {
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    box-shadow: 0 0 20px rgba(251, 191, 36, 0.6);
+  }
+  
+  .reward-card {
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.1), rgba(236, 72, 153, 0.1));
+    border: 2px solid rgba(251, 191, 36, 0.4);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .reward-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(251, 191, 36, 0.1), transparent);
+    animation: shine 4s linear infinite;
+  }
+  
+  .reward-stat {
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(255,255,255,0.1);
+    transition: all 0.3s;
+  }
+  
+  .reward-stat:hover {
+    transform: translateY(-4px);
+    border-color: rgba(251, 191, 36, 0.5);
+  }
+  
+  .phase-badge {
+    background: linear-gradient(135deg, #8b5cf6, #ec4899);
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  
+  .phase-badge.discursive {
+    background: linear-gradient(135deg, #f59e0b, #ef4444);
+  }
+  
+  .discursive-view-card {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(236, 72, 153, 0.08));
+    border: 2px solid rgba(139, 92, 246, 0.3);
+  }
+  
+  .model-answer-card {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(59, 130, 246, 0.1));
+    border: 1px solid rgba(16, 185, 129, 0.3);
+  }
+  
+  .keyword-chip {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    background: rgba(139, 92, 246, 0.2);
+    border: 1px solid rgba(139, 92, 246, 0.4);
+    color: #c4b5fd;
+    margin: 2px;
+  }
+</style>
+</head>
+<body>
+
+<div class="star-bg" id="starBg"></div>
+
+<!-- TELA DE BOAS-VINDAS -->
+<div id="welcomeScreen" class="min-h-screen flex items-center justify-center p-4 relative z-10">
+  <div class="glass rounded-3xl p-8 md:p-12 max-w-2xl w-full animate-slide-in">
+    <div class="text-center mb-8">
+      <div class="inline-block animate-float mb-6">
+        <div class="text-7xl mb-4">🎮</div>
+      </div>
+      <h1 class="pixel-font text-2xl md:text-4xl neon-text mb-4">SIMULADO RPG</h1>
+      <h2 class="text-xl md:text-2xl font-bold text-pink-400 neon-pink mb-2">Sistemas Distribuídos</h2>
+      <p class="text-gray-300 mt-4">Embarque nesta jornada épica pelo universo dos sistemas distribuídos!</p>
+    </div>
+    
+    <div class="space-y-4 mb-8">
+      <div class="glass rounded-xl p-4 flex items-center gap-4">
+        <div class="text-3xl">⚔️</div>
+        <div>
+          <h3 class="font-bold text-purple-300">16 Missões Objetivas</h3>
+          <p class="text-sm text-gray-400">Responda e ganhe XP, pontos e conquistas</p>
+        </div>
+      </div>
+      <div class="glass rounded-xl p-4 flex items-center gap-4">
+        <div class="text-3xl">🎁</div>
+        <div>
+          <h3 class="font-bold text-pink-300">Recompensa ao Completar</h3>
+          <p class="text-sm text-gray-400">Desbloqueie bônus e material de estudo</p>
+        </div>
+      </div>
+      <div class="glass rounded-xl p-4 flex items-center gap-4">
+        <div class="text-3xl">📖</div>
+        <div>
+          <h3 class="font-bold text-yellow-300">4 Questões Discursivas</h3>
+          <p class="text-sm text-gray-400">Visualize o gabarito comentado como material de revisão</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="mb-6">
+      <label class="block text-sm font-bold text-purple-300 mb-2">
+        <i class="fas fa-user-astronaut mr-2"></i>Nome do Jogador
+      </label>
+      <input type="text" id="playerName" placeholder="Digite seu nome de guerreiro..." 
+             class="w-full px-4 py-3 rounded-xl bg-black/40 border-2 border-purple-500/50 text-white placeholder-gray-500 focus:outline-none focus:border-purple-400 focus:shadow-[0_0_20px_rgba(139,92,246,0.5)] transition-all">
+    </div>
+    
+    <button onclick="startGame()" class="w-full py-4 rounded-xl font-bold text-lg bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 transition-all transform hover:scale-105 animate-pulse-glow">
+      <i class="fas fa-play mr-2"></i>INICIAR JORNADA
+    </button>
+  </div>
+</div>
+
+<!-- TELA DO JOGO (OBJETIVAS) -->
+<div id="gameScreen" class="hidden min-h-screen p-4 relative z-10">
+  <div class="max-w-5xl mx-auto">
+    
+    <!-- HUD Superior -->
+    <div class="glass rounded-2xl p-4 mb-4 animate-slide-in">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <div class="level-badge w-14 h-14 rounded-full flex items-center justify-center font-bold text-black text-lg">
+            <span id="playerLevel">1</span>
+          </div>
+          <div>
+            <div class="font-bold text-sm" id="playerNameDisplay">Jogador</div>
+            <div class="text-xs text-gray-400">Nível <span id="levelTitle">Aprendiz</span></div>
+          </div>
+        </div>
+        
+        <div class="flex-1 min-w-[200px] max-w-md">
+          <div class="flex justify-between text-xs mb-1">
+            <span class="text-yellow-400 font-bold"><i class="fas fa-star"></i> XP</span>
+            <span><span id="currentXP">0</span>/<span id="nextLevelXP">100</span></span>
+          </div>
+          <div class="h-3 bg-black/40 rounded-full overflow-hidden">
+            <div id="xpBar" class="xp-bar h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+          </div>
+        </div>
+        
+        <div class="flex items-center gap-4">
+          <div class="text-center">
+            <div class="text-2xl font-bold text-green-400" id="scoreDisplay">0</div>
+            <div class="text-xs text-gray-400">Pontos</div>
+          </div>
+          <div class="text-center">
+            <div class="text-2xl font-bold text-orange-400" id="streakDisplay">0 🔥</div>
+            <div class="text-xs text-gray-400">Sequência</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Indicador de Fase -->
+      <div class="mt-3 flex items-center gap-2">
+        <span id="phaseBadge" class="phase-badge">Fase 1 - Objetivas</span>
+        <span class="text-xs text-gray-400" id="phaseProgress">Questão 1 de 16</span>
+      </div>
+      
+      <!-- Progresso das questões -->
+      <div class="mt-3 flex gap-1 flex-wrap">
+        <div id="questionDots" class="flex gap-1 flex-wrap w-full"></div>
+      </div>
+    </div>
+    
+    <!-- Card da Questão -->
+    <div id="questionCard" class="glass rounded-2xl p-6 md:p-8 animate-slide-in relative">
+      
+      <!-- Cabeçalho da questão -->
+      <div class="flex items-center justify-between mb-6 flex-wrap gap-4">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center font-bold text-lg">
+            <span id="questionNumber">1</span>
+          </div>
+          <div>
+            <div class="text-xs text-gray-400">QUESTÃO</div>
+            <div class="font-bold"><span id="questionType">Múltipla Escolha</span></div>
+          </div>
+        </div>
+        
+        <div id="timerContainer" class="flex items-center gap-2">
+          <svg width="50" height="50" class="transform -rotate-90">
+            <circle cx="25" cy="25" r="20" stroke="rgba(255,255,255,0.1)" stroke-width="4" fill="none"/>
+            <circle id="timerCircle" cx="25" cy="25" r="20" stroke="#8b5cf6" stroke-width="4" fill="none"
+                    stroke-dasharray="125.6" stroke-dashoffset="0" class="timer-ring"/>
+          </svg>
+          <div class="text-2xl font-bold" id="timerDisplay">30</div>
+        </div>
+      </div>
+      
+      <!-- Texto da questão -->
+      <div class="mb-6">
+        <p id="questionText" class="text-lg leading-relaxed text-gray-100"></p>
+      </div>
+      
+      <!-- Alternativas -->
+      <div id="optionsContainer" class="space-y-3 mb-6"></div>
+      
+      <!-- Botões -->
+      <div class="flex gap-3">
+        <button id="hintBtn" onclick="useHint()" class="px-4 py-3 rounded-xl bg-yellow-600/30 border border-yellow-500/50 hover:bg-yellow-600/50 transition-all">
+          <i class="fas fa-lightbulb mr-2"></i><span id="hintCount">3</span> Dicas
+        </button>
+        <button id="confirmBtn" onclick="confirmAnswer()" class="flex-1 py-3 rounded-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 transition-all transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+          <i class="fas fa-check mr-2"></i>CONFIRMAR RESPOSTA
+        </button>
+      </div>
+      
+      <!-- Feedback -->
+      <div id="feedbackContainer" class="hidden mt-6"></div>
+      
+      <!-- Botão próxima -->
+      <button id="nextBtn" onclick="nextQuestion()" class="hidden w-full mt-4 py-3 rounded-xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 transition-all">
+        PRÓXIMA MISSÃO <i class="fas fa-arrow-right ml-2"></i>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- TELA DE RECOMPENSA -->
+<div id="rewardScreen" class="hidden min-h-screen p-4 relative z-10 flex items-center justify-center">
+  <div class="max-w-3xl w-full">
+    <div class="reward-card rounded-3xl p-8 md:p-10 animate-card-flip relative">
+      
+      <div class="text-center mb-8">
+        <div class="text-8xl mb-4 animate-trophy inline-block">🏆</div>
+        <div class="text-xs font-bold text-yellow-400 tracking-widest mb-2">FASE 1 CONCLUÍDA</div>
+        <h1 class="pixel-font text-2xl md:text-3xl shine-text mb-2">QUESTÕES OBJETIVAS!</h1>
+        <p class="text-gray-300">Você provou seu conhecimento. Veja suas recompensas:</p>
+      </div>
+      
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+        <div class="reward-stat rounded-xl p-4 text-center">
+          <div class="text-3xl font-bold text-green-400" id="rewardCorrect">0</div>
+          <div class="text-xs text-gray-400 mt-1"><i class="fas fa-check-circle mr-1"></i>ACERTOS</div>
+        </div>
+        <div class="reward-stat rounded-xl p-4 text-center">
+          <div class="text-3xl font-bold text-red-400" id="rewardWrong">0</div>
+          <div class="text-xs text-gray-400 mt-1"><i class="fas fa-times-circle mr-1"></i>ERROS</div>
+        </div>
+        <div class="reward-stat rounded-xl p-4 text-center">
+          <div class="text-3xl font-bold text-yellow-400" id="rewardAccuracy">0%</div>
+          <div class="text-xs text-gray-400 mt-1"><i class="fas fa-bullseye mr-1"></i>PRECISÃO</div>
+        </div>
+        <div class="reward-stat rounded-xl p-4 text-center">
+          <div class="text-3xl font-bold text-orange-400" id="rewardStreak">0</div>
+          <div class="text-xs text-gray-400 mt-1"><i class="fas fa-fire mr-1"></i>MELHOR SEQ.</div>
+        </div>
+      </div>
+      
+      <div class="glass rounded-2xl p-5 mb-6 border border-yellow-500/30">
+        <h3 class="font-bold text-yellow-400 mb-4 text-center">
+          <i class="fas fa-gift mr-2"></i>RECOMPENSAS DESBLOQUEADAS
+        </h3>
+        <div id="rewardList" class="space-y-3"></div>
+      </div>
+      
+      <div class="glass rounded-2xl p-5 mb-6 animate-glow-gold border border-yellow-500/50">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="text-4xl">💎</div>
+            <div>
+              <div class="text-xs text-yellow-400 font-bold">BÔNUS DE CONCLUSÃO</div>
+              <div class="text-sm text-gray-300" id="bonusDescription">Completou a Fase 1!</div>
+            </div>
+          </div>
+          <div class="text-3xl font-bold text-yellow-400" id="bonusXP">+0 XP</div>
+        </div>
+      </div>
+      
+      <div class="mb-6">
+        <div class="flex justify-between text-xs mb-2">
+          <span class="text-purple-300 font-bold">PROGRESSO GERAL</span>
+          <span class="text-gray-400">16/20 missões</span>
+        </div>
+        <div class="h-4 bg-black/40 rounded-full overflow-hidden">
+          <div class="h-full rounded-full bg-gradient-to-r from-purple-600 via-pink-600 to-yellow-500 transition-all duration-1000" style="width: 80%"></div>
+        </div>
+        <div class="flex justify-between text-xs mt-2">
+          <span class="text-green-400">✓ Fase 1</span>
+          <span class="text-yellow-400 font-bold">→ Fase 2: Gabarito Discursivo</span>
+        </div>
+      </div>
+      
+      <button onclick="startPhase2()" class="w-full py-4 rounded-xl font-bold text-lg bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-500 hover:to-orange-500 transition-all transform hover:scale-105 animate-pulse-glow">
+        <i class="fas fa-book-open mr-2"></i>VER GABARITO DAS DISCURSIVAS
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- TELA DE VISUALIZAÇÃO DAS DISCURSIVAS (APENAS LEITURA) -->
+<div id="discursiveViewScreen" class="hidden min-h-screen p-4 relative z-10">
+  <div class="max-w-4xl mx-auto">
+    
+    <!-- Header -->
+    <div class="glass rounded-2xl p-5 mb-4 animate-slide-in">
+      <div class="flex items-center justify-between flex-wrap gap-3">
+        <div class="flex items-center gap-3">
+          <div class="text-4xl">📖</div>
+          <div>
+            <div class="text-xs text-yellow-400 font-bold tracking-widest">FASE 2 - MATERIAL DE ESTUDO</div>
+            <h2 class="text-xl font-bold neon-text">Questões Discursivas - Gabarito</h2>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="prevDiscursive()" id="prevDiscBtn" class="px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20 transition-all disabled:opacity-30" disabled>
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          <div class="px-3 py-2 rounded-lg bg-black/30 text-sm font-bold">
+            <span id="discCurrent">1</span>/<span id="discTotal">4</span>
+          </div>
+          <button onclick="nextDiscursive()" id="nextDiscBtn" class="px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20 transition-all">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Progresso discursivas -->
+      <div class="mt-3 flex gap-2">
+        <div id="discDots" class="flex gap-2 w-full"></div>
+      </div>
+    </div>
+    
+    <!-- Card da Discursiva -->
+    <div id="discCard" class="discursive-view-card rounded-2xl p-6 md:p-8 animate-slide-in">
+      
+      <!-- Cabeçalho -->
+      <div class="flex items-center gap-3 mb-5">
+        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-500 to-orange-600 flex items-center justify-center font-bold text-lg">
+          <i class="fas fa-pen-fancy"></i>
+        </div>
+        <div>
+          <div class="text-xs text-gray-400">QUESTÃO DISCURSIVA</div>
+          <div class="font-bold text-yellow-300" id="discTitle">Questão 17</div>
+        </div>
+      </div>
+      
+      <!-- Situação-problema -->
+      <div class="mb-5">
+        <h4 class="text-sm font-bold text-purple-300 mb-2"><i class="fas fa-bullseye mr-2"></i>SITUAÇÃO-PROBLEMA</h4>
+        <p id="discSituation" class="text-gray-200 leading-relaxed"></p>
+      </div>
+      
+      <!-- Textos motivadores -->
+      <div class="glass rounded-xl p-4 mb-5 bg-blue-500/10 border-blue-500/30">
+        <h4 class="font-bold text-blue-300 mb-2"><i class="fas fa-book-open mr-2"></i>TEXTOS MOTIVADORES</h4>
+        <div id="discMotivational" class="text-sm text-gray-300 space-y-2"></div>
+      </div>
+      
+      <!-- Enunciado -->
+      <div class="glass rounded-xl p-4 mb-5 bg-purple-500/10 border-purple-500/30">
+        <h4 class="font-bold text-purple-300 mb-2"><i class="fas fa-question-circle mr-2"></i>ENUNCIADO</h4>
+        <div id="discPrompt" class="text-gray-200 leading-relaxed whitespace-pre-line"></div>
+      </div>
+      
+      <!-- Palavras-chave esperadas -->
+      <div class="mb-5">
+        <h4 class="text-sm font-bold text-pink-300 mb-2"><i class="fas fa-key mr-2"></i>PALAVRAS-CHAVE ESPERADAS</h4>
+        <div id="discKeywords" class="flex flex-wrap"></div>
+      </div>
+      
+      <!-- Resposta modelo -->
+      <div class="model-answer-card rounded-xl p-5">
+        <h4 class="font-bold text-green-300 mb-3 flex items-center gap-2">
+          <i class="fas fa-check-circle"></i>RESPOSTA MODELO (GABARITO)
+        </h4>
+        <div id="discModelAnswer" class="text-gray-200 leading-relaxed whitespace-pre-line text-sm"></div>
+      </div>
+      
+      <!-- Botões de navegação -->
+      <div class="flex gap-3 mt-6">
+        <button onclick="prevDiscursive()" id="prevBtn2" class="flex-1 py-3 rounded-xl font-bold bg-white/10 hover:bg-white/20 transition-all disabled:opacity-30" disabled>
+          <i class="fas fa-chevron-left mr-2"></i>ANTERIOR
+        </button>
+        <button onclick="nextDiscursive()" id="nextBtn2" class="flex-1 py-3 rounded-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 transition-all">
+          PRÓXIMA<i class="fas fa-chevron-right ml-2"></i>
+        </button>
+        <button onclick="finishGame()" id="finishBtn" class="hidden flex-1 py-3 rounded-xl font-bold bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-500 hover:to-orange-500 transition-all animate-pulse-glow">
+          <i class="fas fa-trophy mr-2"></i>FINALIZAR JOGO
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TELA FINAL -->
+<div id="endScreen" class="hidden min-h-screen p-4 relative z-10 flex items-center justify-center">
+  <div class="glass rounded-3xl p-8 max-w-3xl w-full animate-slide-in">
+    <div class="text-center mb-8">
+      <div class="text-7xl mb-4 animate-float" id="endEmoji">🏆</div>
+      <h1 class="pixel-font text-3xl neon-text mb-2">JORNADA COMPLETA!</h1>
+      <p class="text-xl text-pink-400 neon-pink" id="endTitle">Parabéns, Guerreiro!</p>
+    </div>
+    
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <div class="glass rounded-xl p-4 text-center">
+        <div class="text-3xl font-bold text-green-400" id="finalScore">0</div>
+        <div class="text-xs text-gray-400 mt-1">PONTOS</div>
+      </div>
+      <div class="glass rounded-xl p-4 text-center">
+        <div class="text-3xl font-bold text-purple-400" id="finalLevel">1</div>
+        <div class="text-xs text-gray-400 mt-1">NÍVEL FINAL</div>
+      </div>
+      <div class="glass rounded-xl p-4 text-center">
+        <div class="text-3xl font-bold text-yellow-400" id="finalAccuracy">0%</div>
+        <div class="text-xs text-gray-400 mt-1">ACERTOS</div>
+      </div>
+      <div class="glass rounded-xl p-4 text-center">
+        <div class="text-3xl font-bold text-orange-400" id="finalStreak">0</div>
+        <div class="text-xs text-gray-400 mt-1">MAIOR SEQUÊNCIA</div>
+      </div>
+    </div>
+    
+    <div class="mb-8">
+      <h3 class="font-bold text-lg mb-4 text-center"><i class="fas fa-trophy text-yellow-400 mr-2"></i>Conquistas Desbloqueadas</h3>
+      <div id="achievementsList" class="grid grid-cols-2 md:grid-cols-4 gap-3"></div>
+    </div>
+    
+    <div class="glass rounded-xl p-6 mb-6 text-center">
+      <div class="text-sm text-gray-400 mb-2">SUA CLASSIFICAÇÃO</div>
+      <div class="text-3xl font-bold neon-text" id="finalRank">-</div>
+    </div>
+    
+    <div class="flex gap-3">
+      <button onclick="restartGame()" class="flex-1 py-3 rounded-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 transition-all">
+        <i class="fas fa-redo mr-2"></i>JOGAR NOVAMENTE
+      </button>
+      <button onclick="showReview()" class="flex-1 py-3 rounded-xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 transition-all">
+        <i class="fas fa-eye mr-2"></i>VER GABARITO COMPLETO
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- TELA DE REVISÃO COMPLETA -->
+<div id="reviewScreen" class="hidden min-h-screen p-4 relative z-10">
+  <div class="max-w-4xl mx-auto">
+    <div class="glass rounded-2xl p-6 mb-4 flex items-center justify-between">
+      <h2 class="text-2xl font-bold neon-text"><i class="fas fa-book mr-2"></i>Gabarito Completo</h2>
+      <button onclick="backToEnd()" class="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 transition-all">
+        <i class="fas fa-arrow-left mr-2"></i>Voltar
+      </button>
+    </div>
+    <div id="reviewContent" class="space-y-4"></div>
+  </div>
+</div>
+
+<!-- Toast de conquista -->
+<div id="achievementToast" class="hidden fixed top-4 right-4 z-50 glass rounded-xl p-4 border-2 border-yellow-400 achievement-toast max-w-sm">
+  <div class="flex items-center gap-3">
+    <div class="text-4xl" id="toastIcon">🏆</div>
+    <div>
+      <div class="text-xs text-yellow-400 font-bold">CONQUISTA DESBLOQUEADA!</div>
+      <div class="font-bold" id="toastTitle">-</div>
+      <div class="text-xs text-gray-400" id="toastDesc">-</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============ DADOS DAS QUESTÕES ============
+const questions = [
+  {
+    type: 'multiple',
+    text: 'Em sistemas distribuídos, a arquitetura frequentemente utiliza nós específicos para orquestrar o comportamento do ambiente. Considerando o conceito de "Manager" nesse contexto, assinale a alternativa que corretamente define sua principal função.',
+    options: [
+      'Atuar exclusivamente como um repositório de dados persistentes.',
+      'Gerenciar e coordenar as operações do sistema distribuído.',
+      'Substituir a necessidade de protocolos de comunicação de rede.',
+      'Centralizar todo o processamento em um único hardware principal.'
+    ],
+    correct: 1,
+    explanation: 'O Manager tem como principal função gerenciar e coordenar as operações do sistema distribuído, orquestrando o comportamento dos demais nós.',
+    hint: 'Pense em quem "gerencia" algo...'
+  },
+  {
+    type: 'multiple',
+    text: 'O modelo Master-Worker é amplamente utilizado para paralelismo e distribuição de tarefas. Nesse modelo, qual é o papel fundamental do nó designado como Master?',
+    options: [
+      'Armazenar os logs de todas as transações do sistema.',
+      'Coordenar o trabalho e distribuir tarefas para os nós Workers.',
+      'Processar todas as requisições externas diretamente, sem repassar.',
+      'Servir como um nó de backup exclusivo para os Workers.'
+    ],
+    correct: 1,
+    explanation: 'No modelo Master-Worker, o Master coordena o trabalho e distribui tarefas para os Workers, que executam o processamento.',
+    hint: 'Master = Mestre, que comanda os outros...'
+  },
+  {
+    type: 'multiple',
+    text: 'A sincronização é um dos pilares para o correto funcionamento de ambientes distribuídos. A falta de mecanismos adequados de sincronização entre os nós pode levar a problemas críticos. Assinale a alternativa que apresenta uma consequência direta da ausência de sincronização.',
+    options: [
+      'Aumento automático da segurança contra ataques externos.',
+      'Prevenção natural de condições de corrida e deadlocks.',
+      'Inconsistências de dados e falhas na execução concorrente.',
+      'Redução drástica da latência na comunicação entre os processos.'
+    ],
+    correct: 2,
+    explanation: 'A ausência de sincronização causa inconsistências de dados e falhas na execução concorrente, como condições de corrida.',
+    hint: 'Sem sincronia, o que acontece com os dados?'
+  },
+  {
+    type: 'multiple',
+    text: 'A evolução das arquiteturas de software levou ao surgimento dos microsserviços como uma alternativa aos sistemas monolíticos. Assinale a alternativa que caracteriza corretamente um sistema baseado em microsserviços.',
+    options: [
+      'Alta coesão e baixo acoplamento, com serviços independentes e escaláveis.',
+      'Dependência de um único banco de dados centralizado para todos os módulos.',
+      'Arquitetura monolítica que exige escalabilidade vertical obrigatória.',
+      'Uso de um único ponto de falha que centraliza o processamento.'
+    ],
+    correct: 0,
+    explanation: 'Microsserviços são caracterizados por alta coesão e baixo acoplamento, com serviços independentes e escaláveis.',
+    hint: 'Pense na ideia de "micro" + "serviços" independentes...'
+  },
+  {
+    type: 'multiple',
+    text: 'A escalabilidade é uma propriedade essencial em sistemas distribuídos. A escalabilidade horizontal é uma estratégia frequentemente adotada para lidar com o crescimento da demanda. Como essa abordagem melhora o desempenho do sistema?',
+    options: [
+      'Aumentando a capacidade de processamento de um único servidor.',
+      'Adicionando mais máquinas ao pool para distribuir a carga de trabalho.',
+      'Eliminando completamente a necessidade de sincronização entre os nós.',
+      'Centralizando os processos em um nó de comunicação único.'
+    ],
+    correct: 1,
+    explanation: 'A escalabilidade horizontal adiciona mais máquinas ao pool para distribuir a carga de trabalho, diferente da vertical que aumenta um único servidor.',
+    hint: 'Horizontal = lado a lado, mais máquinas...'
+  },
+  {
+    type: 'multiple',
+    text: 'Diferentemente da escalabilidade horizontal, a escalabilidade vertical enfrenta barreiras físicas e econômicas. Assinale a alternativa que apresenta um dos principais desafios da escalabilidade vertical.',
+    options: [
+      'Facilidade de expansão infinita sem troca de componentes.',
+      'Limitações impostas pelo hardware máximo disponível no mercado.',
+      'Redução obrigatória do consumo de memória RAM do servidor.',
+      'Desnecessidade de implementação de balanceadores de carga.'
+    ],
+    correct: 1,
+    explanation: 'A escalabilidade vertical esbarra nas limitações físicas do hardware máximo disponível, além de custos elevados.',
+    hint: 'Vertical = crescer para cima, mas até onde o hardware permite...'
+  },
+  {
+    type: 'multiple',
+    text: 'Para compreender a natureza dos sistemas distribuídos, é necessário diferenciá-los de sistemas centralizados tradicionais. Assinale a alternativa que define corretamente um sistema distribuído.',
+    options: [
+      'Um conjunto de computadores independentes que se apresenta ao usuário como um sistema único e coerente.',
+      'Um sistema que opera estritamente em um único hardware centralizado, sem comunicação externa.',
+      'Uma arquitetura que não exige comunicação entre os processos para manter a consistência.',
+      'Um modelo que não utiliza protocolos de comunicação padronizados.'
+    ],
+    correct: 0,
+    explanation: 'Um sistema distribuído é um conjunto de computadores independentes que se apresenta ao usuário como um sistema único e coerente.',
+    hint: 'Muitos computadores, mas parece um só para o usuário...'
+  },
+  {
+    type: 'multiple',
+    text: 'A comunicação entre processos é vital para a coordenação em sistemas distribuídos. Assinale a alternativa que indica mecanismos essenciais para uma comunicação eficiente e flexível entre nós distribuídos.',
+    options: [
+      'Uso exclusivo de memória compartilhada e ausência de sincronização.',
+      'Processamento local isolado, sem qualquer troca de mensagens.',
+      'Utilização de mensagens assíncronas e Chamadas de Procedimento Remoto (RPC).',
+      'Dependência de um único servidor de mensagens centralizado.'
+    ],
+    correct: 2,
+    explanation: 'Mensagens assíncronas e RPC (Remote Procedure Call) são mecanismos essenciais para comunicação eficiente em sistemas distribuídos.',
+    hint: 'RPC é uma sigla famosa em sistemas distribuídos...'
+  },
+  {
+    type: 'multiple',
+    text: 'Os sistemas distribuídos apresentam desafios únicos decorrentes da sua natureza descentralizada e da dependência de redes de comunicação. Considerando os desafios clássicos dessa arquitetura, avalie as afirmativas:\n\nI. A sincronização e a consistência de dados em múltiplos nós.\nII. A garantia de que falhas de hardware nunca ocorrerão.\nIII. A latência e a possível partição na comunicação entre os nós.\n\nEstá correto o que se afirma em:',
+    options: [
+      'I, apenas.',
+      'I e II, apenas.',
+      'I e III, apenas.',
+      'I, II e III.'
+    ],
+    correct: 2,
+    explanation: 'I e III estão corretas. A II está errada porque falhas de hardware SEMPRE podem ocorrer em sistemas distribuídos.',
+    hint: 'É possível garantir que hardware nunca falhe?'
+  },
+  {
+    type: 'multiple',
+    text: 'No modelo Master-Worker, a distribuição de tarefas é fundamental. Caso o nó Master apresente uma falha catastrófica e não haja redundância, o que ocorre com o sistema?',
+    options: [
+      'Os Workers assumem automaticamente o papel de Master sem interrupção.',
+      'O sistema continua operando normalmente, pois os Workers são autônomos.',
+      'Há um ponto único de falha, paralisando a coordenação e distribuição de novas tarefas.',
+      'O sistema reverte para um modelo de microsserviços para compensar a falha.'
+    ],
+    correct: 2,
+    explanation: 'Sem redundância, o Master é um ponto único de falha (SPOF), paralisando todo o sistema.',
+    hint: 'Se só existe um chefe e ele cai...'
+  },
+  {
+    type: 'multiple',
+    text: 'Ao comparar a escalabilidade horizontal com a vertical, um arquiteto de sistemas deve considerar as implicações de cada abordagem. Assinale a alternativa que descreve uma vantagem típica da escalabilidade horizontal sobre a vertical.',
+    options: [
+      'Permite a adição contínua de nós, evitando limites físicos de um único servidor.',
+      'Exige a compra de hardwares proprietários e de altíssimo custo para cada expansão.',
+      'Garante que não haverá necessidade de balanceamento de carga entre as máquinas.',
+      'Simplifica a sincronização de dados, pois tudo é processado em um único nó.'
+    ],
+    correct: 0,
+    explanation: 'A escalabilidade horizontal permite adicionar nós continuamente, evitando os limites físicos de um único servidor.',
+    hint: 'Horizontal cresce sem limite teórico...'
+  },
+  {
+    type: 'multiple',
+    text: 'A transição de uma arquitetura monolítica para microsserviços impacta diretamente a forma como o sistema é escalado. Assinale a alternativa que explica corretamente essa relação.',
+    options: [
+      'Microsserviços impedem a escalabilidade, pois exigem que todo o sistema seja replicado.',
+      'Microsserviços permitem escalar apenas os serviços específicos que estão sob maior demanda.',
+      'Microsserviços exigem escalabilidade vertical, pois não suportam distribuição em múltiplos nós.',
+      'Microsserviços centralizam o processamento, tornando a escalabilidade horizontal inviável.'
+    ],
+    correct: 1,
+    explanation: 'Microsserviços permitem escalar seletivamente apenas os serviços sob maior demanda, otimizando recursos.',
+    hint: 'A vantagem é poder escalar partes específicas...'
+  },
+  {
+    type: 'multiple',
+    text: 'A sincronização de processos em sistemas distribuídos é um tema complexo. Assinale a alternativa que explica por que a sincronização excessiva ou mal projetada pode ser prejudicial.',
+    options: [
+      'Aumenta a latência e reduz o desempenho, pois os nós ficam aguardando confirmações.',
+      'Garante a consistência absoluta sem nenhum impacto no tempo de resposta do sistema.',
+      'Elimina a necessidade de comunicação de rede, acelerando o processamento local.',
+      'Transforma automaticamente o sistema em um modelo Master-Worker mais eficiente.'
+    ],
+    correct: 0,
+    explanation: 'Sincronização excessiva aumenta a latência e reduz o desempenho, pois os nós ficam aguardando confirmações.',
+    hint: 'Esperar confirmações custa tempo...'
+  },
+  {
+    type: 'multiple',
+    text: 'Em redes de computadores que suportam sistemas distribuídos, a latência e as falhas parciais são comuns. Assinale a alternativa que define o conceito de "falha parcial" nesse contexto.',
+    options: [
+      'O sistema inteiro para de funcionar simultaneamente devido a um erro de software.',
+      'Apenas uma parte do sistema falha, enquanto o restante continua operando.',
+      'A rede inteira fica inacessível, impedindo qualquer comunicação entre os nós.',
+      'O nó Master falha, mas os nós Workers continuam processando sem coordenação.'
+    ],
+    correct: 1,
+    explanation: 'Falha parcial significa que apenas uma parte do sistema falha, enquanto o restante continua operando normalmente.',
+    hint: 'Parcial = parte, não tudo...'
+  },
+  {
+    type: 'multiple',
+    text: 'A Comunicação por Mensagens e o RPC (Remote Procedure Call) são paradigmas de interação em sistemas distribuídos. Assinale a alternativa que apresenta uma característica da comunicação assíncrona por mensagens.',
+    options: [
+      'O remetente bloqueia sua execução até que o destinatário processe e responda.',
+      'O remetente envia a mensagem e pode continuar sua execução sem aguardar resposta imediata.',
+      'Exige que ambos os nós estejam estritamente sincronizados em nível de relógio físico.',
+      'Funciona apenas em arquiteturas monolíticas, sendo incompatível com microsserviços.'
+    ],
+    correct: 1,
+    explanation: 'Na comunicação assíncrona, o remetente envia a mensagem e continua sua execução sem aguardar resposta imediata.',
+    hint: 'Assíncrono = não espera...'
+  },
+  {
+    type: 'multiple',
+    text: 'A consistência de dados é um dos maiores desafios em sistemas distribuídos, especialmente quando a sincronização é relaxada para melhorar o desempenho. Assinale a alternativa que descreve o trade-off comum nesse cenário.',
+    options: [
+      'Maior disponibilidade e desempenho em troca de uma consistência de dados imediata e forte.',
+      'Consistência absoluta garantida, mesmo que o sistema fique indisponível durante falhas de rede.',
+      'Redução da latência e aumento da disponibilidade, aceitando-se uma consistência eventual.',
+      'Eliminação total da latência de rede, mantendo a consistência forte em todos os nós.'
+    ],
+    correct: 2,
+    explanation: 'O trade-off típico é reduzir latência e aumentar disponibilidade, aceitando consistência eventual em vez de forte.',
+    hint: 'Pense no Teorema CAP...'
+  },
+  {
+    type: 'discursive',
+    text: 'Uma equipe de desenvolvimento está migrando um sistema bancário legado, que opera em um modelo monolítico centralizado, para uma arquitetura baseada em microsserviços distribuídos. Durante o planejamento, os arquitetos identificaram que a independência dos serviços pode gerar problemas de consistência de dados entre os diferentes nós do sistema distribuído.',
+    motivationalTexts: [
+      'Texto 1: "Em uma arquitetura de microsserviços, cada serviço gerencia seu próprio estado e banco de dados, o que promove a independência e a escalabilidade, mas introduz o desafio da consistência distribuída."',
+      'Texto 2: "O Teorema CAP postula que é impossível para um sistema distribuído garantir simultaneamente Consistência forte, Disponibilidade total e Tolerância a Partições de rede."'
+    ],
+    prompt: 'Considerando a situação-problema e os textos motivadores, discuta os desafios de consistência de dados em sistemas distribuídos baseados em microsserviços. Em sua resposta, aborde:\n\n1) Explique por que a consistência forte é difícil de ser alcançada nesse contexto.\n2) Apresente uma estratégia (como a consistência eventual) para mitigar esse problema, justificando sua escolha com base no trade-off entre disponibilidade e consistência.',
+    keywords: ['consistência', 'forte', 'eventual', 'microsserviços', 'disponibilidade', 'trade-off', 'cap', 'dados', 'banco', 'transação', 'sincronização', 'desempenho'],
+    modelAnswer: '1) A consistência forte é difícil de ser alcançada em microsserviços porque cada serviço possui sua própria base de dados, o que impede o uso de transações distribuídas tradicionais de forma eficiente e sem prejudicar o desempenho. Manter todos os nós sincronizados em tempo real exigiria um acoplamento excessivo e bloqueios constantes, o que contraria o princípio de independência e autonomia dos microsserviços.\n\n2) Para mitigar esse problema, a estratégia mais adequada é adotar a consistência eventual. Nesse modelo, o sistema garante que, se não houver novas atualizações em um determinado dado, eventualmente todos os nós retornarão o mesmo valor. Essa abordagem permite que o sistema mantenha alta disponibilidade e tolerância a falhas, aceitando que, por um breve período, os dados possam estar desatualizados em alguns serviços, o que é um trade-off aceitável em troca da escalabilidade e da velocidade de resposta do sistema distribuído.'
+  },
+  {
+    type: 'discursive',
+    text: 'Um sistema de processamento de imagens utiliza o modelo Master-Worker para distribuir tarefas pesadas de renderização. Recentemente, o sistema sofreu uma interrupção total porque o nó Master apresentou uma falha de hardware, paralisando todos os nós Workers que aguardavam novas instruções. A equipe técnica foi acionada para resolver a dependência de um único ponto de falha.',
+    motivationalTexts: [
+      'Texto 1: "A coordenação centralizada em sistemas distribuídos simplifica a lógica de distribuição de tarefas, mas cria um gargalo e um ponto único de falha (Single Point of Failure - SPOF)."',
+      'Texto 2: "Mecanismos de redundância e eleição de líder são frequentemente utilizados para garantir a alta disponibilidade em arquiteturas de coordenação."'
+    ],
+    prompt: 'Com base na situação-problema e nos textos, analise a vulnerabilidade do modelo Master-Worker centralizado e proponha uma solução arquitetural. Em sua resposta, desenvolva:\n\n1) Explique o conceito de "ponto único de falha" no contexto do nó Master.\n2) Proponha uma solução para garantir a alta disponibilidade da coordenação (ex: redundância, eleição de líder), detalhando como ela funcionaria no sistema descrito.',
+    keywords: ['ponto único', 'falha', 'spof', 'redundância', 'eleição', 'líder', 'master', 'worker', 'disponibilidade', 'cluster', 'backup', 'coordenação'],
+    modelAnswer: '1) O "ponto único de falha" (SPOF) refere-se a um componente do sistema que, se falhar, causará a interrupção de todo o fluxo de trabalho. No modelo Master-Worker centralizado, o nó Master é responsável por coordenar e distribuir tarefas. Se ele cair, os nós Workers ficam ociosos ou órfãos, paralisando o processamento, pois não há quem orquestre o sistema.\n\n2) Para garantir a alta disponibilidade, a equipe deve implementar um cluster de coordenação com redundância e eleição de líder. Na prática, haveria múltiplos nós capacitados a atuar como Master, mas apenas um estaria ativo (líder) por vez. Caso o Master atual falhe, os nós restantes realizam uma eleição automática e rápida para promover um novo Master, garantindo que a distribuição de tarefas para os Workers seja retomada sem interrupção perceptível, eliminando o ponto único de falha.'
+  },
+  {
+    type: 'discursive',
+    text: 'Uma startup de e-commerce está enfrentando um aumento exponencial no número de acessos durante promoções sazonais. O CTO está em dúvida sobre qual estratégia de escalabilidade adotar para o banco de dados e a camada de aplicação do sistema distribuído: escalabilidade vertical (Scale-up) ou escalabilidade horizontal (Scale-out).',
+    motivationalTexts: [
+      'Texto 1: "A escalabilidade vertical consiste em adicionar mais recursos (CPU, RAM) a um nó existente, enquanto a escalabilidade horizontal envolve a adição de novos nós ao sistema."',
+      'Texto 2: "Sistemas distribuídos modernos tendem a preferir a escalabilidade horizontal devido aos limites físicos do hardware e ao custo-benefício de máquinas commodity."'
+    ],
+    prompt: 'Considerando o dilema do CTO e os textos motivadores, analise as duas estratégias de escalabilidade. Em sua resposta, aborde:\n\n1) Compare a escalabilidade vertical e a horizontal, citando as limitações de hardware da primeira e a complexidade de sincronização da segunda.\n2) Recomende a estratégia mais adequada para o cenário de picos sazonais imprevisíveis, justificando sua escolha com base na flexibilidade e nos limites físicos do hardware.',
+    keywords: ['vertical', 'horizontal', 'hardware', 'limites', 'sincronização', 'flexibilidade', 'escala', 'nós', 'elasticidade', 'custo', 'commodity', 'sazonal'],
+    modelAnswer: '1) A escalabilidade vertical (adicionar mais CPU/RAM a um único servidor) esbarra em limitações físicas e econômicas, pois existe um limite máximo de hardware que uma máquina suporta, além de gerar um ponto único de falha. Já a escalabilidade horizontal (adicionar mais máquinas) permite expansão teoricamente infinita, mas introduz a complexidade de sincronização de dados, balanceamento de carga e comunicação entre os nós distribuídos.\n\n2) Para o cenário de picos sazonais imprevisíveis, a estratégia mais adequada é a escalabilidade horizontal. Ela oferece maior flexibilidade, permitindo que a startup adicione ou remova nós dinamicamente (elasticidade) conforme a demanda. Como a escalabilidade vertical esbarra em limites físicos de hardware que não podem ser expandidos instantaneamente durante uma promoção, a escalabilidade horizontal é a única capaz de absorver o crescimento exponencial de acessos de forma ágil e resiliente.'
+  },
+  {
+    type: 'discursive',
+    text: 'Durante uma aula sobre sistemas distribuídos, um estudante questionou o professor: "Se a comunicação entre os nós é essencial, por que não podemos simplesmente garantir que a rede nunca falhe e que todos os processos estejam perfeitamente sincronizados o tempo todo, eliminando assim a latência e as inconsistências?" O professor respondeu que a natureza da computação distribuída impõe restrições físicas e lógicas intransponíveis.',
+    motivationalTexts: [
+      'Texto 1: "Em sistemas distribuídos, não há um relógio global perfeito e a comunicação por rede está sujeita a latências variáveis e partições."',
+      'Texto 2: "A sincronização excessiva para garantir consistência absoluta pode tornar o sistema inoperante ou extremamente lento, ferindo a usabilidade e o desempenho."'
+    ],
+    prompt: 'Com base na situação-problema e nos textos, explique a importância e os limites da sincronização em sistemas distribuídos. Em sua resposta, desenvolva:\n\n1) Discuta por que a latência e a ausência de um relógio global tornam a sincronização perfeita impossível na prática.\n2) Analise como a sincronização afeta o desempenho do sistema, explicando o trade-off entre consistência estrita e a responsividade (desempenho) da aplicação.',
+    keywords: ['latência', 'relógio', 'global', 'sincronização', 'desempenho', 'consistência', 'trade-off', 'rede', 'partição', 'tempo', 'disponibilidade'],
+    modelAnswer: '1) A sincronização perfeita é impossível na prática porque, em sistemas distribuídos, a comunicação ocorre via rede, que está sujeita a latências variáveis, atrasos e partições. Além disso, não existe um relógio global perfeito; cada nó possui seu próprio relógio físico, que pode sofrer desvios. Tentar sincronizar perfeitamente todos os eventos exigiria um controle centralizado absoluto, o que é inviável em ambientes descentralizados e geograficamente dispersos.\n\n2) A sincronização impacta diretamente o desempenho do sistema, pois exige que os nós gastem tempo e recursos de rede trocando mensagens de coordenação e aguardando confirmações. Quanto mais estrita for a consistência exigida, maior será a latência e menor a disponibilidade do sistema em caso de falhas de rede. Portanto, é necessário equilibrar esse trade-off: abrir mão da consistência estrita em prol de uma consistência eventual permite que o sistema seja mais responsivo, rápido e tolerante a falhas, atendendo melhor às necessidades de desempenho das aplicações modernas.'
+  }
+];
+
+const TOTAL_OBJECTIVE = 16;
+const TOTAL_DISCURSIVE = 4;
+
+// ============ CONQUISTAS ============
+const achievements = [
+  { id: 'first_blood', icon: '🎯', title: 'Primeiro Acerto', desc: 'Acerte sua primeira questão', check: (s) => s.correct >= 1 },
+  { id: 'streak_3', icon: '🔥', title: 'Em Chamas!', desc: '3 acertos consecutivos', check: (s) => s.maxStreak >= 3 },
+  { id: 'streak_5', icon: '💥', title: 'Imparável!', desc: '5 acertos consecutivos', check: (s) => s.maxStreak >= 5 },
+  { id: 'streak_10', icon: '⚡', title: 'Lendário!', desc: '10 acertos consecutivos', check: (s) => s.maxStreak >= 10 },
+  { id: 'perfect', icon: '👑', title: 'Perfeição', desc: 'Acerte todas as objetivas', check: (s) => s.correct === 16 },
+  { id: 'speed', icon: '⚡', title: 'Velocista', desc: 'Responda em menos de 5 segundos', check: (s) => s.fastAnswers >= 1 },
+  { id: 'phase1_complete', icon: '🏅', title: 'Fase 1 Completa', desc: 'Termine todas as objetivas', check: (s) => s.phase1Complete },
+  { id: 'survivor', icon: '🛡️', title: 'Sobrevivente', desc: 'Use todas as dicas', check: (s) => s.hintsUsed >= 3 },
+  { id: 'level5', icon: '⭐', title: 'Nível 5', desc: 'Alcance o nível 5', check: (s) => s.level >= 5 },
+  { id: 'level10', icon: '🌟', title: 'Mestre', desc: 'Alcance o nível 10', check: (s) => s.level >= 10 },
+  { id: 'xp1000', icon: '💎', title: 'Diamante', desc: 'Acumule 1000 XP', check: (s) => s.totalXP >= 1000 },
+  { id: 'hint_master', icon: '🧠', title: 'Sem Ajuda', desc: 'Acerte 10 sem usar dicas', check: (s) => s.correctWithoutHint >= 10 }
+];
+
+// ============ ESTADO DO JOGO ============
+let gameState = {
+  playerName: '',
+  currentQuestion: 0,
+  score: 0,
+  xp: 0,
+  level: 1,
+  streak: 0,
+  maxStreak: 0,
+  correct: 0,
+  incorrect: 0,
+  hints: 3,
+  hintsUsed: 0,
+  fastAnswers: 0,
+  correctWithoutHint: 0,
+  totalXP: 0,
+  selectedOption: null,
+  answered: false,
+  usedHint: false,
+  timer: 30,
+  timerInterval: null,
+  questionStartTime: 0,
+  unlockedAchievements: [],
+  answers: [],
+  phase1Correct: 0,
+  phase1Wrong: 0,
+  phase1Complete: false,
+  phase1Streak: 0,
+  currentDiscursive: 0
+};
+
+const levelTitles = {
+  1: 'Aprendiz', 2: 'Iniciante', 3: 'Estudante', 4: 'Praticante',
+  5: 'Explorador', 6: 'Aventureiro', 7: 'Veterano', 8: 'Especialista',
+  9: 'Mestre', 10: 'Grão-Mestre', 11: 'Lendário', 12: 'Mítico'
+};
+
+// ============ ESTRELAS ============
+function createStars() {
+  const bg = document.getElementById('starBg');
+  for (let i = 0; i < 80; i++) {
+    const star = document.createElement('div');
+    star.className = 'star';
+    const size = Math.random() * 3 + 1;
+    star.style.width = size + 'px';
+    star.style.height = size + 'px';
+    star.style.left = Math.random() * 100 + '%';
+    star.style.top = Math.random() * 100 + '%';
+    star.style.animationDelay = Math.random() * 3 + 's';
+    bg.appendChild(star);
+  }
+}
+
+// ============ INICIAR JOGO ============
+function startGame() {
+  const name = document.getElementById('playerName').value.trim() || 'Guerreiro';
+  gameState.playerName = name;
+  document.getElementById('playerNameDisplay').textContent = name;
+  document.getElementById('welcomeScreen').classList.add('hidden');
+  document.getElementById('gameScreen').classList.remove('hidden');
+  updatePhaseIndicator();
+  renderQuestionDots();
+  loadQuestion();
+}
+
+function updatePhaseIndicator() {
+  const badge = document.getElementById('phaseBadge');
+  const progress = document.getElementById('phaseProgress');
+  badge.textContent = 'Fase 1 - Objetivas';
+  badge.className = 'phase-badge';
+  const qNum = gameState.currentQuestion + 1;
+  progress.textContent = `Questão ${qNum} de ${TOTAL_OBJECTIVE}`;
+}
+
+function renderQuestionDots() {
+  const container = document.getElementById('questionDots');
+  container.innerHTML = '';
+  for (let i = 0; i < TOTAL_OBJECTIVE; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-all';
+    dot.style.background = 'rgba(255,255,255,0.1)';
+    dot.style.border = '1px solid rgba(255,255,255,0.2)';
+    dot.textContent = i + 1;
+    if (i === gameState.currentQuestion) {
+      dot.style.background = 'linear-gradient(135deg, #8b5cf6, #ec4899)';
+      dot.style.boxShadow = '0 0 10px rgba(139, 92, 246, 0.8)';
+    } else if (gameState.answers[i]) {
+      if (gameState.answers[i].correct) {
+        dot.style.background = '#10b981';
+        dot.innerHTML = '✓';
+      } else {
+        dot.style.background = '#ef4444';
+        dot.innerHTML = '✗';
+      }
+    }
+    container.appendChild(dot);
+  }
+}
+
+// ============ CARREGAR QUESTÃO ============
+function loadQuestion() {
+  const q = questions[gameState.currentQuestion];
+  document.getElementById('questionNumber').textContent = gameState.currentQuestion + 1;
+  document.getElementById('questionText').textContent = q.text;
+  document.getElementById('questionType').textContent = 'Múltipla Escolha';
+  
+  gameState.selectedOption = null;
+  gameState.answered = false;
+  gameState.usedHint = false;
+  document.getElementById('feedbackContainer').classList.add('hidden');
+  document.getElementById('nextBtn').classList.add('hidden');
+  document.getElementById('confirmBtn').disabled = true;
+  document.getElementById('hintBtn').disabled = false;
+  
+  renderOptions(q.options);
+  startTimer();
+  
+  gameState.questionStartTime = Date.now();
+  updatePhaseIndicator();
+  renderQuestionDots();
+  
+  document.getElementById('questionCard').classList.remove('animate-slide-in');
+  void document.getElementById('questionCard').offsetWidth;
+  document.getElementById('questionCard').classList.add('animate-slide-in');
+}
+
+function renderOptions(options) {
+  const container = document.getElementById('optionsContainer');
+  container.innerHTML = '';
+  const letters = ['A', 'B', 'C', 'D'];
+  options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn w-full text-left p-4 rounded-xl glass border-2 border-white/10 hover:border-purple-400 transition-all';
+    btn.innerHTML = `
+      <div class="flex items-start gap-3">
+        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center font-bold flex-shrink-0">${letters[i]}</div>
+        <div class="flex-1 pt-1">${opt}</div>
+      </div>
+    `;
+    btn.onclick = () => selectOption(i);
+    btn.dataset.index = i;
+    container.appendChild(btn);
+  });
+}
+
+function selectOption(index) {
+  if (gameState.answered) return;
+  gameState.selectedOption = index;
+  document.querySelectorAll('.option-btn').forEach((btn, i) => {
+    btn.classList.toggle('selected', i === index);
+  });
+  document.getElementById('confirmBtn').disabled = false;
+}
+
+// ============ TIMER ============
+function startTimer() {
+  gameState.timer = 30;
+  updateTimerDisplay();
+  clearInterval(gameState.timerInterval);
+  gameState.timerInterval = setInterval(() => {
+    gameState.timer--;
+    updateTimerDisplay();
+    if (gameState.timer <= 0) {
+      clearInterval(gameState.timerInterval);
+      autoConfirm();
+    }
+  }, 1000);
+}
+
+function stopTimer() {
+  clearInterval(gameState.timerInterval);
+}
+
+function updateTimerDisplay() {
+  document.getElementById('timerDisplay').textContent = gameState.timer;
+  const circle = document.getElementById('timerCircle');
+  const circumference = 125.6;
+  const offset = circumference * (1 - gameState.timer / 30);
+  circle.style.strokeDashoffset = offset;
+  if (gameState.timer <= 10) {
+    circle.style.stroke = '#ef4444';
+    document.getElementById('timerDisplay').style.color = '#ef4444';
+  } else if (gameState.timer <= 20) {
+    circle.style.stroke = '#f59e0b';
+    document.getElementById('timerDisplay').style.color = '#f59e0b';
+  } else {
+    circle.style.stroke = '#8b5cf6';
+    document.getElementById('timerDisplay').style.color = 'white';
+  }
+}
+
+function autoConfirm() {
+  if (!gameState.answered) {
+    if (gameState.selectedOption === null) gameState.selectedOption = -1;
+    confirmAnswer();
+  }
+}
+
+// ============ DICA ============
+function useHint() {
+  if (gameState.hints <= 0 || gameState.answered) return;
+  const q = questions[gameState.currentQuestion];
+  
+  gameState.hints--;
+  gameState.hintsUsed++;
+  gameState.usedHint = true;
+  document.getElementById('hintCount').textContent = gameState.hints;
+  
+  const wrongOptions = [];
+  q.options.forEach((_, i) => {
+    if (i !== q.correct) wrongOptions.push(i);
+  });
+  const toEliminate = wrongOptions[Math.floor(Math.random() * wrongOptions.length)];
+  const btn = document.querySelectorAll('.option-btn')[toEliminate];
+  btn.style.opacity = '0.3';
+  btn.style.pointerEvents = 'none';
+  btn.style.textDecoration = 'line-through';
+  
+  if (gameState.hints === 0) document.getElementById('hintBtn').disabled = true;
+  showXPAnimation('-10 XP', 'text-red-400');
+}
+
+// ============ CONFIRMAR ============
+function confirmAnswer() {
+  if (gameState.answered) return;
+  gameState.answered = true;
+  stopTimer();
+  
+  const q = questions[gameState.currentQuestion];
+  const timeSpent = (Date.now() - gameState.questionStartTime) / 1000;
+  handleMultipleChoice(q, timeSpent);
+  checkAchievements();
+  updateHUD();
+}
+
+function handleMultipleChoice(q, timeSpent) {
+  const isCorrect = gameState.selectedOption === q.correct;
+  const buttons = document.querySelectorAll('.option-btn');
+  
+  buttons.forEach((btn, i) => {
+    btn.style.pointerEvents = 'none';
+    if (i === q.correct) btn.classList.add('correct');
+    else if (i === gameState.selectedOption && !isCorrect) btn.classList.add('incorrect');
+  });
+  
+  let xpGained = 0;
+  let pointsGained = 0;
+  
+  if (isCorrect) {
+    gameState.correct++;
+    gameState.streak++;
+    if (gameState.streak > gameState.maxStreak) gameState.maxStreak = gameState.streak;
+    if (!gameState.usedHint) gameState.correctWithoutHint++;
+    
+    xpGained = 50;
+    pointsGained = 100;
+    
+    if (timeSpent < 5) {
+      xpGained += 30;
+      pointsGained += 50;
+      gameState.fastAnswers++;
+    } else if (timeSpent < 15) {
+      xpGained += 15;
+      pointsGained += 25;
+    }
+    
+    xpGained += gameState.streak * 5;
+    pointsGained += gameState.streak * 10;
+    
+    createConfetti();
+    showXPAnimation(`+${xpGained} XP`, 'text-yellow-400');
+  } else {
+    gameState.incorrect++;
+    gameState.streak = 0;
+    xpGained = 10;
+    pointsGained = 0;
+    showXPAnimation('+10 XP', 'text-gray-400');
+  }
+  
+  gameState.xp += xpGained;
+  gameState.totalXP += xpGained;
+  gameState.score += pointsGained;
+  
+  gameState.answers[gameState.currentQuestion] = {
+    correct: isCorrect,
+    selected: gameState.selectedOption,
+    userAnswer: q.options[gameState.selectedOption] || 'Sem resposta',
+    timeSpent: timeSpent.toFixed(1)
+  };
+  
+  showFeedback(isCorrect, q.explanation, pointsGained);
+  checkLevelUp();
+}
+
+function showFeedback(isCorrect, explanation, points) {
+  const container = document.getElementById('feedbackContainer');
+  container.classList.remove('hidden');
+  container.innerHTML = `
+    <div class="glass rounded-xl p-5 border-2 ${isCorrect ? 'border-green-500 glow-green' : 'border-red-500 glow-red'} animate-bounce-in">
+      <div class="flex items-start gap-4">
+        <div class="text-5xl">${isCorrect ? '🎉' : '💔'}</div>
+        <div class="flex-1">
+          <h3 class="font-bold text-xl mb-2 ${isCorrect ? 'text-green-400' : 'text-red-400'}">
+            ${isCorrect ? 'RESPOSTA CORRETA!' : 'RESPOSTA INCORRETA'}
+          </h3>
+          ${points > 0 ? `<div class="text-yellow-400 font-bold mb-2">+${points} pontos!</div>` : ''}
+          <p class="text-gray-200 text-sm leading-relaxed">${explanation}</p>
+          ${gameState.streak > 1 ? `<div class="mt-2 text-orange-400 font-bold">🔥 Sequência de ${gameState.streak} acertos!</div>` : ''}
+        </div>
+      </div>
+    </div>
+  `;
+  document.getElementById('nextBtn').classList.remove('hidden');
+}
+
+// ============ PRÓXIMA QUESTÃO ============
+function nextQuestion() {
+  gameState.currentQuestion++;
+  
+  // Se acabou as objetivas → tela de recompensa
+  if (gameState.currentQuestion >= TOTAL_OBJECTIVE) {
+    showRewardScreen();
+    return;
+  }
+  
+  loadQuestion();
+}
+
+// ============ TELA DE RECOMPENSA ============
+function showRewardScreen() {
+  let phase1Correct = 0;
+  let phase1Wrong = 0;
+  let phase1Streak = 0;
+  let currentStreak = 0;
+  
+  for (let i = 0; i < TOTAL_OBJECTIVE; i++) {
+    if (gameState.answers[i]) {
+      if (gameState.answers[i].correct) {
+        phase1Correct++;
+        currentStreak++;
+        if (currentStreak > phase1Streak) phase1Streak = currentStreak;
+      } else {
+        phase1Wrong++;
+        currentStreak = 0;
+      }
+    }
+  }
+  
+  gameState.phase1Correct = phase1Correct;
+  gameState.phase1Wrong = phase1Wrong;
+  gameState.phase1Streak = phase1Streak;
+  gameState.phase1Complete = true;
+  
+  const accuracy = phase1Correct / TOTAL_OBJECTIVE;
+  let bonusXP = 200;
+  let bonusTitle = 'Conquistador da Fase 1';
+  let bonusDesc = 'Completou todas as 16 questões objetivas!';
+  
+  if (accuracy === 1) {
+    bonusXP = 500;
+    bonusTitle = 'PERFEIÇÃO ABSOLUTA!';
+    bonusDesc = 'Acertou todas as 16 objetivas! Bônus lendário!';
+  } else if (accuracy >= 0.9) {
+    bonusXP = 400;
+    bonusTitle = 'Desempenho Excelente!';
+    bonusDesc = 'Mais de 90% de acerto nas objetivas!';
+  } else if (accuracy >= 0.75) {
+    bonusXP = 300;
+    bonusTitle = 'Ótimo Trabalho!';
+    bonusDesc = 'Mais de 75% de acerto nas objetivas!';
+  } else if (accuracy >= 0.5) {
+    bonusXP = 250;
+    bonusTitle = 'Bom Esforço!';
+    bonusDesc = 'Mais de 50% de acerto nas objetivas!';
+  } else {
+    bonusXP = 150;
+    bonusTitle = 'Guerreiro Persistente';
+    bonusDesc = 'Completou a Fase 1 mesmo com dificuldades!';
+  }
+  
+  gameState.xp += bonusXP;
+  gameState.totalXP += bonusXP;
+  gameState.score += bonusXP;
+  checkLevelUp();
+  checkAchievements();
+  
+  document.getElementById('rewardCorrect').textContent = phase1Correct;
+  document.getElementById('rewardWrong').textContent = phase1Wrong;
+  document.getElementById('rewardAccuracy').textContent = Math.round(accuracy * 100) + '%';
+  document.getElementById('rewardStreak').textContent = phase1Streak;
+  document.getElementById('bonusXP').textContent = `+${bonusXP} XP`;
+  document.getElementById('bonusDescription').textContent = bonusDesc;
+  
+  const rewardList = document.getElementById('rewardList');
+  rewardList.innerHTML = '';
+  
+  const rewards = [
+    { icon: '💎', title: 'Bônus de XP', desc: `+${bonusXP} XP pelo esforço`, color: 'text-yellow-400' },
+    { icon: '🔥', title: 'Sequência Preservada', desc: `Melhor sequência: ${phase1Streak} acertos`, color: 'text-orange-400' },
+    { icon: '🎖️', title: 'Badge de Fase', desc: bonusTitle, color: 'text-purple-400' },
+    { icon: '📖', title: 'Gabarito Discursivo', desc: '4 questões comentadas desbloqueadas', color: 'text-pink-400' }
+  ];
+  
+  rewards.forEach((r, idx) => {
+    const div = document.createElement('div');
+    div.className = 'flex items-center gap-3 p-3 rounded-xl bg-black/30 border border-white/10';
+    div.style.animation = `slideIn 0.5s ease-out ${idx * 0.15}s both`;
+    div.innerHTML = `
+      <div class="text-3xl">${r.icon}</div>
+      <div class="flex-1">
+        <div class="font-bold ${r.color}">${r.title}</div>
+        <div class="text-xs text-gray-400">${r.desc}</div>
+      </div>
+    `;
+    rewardList.appendChild(div);
+  });
+  
+  document.getElementById('gameScreen').classList.add('hidden');
+  document.getElementById('rewardScreen').classList.remove('hidden');
+  createConfetti(60);
+}
+
+// ============ FASE 2 - VISUALIZAÇÃO DAS DISCURSIVAS ============
+function startPhase2() {
+  gameState.currentDiscursive = 0;
+  document.getElementById('rewardScreen').classList.add('hidden');
+  document.getElementById('discursiveViewScreen').classList.remove('hidden');
+  document.getElementById('discTotal').textContent = TOTAL_DISCURSIVE;
+  renderDiscDots();
+  loadDiscursive();
+}
+
+function renderDiscDots() {
+  const container = document.getElementById('discDots');
+  container.innerHTML = '';
+  for (let i = 0; i < TOTAL_DISCURSIVE; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'flex-1 h-2 rounded-full transition-all';
+    if (i === gameState.currentDiscursive) {
+      dot.style.background = 'linear-gradient(90deg, #f59e0b, #ef4444)';
+      dot.style.boxShadow = '0 0 10px rgba(245, 158, 11, 0.6)';
+    } else if (i < gameState.currentDiscursive) {
+      dot.style.background = '#10b981';
+    } else {
+      dot.style.background = 'rgba(255,255,255,0.1)';
+    }
+    container.appendChild(dot);
+  }
+}
+
+function loadDiscursive() {
+  const idx = TOTAL_OBJECTIVE + gameState.currentDiscursive;
+  const q = questions[idx];
+  
+  document.getElementById('discCurrent').textContent = gameState.currentDiscursive + 1;
+  document.getElementById('discTitle').textContent = `Questão ${idx + 1}`;
+  document.getElementById('discSituation').textContent = q.text;
+  
+  const motivContainer = document.getElementById('discMotivational');
+  motivContainer.innerHTML = q.motivationalTexts.map(t => `<p>${t}</p>`).join('');
+  
+  document.getElementById('discPrompt').textContent = q.prompt;
+  
+  const kwContainer = document.getElementById('discKeywords');
+  kwContainer.innerHTML = q.keywords.map(kw => `<span class="keyword-chip">${kw}</span>`).join('');
+  
+  document.getElementById('discModelAnswer').textContent = q.modelAnswer;
+  
+  // Atualizar botões
+  const isFirst = gameState.currentDiscursive === 0;
+  const isLast = gameState.currentDiscursive === TOTAL_DISCURSIVE - 1;
+  
+  document.getElementById('prevDiscBtn').disabled = isFirst;
+  document.getElementById('prevBtn2').disabled = isFirst;
+  
+  if (isLast) {
+    document.getElementById('nextBtn2').classList.add('hidden');
+    document.getElementById('nextDiscBtn').classList.add('hidden');
+    document.getElementById('finishBtn').classList.remove('hidden');
+  } else {
+    document.getElementById('nextBtn2').classList.remove('hidden');
+    document.getElementById('nextDiscBtn').classList.remove('hidden');
+    document.getElementById('finishBtn').classList.add('hidden');
+  }
+  
+  renderDiscDots();
+  
+  // Animação
+  document.getElementById('discCard').classList.remove('animate-slide-in');
+  void document.getElementById('discCard').offsetWidth;
+  document.getElementById('discCard').classList.add('animate-slide-in');
+}
+
+function nextDiscursive() {
+  if (gameState.currentDiscursive < TOTAL_DISCURSIVE - 1) {
+    gameState.currentDiscursive++;
+    loadDiscursive();
+  }
+}
+
+function prevDiscursive() {
+  if (gameState.currentDiscursive > 0) {
+    gameState.currentDiscursive--;
+    loadDiscursive();
+  }
+}
+
+function finishGame() {
+  document.getElementById('discursiveViewScreen').classList.add('hidden');
+  endGame();
+}
+
+// ============ LEVEL UP ============
+function checkLevelUp() {
+  const xpNeeded = gameState.level * 100;
+  while (gameState.xp >= xpNeeded) {
+    gameState.xp -= xpNeeded;
+    gameState.level++;
+    showLevelUp();
+  }
+}
+
+function showLevelUp() {
+  const toast = document.createElement('div');
+  toast.className = 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 text-center animate-bounce-in';
+  toast.innerHTML = `
+    <div class="text-8xl mb-4">⭐</div>
+    <div class="pixel-font text-4xl neon-text mb-2">LEVEL UP!</div>
+    <div class="text-2xl font-bold text-yellow-400">Nível ${gameState.level}</div>
+    <div class="text-lg text-pink-300">${levelTitles[gameState.level] || 'Mestre Supremo'}</div>
+  `;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 2500);
+  createConfetti(50);
+}
+
+// ============ CONQUISTAS ============
+function checkAchievements() {
+  achievements.forEach(ach => {
+    if (!gameState.unlockedAchievements.includes(ach.id) && ach.check(gameState)) {
+      gameState.unlockedAchievements.push(ach.id);
+      showAchievementToast(ach);
+    }
+  });
+}
+
+function showAchievementToast(ach) {
+  const toast = document.getElementById('achievementToast');
+  document.getElementById('toastIcon').textContent = ach.icon;
+  document.getElementById('toastTitle').textContent = ach.title;
+  document.getElementById('toastDesc').textContent = ach.desc;
+  toast.classList.remove('hidden');
+  setTimeout(() => toast.classList.add('hidden'), 4000);
+}
+
+// ============ HUD ============
+function updateHUD() {
+  document.getElementById('playerLevel').textContent = gameState.level;
+  document.getElementById('levelTitle').textContent = levelTitles[gameState.level] || 'Mestre Supremo';
+  document.getElementById('currentXP').textContent = gameState.xp;
+  document.getElementById('nextLevelXP').textContent = gameState.level * 100;
+  document.getElementById('xpBar').style.width = (gameState.xp / (gameState.level * 100) * 100) + '%';
+  document.getElementById('scoreDisplay').textContent = gameState.score;
+  document.getElementById('streakDisplay').textContent = gameState.streak + ' 🔥';
+}
+
+function showXPAnimation(text, colorClass) {
+  const popup = document.createElement('div');
+  popup.className = `xp-popup ${colorClass}`;
+  popup.textContent = text;
+  popup.style.left = '50%';
+  popup.style.top = '50%';
+  document.getElementById('questionCard').appendChild(popup);
+  setTimeout(() => popup.remove(), 1500);
+}
+
+function createConfetti(count = 30) {
+  const colors = ['#8b5cf6', '#ec4899', '#fbbf24', '#10b981', '#3b82f6'];
+  for (let i = 0; i < count; i++) {
+    const confetti = document.createElement('div');
+    confetti.className = 'confetti';
+    confetti.style.left = Math.random() * 100 + '%';
+    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+    confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+    confetti.style.animationDelay = Math.random() * 0.5 + 's';
+    if (Math.random() > 0.5) confetti.style.borderRadius = '50%';
+    document.body.appendChild(confetti);
+    setTimeout(() => confetti.remove(), 4000);
+  }
+}
+
+// ============ FIM DO JOGO ============
+function endGame() {
+  document.getElementById('endScreen').classList.remove('hidden');
+  
+  const accuracy = Math.round((gameState.correct / TOTAL_OBJECTIVE) * 100);
+  
+  document.getElementById('finalScore').textContent = gameState.score;
+  document.getElementById('finalLevel').textContent = gameState.level;
+  document.getElementById('finalAccuracy').textContent = accuracy + '%';
+  document.getElementById('finalStreak').textContent = gameState.maxStreak;
+  
+  let rank, emoji, title;
+  if (accuracy >= 90) { rank = 'LENDOÁRIO'; emoji = '👑'; title = 'Mestre dos Sistemas Distribuídos!'; }
+  else if (accuracy >= 75) { rank = 'DIAMANTE'; emoji = '💎'; title = 'Expert em Sistemas Distribuídos!'; }
+  else if (accuracy >= 60) { rank = 'OURO'; emoji = '🥇'; title = 'Bom conhecimento!'; }
+  else if (accuracy >= 40) { rank = 'PRATA'; emoji = '🥈'; title = 'Continue estudando!'; }
+  else { rank = 'BRONZE'; emoji = '🥉'; title = 'Hora de revisar o conteúdo!'; }
+  
+  document.getElementById('endEmoji').textContent = emoji;
+  document.getElementById('endTitle').textContent = title;
+  document.getElementById('finalRank').textContent = rank;
+  
+  const achList = document.getElementById('achievementsList');
+  achList.innerHTML = '';
+  achievements.forEach(ach => {
+    const unlocked = gameState.unlockedAchievements.includes(ach.id);
+    const div = document.createElement('div');
+    div.className = `badge glass rounded-xl p-3 text-center ${unlocked ? '' : 'locked'}`;
+    div.innerHTML = `
+      <div class="text-3xl mb-1">${ach.icon}</div>
+      <div class="text-xs font-bold ${unlocked ? 'text-yellow-400' : 'text-gray-500'}">${ach.title}</div>
+      <div class="text-xs text-gray-500">${ach.desc}</div>
+    `;
+    achList.appendChild(div);
+  });
+  
+  createConfetti(80);
+}
+
+// ============ REVISÃO ============
+function showReview() {
+  document.getElementById('endScreen').classList.add('hidden');
+  document.getElementById('reviewScreen').classList.remove('hidden');
+  
+  const container = document.getElementById('reviewContent');
+  container.innerHTML = '';
+  
+  questions.forEach((q, i) => {
+    const card = document.createElement('div');
+    card.className = 'glass rounded-2xl p-6 animate-slide-in';
+    
+    if (q.type === 'multiple') {
+      const answer = gameState.answers[i];
+      const letters = ['A', 'B', 'C', 'D'];
+      card.innerHTML = `
+        <div class="flex items-start gap-3 mb-4">
+          <div class="w-10 h-10 rounded-lg ${answer.correct ? 'bg-green-600' : 'bg-red-600'} flex items-center justify-center font-bold flex-shrink-0">
+            ${answer.correct ? '✓' : '✗'}
+          </div>
+          <div class="flex-1">
+            <div class="text-xs text-gray-400 mb-1">QUESTÃO ${i + 1} - MÚLTIPLA ESCOLHA</div>
+            <p class="text-gray-200">${q.text}</p>
+          </div>
+        </div>
+        <div class="space-y-2 mb-4">
+          ${q.options.map((opt, j) => `
+            <div class="p-3 rounded-lg ${j === q.correct ? 'bg-green-500/20 border border-green-500' : j === answer.selected && !answer.correct ? 'bg-red-500/20 border border-red-500' : 'bg-black/20'}">
+              <span class="font-bold mr-2">${letters[j]})</span>${opt}
+              ${j === q.correct ? ' <span class="text-green-400 text-xs">✓ CORRETA</span>' : ''}
+              ${j === answer.selected && !answer.correct ? ' <span class="text-red-400 text-xs">✗ SUA RESPOSTA</span>' : ''}
+            </div>
+          `).join('')}
+        </div>
+        <div class="glass rounded-lg p-3 bg-blue-500/10 border border-blue-500/30">
+          <div class="text-sm text-blue-300 font-bold mb-1"><i class="fas fa-info-circle mr-2"></i>Explicação</div>
+          <div class="text-sm text-gray-300">${q.explanation}</div>
+        </div>
+      `;
+    } else {
+      card.innerHTML = `
+        <div class="flex items-start gap-3 mb-4">
+          <div class="w-10 h-10 rounded-lg bg-yellow-600 flex items-center justify-center font-bold flex-shrink-0">
+            <i class="fas fa-pen-fancy"></i>
+          </div>
+          <div class="flex-1">
+            <div class="text-xs text-gray-400 mb-1">QUESTÃO ${i + 1} - DISCURSIVA</div>
+            <p class="text-gray-200">${q.text}</p>
+          </div>
+        </div>
+        <div class="mb-3 flex flex-wrap gap-1">
+          ${q.keywords.map(kw => `<span class="keyword-chip">${kw}</span>`).join('')}
+        </div>
+        <div class="model-answer-card rounded-lg p-4">
+          <div class="text-sm text-green-300 font-bold mb-2"><i class="fas fa-check-circle mr-2"></i>Resposta Modelo</div>
+          <div class="text-sm text-gray-300 whitespace-pre-line">${q.modelAnswer}</div>
+        </div>
+      `;
+    }
+    container.appendChild(card);
+  });
+}
+
+function backToEnd() {
+  document.getElementById('reviewScreen').classList.add('hidden');
+  document.getElementById('endScreen').classList.remove('hidden');
+}
+
+function restartGame() {
+  gameState = {
+    playerName: gameState.playerName,
+    currentQuestion: 0, score: 0, xp: 0, level: 1,
+    streak: 0, maxStreak: 0, correct: 0, incorrect: 0,
+    hints: 3, hintsUsed: 0, fastAnswers: 0,
+    correctWithoutHint: 0, totalXP: 0, selectedOption: null,
+    answered: false, usedHint: false, timer: 30, timerInterval: null,
+    questionStartTime: 0, unlockedAchievements: [], answers: [],
+    phase1Correct: 0, phase1Wrong: 0, phase1Complete: false, phase1Streak: 0,
+    currentDiscursive: 0
+  };
+  document.getElementById('endScreen').classList.add('hidden');
+  document.getElementById('reviewScreen').classList.add('hidden');
+  document.getElementById('discursiveViewScreen').classList.add('hidden');
+  document.getElementById('rewardScreen').classList.add('hidden');
+  document.getElementById('gameScreen').classList.remove('hidden');
+  document.getElementById('hintCount').textContent = '3';
+  updateHUD();
+  updatePhaseIndicator();
+  renderQuestionDots();
+  loadQuestion();
+}
+
+createStars();
+</script>
+
+</body>
+</html>
