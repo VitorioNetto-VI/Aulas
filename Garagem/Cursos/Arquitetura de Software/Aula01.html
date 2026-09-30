@@ -1,0 +1,2234 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arquitetura de Software - Curso Interativo</title>
+    <link href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.8/index.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@fontsource/fira-code@5.0.8/index.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --azul-primario: #0066CC;
+            --azul-escuro: #003366;
+            --azul-marinho: #001F4D;
+            --laranja: #FF8C00;
+            --roxo-escuro: #2D1B4E;
+            --roxo-claro: #4A3B6B;
+            --branco: #FFFFFF;
+            --preto: #000000;
+            --cinza-claro: #F5F5F5;
+            --verde: #28a745;
+            --vermelho: #dc3545;
+            --radius: 16px;
+            --sombra: 0 4px 20px rgba(0,0,0,0.08);
+            --sombra-hover: 0 8px 30px rgba(0,0,0,0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--branco);
+            color: var(--preto);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--azul-primario), var(--laranja));
+            transition: width 0.4s ease;
+            z-index: 1000;
+        }
+
+        /* Slide Container */
+        .slides-container {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 60px 40px 80px;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto;
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .slide.prev {
+            opacity: 0;
+            transform: translateX(-100%);
+        }
+
+        .slide-content {
+            max-width: 1100px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* Typography */
+        h1, h2, h3, h4, h5, h6 {
+            color: var(--azul-marinho);
+            font-weight: 700;
+            line-height: 1.3;
+        }
+
+        h1 { font-size: clamp(2rem, 5vw, 3.5rem); margin-bottom: 16px; }
+        h2 { font-size: clamp(1.5rem, 3.5vw, 2.5rem); margin-bottom: 14px; }
+        h3 { font-size: clamp(1.2rem, 2.5vw, 1.8rem); margin-bottom: 12px; }
+        h4 { font-size: clamp(1rem, 2vw, 1.4rem); margin-bottom: 10px; }
+
+        p {
+            color: var(--preto);
+            font-size: 1.05rem;
+            line-height: 1.7;
+            margin-bottom: 12px;
+        }
+
+        /* Navigation Dots */
+        .nav-dots {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 999;
+            background: rgba(255,255,255,0.95);
+            padding: 10px 16px;
+            border-radius: 30px;
+            box-shadow: var(--sombra);
+        }
+
+        .nav-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ddd;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .nav-dot.active {
+            background: var(--azul-primario);
+            transform: scale(1.3);
+            border-color: var(--azul-marinho);
+        }
+
+        .nav-dot:hover {
+            background: var(--azul-primario);
+            transform: scale(1.2);
+        }
+
+        /* Navigation Arrows */
+        .nav-arrow {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--branco);
+            border: 2px solid var(--azul-primario);
+            color: var(--azul-primario);
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            transition: all 0.3s;
+            box-shadow: var(--sombra);
+        }
+
+        .nav-arrow:hover {
+            background: var(--azul-primario);
+            color: var(--branco);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .nav-arrow.left { left: 15px; }
+        .nav-arrow.right { right: 15px; }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            background: linear-gradient(135deg, var(--cinza-claro) 0%, var(--branco) 100%);
+        }
+
+        .hero h1 {
+            background: linear-gradient(135deg, var(--azul-marinho), var(--azul-primario));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-subtitle {
+            font-size: 1.3rem;
+            color: var(--azul-escuro);
+            margin-bottom: 24px;
+            font-weight: 500;
+        }
+
+        .hero-image {
+            width: 100%;
+            max-width: 600px;
+            border-radius: var(--radius);
+            box-shadow: var(--sombra);
+            margin: 20px auto;
+        }
+
+        .hero-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border: 1px solid;
+        }
+
+        .badge-blue { background: #e6f0ff; color: var(--azul-primario); border-color: var(--azul-primario); }
+        .badge-orange { background: #fff3e0; color: #e67e00; border-color: var(--laranja); }
+        .badge-purple { background: #f0e6ff; color: var(--roxo-claro); border-color: var(--roxo-claro); }
+        .badge-green { background: #e6ffe6; color: #1a7a1a; border-color: var(--verde); }
+        .badge-pink { background: #ffe6f0; color: #c2185b; border-color: #e91e63; }
+
+        /* Cards */
+        .card {
+            background: var(--branco);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--sombra);
+            border: 1px solid #e8e8e8;
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            box-shadow: var(--sombra-hover);
+            transform: translateY(-3px);
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        /* Expandable Cards */
+        .expandable-card {
+            background: var(--branco);
+            border-radius: var(--radius);
+            border: 1px solid #e8e8e8;
+            margin-bottom: 12px;
+            overflow: hidden;
+            box-shadow: var(--sombra);
+        }
+
+        .expandable-header {
+            padding: 16px 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--cinza-claro);
+            border-left: 4px solid var(--azul-primario);
+            transition: background 0.3s;
+        }
+
+        .expandable-header:hover {
+            background: #e8e8e8;
+        }
+
+        .expandable-header h4 {
+            margin: 0;
+            font-size: 1rem;
+        }
+
+        .expandable-icon {
+            font-size: 1.2rem;
+            transition: transform 0.3s;
+            color: var(--azul-primario);
+        }
+
+        .expandable-card.open .expandable-icon {
+            transform: rotate(180deg);
+        }
+
+        .expandable-body {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease;
+            padding: 0 20px;
+        }
+
+        .expandable-card.open .expandable-body {
+            max-height: 500px;
+            padding: 16px 20px;
+        }
+
+        /* Tabs */
+        .tabs-container {
+            margin: 20px 0;
+        }
+
+        .tabs-header {
+            display: flex;
+            gap: 4px;
+            border-bottom: 2px solid #e8e8e8;
+            margin-bottom: 16px;
+            overflow-x: auto;
+        }
+
+        .tab-btn {
+            padding: 10px 20px;
+            border: none;
+            background: transparent;
+            color: var(--azul-escuro);
+            font-weight: 600;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            white-space: nowrap;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+        }
+
+        .tab-btn.active {
+            color: var(--azul-primario);
+            border-bottom-color: var(--azul-primario);
+        }
+
+        .tab-btn:hover {
+            color: var(--azul-primario);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Code Blocks */
+        .code-block {
+            background: var(--roxo-escuro);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin: 16px 0;
+            border-left: 4px solid var(--laranja);
+            position: relative;
+            overflow-x: auto;
+        }
+
+        .code-block pre {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: #f8f8f2;
+            margin: 0;
+            white-space: pre;
+        }
+
+        .code-block .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--roxo-claro);
+            color: #f8f8f2;
+            border: 1px solid #666;
+            padding: 4px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s;
+        }
+
+        .code-block .copy-btn:hover {
+            background: var(--laranja);
+            color: var(--branco);
+        }
+
+        .code-block .copy-btn.copied {
+            background: var(--verde);
+            color: var(--branco);
+        }
+
+        /* Syntax Highlighting (Dracula) */
+        .syn-keyword { color: #ff79c6; }
+        .syn-string { color: #f1fa8c; }
+        .syn-function { color: #50fa7b; }
+        .syn-comment { color: #6272a4; }
+        .syn-type { color: #8be9fd; }
+        .syn-number { color: #bd93f9; }
+        .syn-operator { color: #ff79c6; }
+        .syn-variable { color: #ffb86c; }
+
+        /* Info Boxes */
+        .info-box {
+            border-radius: var(--radius);
+            padding: 16px 20px;
+            margin: 16px 0;
+            border-left: 4px solid;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .info-box.success { background: #e8f5e9; border-color: var(--verde); }
+        .info-box.warning { background: #fff3e0; border-color: var(--laranja); }
+        .info-box.info { background: #e3f2fd; border-color: var(--azul-primario); }
+        .info-box.danger { background: #fce4ec; border-color: var(--vermelho); }
+
+        .info-box-icon {
+            font-size: 1.3rem;
+            flex-shrink: 0;
+        }
+
+        .info-box-text {
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+            margin: 16px 0;
+            border-radius: var(--radius);
+            box-shadow: var(--sombra);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--branco);
+        }
+
+        thead {
+            background: var(--azul-marinho);
+            color: var(--branco);
+        }
+
+        th {
+            padding: 14px 16px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9rem;
+            border: 1px solid var(--azul-escuro);
+        }
+
+        td {
+            padding: 12px 16px;
+            border: 1px solid #e8e8e8;
+            font-size: 0.9rem;
+            color: var(--preto);
+        }
+
+        tbody tr:hover {
+            background: var(--cinza-claro);
+        }
+
+        tbody tr:nth-child(even) {
+            background: #fafafa;
+        }
+
+        tbody tr:nth-child(even):hover {
+            background: var(--cinza-claro);
+        }
+
+        /* Simulation */
+        .simulation {
+            background: linear-gradient(135deg, var(--cinza-claro), var(--branco));
+            border-radius: var(--radius);
+            padding: 30px;
+            margin: 20px 0;
+            border: 2px solid var(--azul-primario);
+            box-shadow: var(--sombra);
+        }
+
+        .simulation h3 {
+            color: var(--azul-primario);
+            margin-bottom: 16px;
+        }
+
+        .sim-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 16px 0;
+        }
+
+        .sim-btn {
+            padding: 10px 20px;
+            border: 2px solid var(--azul-primario);
+            background: var(--branco);
+            color: var(--azul-primario);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .sim-btn:hover {
+            background: var(--azul-primario);
+            color: var(--branco);
+        }
+
+        .sim-btn.active {
+            background: var(--azul-primario);
+            color: var(--branco);
+        }
+
+        .sim-result {
+            background: var(--branco);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 16px;
+            border: 1px solid #e8e8e8;
+            min-height: 100px;
+        }
+
+        .sim-visual {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            margin: 16px 0;
+        }
+
+        .sim-node {
+            width: 80px;
+            height: 80px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-align: center;
+            padding: 8px;
+            transition: all 0.3s;
+            border: 2px solid;
+        }
+
+        .sim-node.mono {
+            background: #e3f2fd;
+            border-color: var(--azul-primario);
+            color: var(--azul-marinho);
+        }
+
+        .sim-node.micro {
+            background: #e8f5e9;
+            border-color: var(--verde);
+            color: #1b5e20;
+        }
+
+        .sim-node.event {
+            background: #f3e5f5;
+            border-color: var(--roxo-claro);
+            color: var(--roxo-escuro);
+        }
+
+        .sim-node.active-node {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(0,102,204,0.4);
+        }
+
+        .sim-node.error-node {
+            background: #fce4ec;
+            border-color: var(--vermelho);
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* Quiz */
+        .quiz-container {
+            background: var(--branco);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--sombra);
+            border: 1px solid #e8e8e8;
+            margin: 16px 0;
+        }
+
+        .quiz-question {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--azul-marinho);
+            margin-bottom: 16px;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .quiz-option {
+            padding: 12px 16px;
+            border: 2px solid #e8e8e8;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.95rem;
+            background: var(--branco);
+        }
+
+        .quiz-option:hover {
+            border-color: var(--azul-primario);
+            background: #f0f7ff;
+        }
+
+        .quiz-option.correct {
+            border-color: var(--verde);
+            background: #e8f5e9;
+            color: #1b5e20;
+        }
+
+        .quiz-option.wrong {
+            border-color: var(--vermelho);
+            background: #fce4ec;
+            color: #b71c1c;
+        }
+
+        .quiz-feedback {
+            margin-top: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .quiz-feedback.show {
+            display: block;
+        }
+
+        /* Challenges */
+        .challenge {
+            background: var(--branco);
+            border-radius: var(--radius);
+            padding: 24px;
+            margin: 16px 0;
+            border: 2px solid var(--laranja);
+            box-shadow: var(--sombra);
+        }
+
+        .challenge h4 {
+            color: var(--laranja);
+            margin-bottom: 12px;
+        }
+
+        .checklist {
+            list-style: none;
+            padding: 0;
+        }
+
+        .checklist li {
+            padding: 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.95rem;
+        }
+
+        .checklist li::before {
+            content: "☐";
+            font-size: 1.2rem;
+            color: var(--azul-primario);
+        }
+
+        .checklist li.checked::before {
+            content: "☑";
+            color: var(--verde);
+        }
+
+        /* Module indicator */
+        .module-indicator {
+            display: inline-block;
+            background: var(--azul-primario);
+            color: var(--branco);
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Comparison visual */
+        .comparison-visual {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+
+        .comparison-item {
+            text-align: center;
+            padding: 20px;
+            border-radius: var(--radius);
+            border: 2px solid;
+        }
+
+        .comparison-item.mono { border-color: var(--azul-primario); background: #f0f7ff; }
+        .comparison-item.micro { border-color: var(--verde); background: #f0fff0; }
+        .comparison-item.event { border-color: var(--roxo-claro); background: #f8f0ff; }
+
+        /* Summary */
+        .summary-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .summary-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid #e8e8e8;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1rem;
+        }
+
+        .summary-list li:last-child {
+            border-bottom: none;
+        }
+
+        .summary-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        /* Page counter */
+        .page-counter {
+            position: fixed;
+            bottom: 70px;
+            right: 20px;
+            background: var(--azul-marinho);
+            color: var(--branco);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            z-index: 999;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .slide {
+                padding: 50px 20px 90px;
+            }
+
+            .nav-arrow {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2rem;
+            }
+
+            .nav-arrow.left { left: 8px; }
+            .nav-arrow.right { right: 8px; }
+
+            .card-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .comparison-visual {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-dots {
+                gap: 5px;
+                padding: 8px 12px;
+            }
+
+            .nav-dot {
+                width: 10px;
+                height: 10px;
+            }
+
+            .sim-controls {
+                justify-content: center;
+            }
+
+            .tabs-header {
+                gap: 0;
+            }
+
+            .tab-btn {
+                padding: 8px 12px;
+                font-size: 0.85rem;
+            }
+        }
+
+        /* Scrollbar */
+        .slide::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .slide::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .slide::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 3px;
+        }
+
+        /* Animations */
+        .fade-in {
+            animation: fadeIn 0.6s ease forwards;
+        }
+
+        .slide-number {
+            position: absolute;
+            top: 15px;
+            left: 20px;
+            font-size: 0.75rem;
+            color: var(--azul-escuro);
+            opacity: 0.6;
+            font-weight: 600;
+        }
+
+        /* Connection lines for event-driven */
+        .event-flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin: 16px 0;
+            flex-wrap: wrap;
+        }
+
+        .event-arrow {
+            color: var(--laranja);
+            font-size: 1.5rem;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        .metric-bar {
+            height: 8px;
+            background: #e8e8e8;
+            border-radius: 4px;
+            margin: 6px 0;
+            overflow: hidden;
+        }
+
+        .metric-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.8s ease;
+        }
+
+        .metric-fill.high { background: var(--verde); }
+        .metric-fill.medium { background: var(--laranja); }
+        .metric-fill.low { background: var(--vermelho); }
+    </style>
+</head>
+<body>
+    <!-- Progress Bar -->
+    <div class="progress-bar" id="progressBar"></div>
+
+    <!-- Navigation Arrows -->
+    <button class="nav-arrow left" id="prevBtn" onclick="changeSlide(-1)">‹</button>
+    <button class="nav-arrow right" id="nextBtn" onclick="changeSlide(1)">›</button>
+
+    <!-- Page Counter -->
+    <div class="page-counter" id="pageCounter">1 / 19</div>
+
+    <!-- Navigation Dots -->
+    <div class="nav-dots" id="navDots"></div>
+
+    <!-- Slides Container -->
+    <div class="slides-container" id="slidesContainer">
+
+        <!-- SLIDE 1: Hero/Capa -->
+        <div class="slide active" data-slide="0">
+            <div class="slide-content hero">
+                <span class="module-indicator">Curso Intermediário • 60h</span>
+                <h1>Arquitetura de Software</h1>
+                <p class="hero-subtitle">Fundamentos, Estilos e Práticas para Tomada de Decisão</p>
+                <img src="https://www.sapicua.com.br/sites/default/files/styles/large/public/articles/01%20UniSenai%20MT%20tem%20mais%20de%20700%20vagas%20abertas%20para%2018%20cursos%20de%20n%C3%ADvel%20superior.jpeg?itok=NuczrSXd" alt="Ambiente acadêmico de tecnologia e inovação" class="hero-image">
+                <div class="hero-badges">
+                    <span class="badge badge-blue">Análise de Sistemas</span>
+                    <span class="badge badge-orange">Ensino Superior</span>
+                    <span class="badge badge-purple">Intermediário</span>
+                    <span class="badge badge-green">60 Horas</span>
+                </div>
+                <div class="info-box info" style="margin-top: 24px; text-align: left;">
+                    <span class="info-box-icon">🎯</span>
+                    <div class="info-box-text">
+                        <strong>Proposta de Valor:</strong> Ao final deste curso, você será capaz de identificar, comparar e escolher a arquitetura de software mais adequada para diferentes cenários corporativos, fundamentando suas decisões com base em critérios técnicos e de negócio.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 2: Estrutura/Cronograma -->
+        <div class="slide" data-slide="1">
+            <div class="slide-content">
+                <span class="module-indicator">Visão Geral</span>
+                <h2>Estrutura do Curso</h2>
+                <p>Organização dos módulos e carga horária distribuída ao longo das 60 horas do curso.</p>
+                <div class="card-grid">
+                    <div class="card">
+                        <h4>📘 Módulo 1 — Fundamentos</h4>
+                        <p><strong>12h</strong> • O que é arquitetura de software, definições formais, elementos e processos.</p>
+                        <span class="badge badge-blue">Teórico</span>
+                    </div>
+                    <div class="card">
+                        <h4>🏗️ Módulo 2 — Estilos Arquiteturais</h4>
+                        <p><strong>24h</strong> • Monolítica, Microservices e Event-Driven com simulações práticas.</p>
+                        <span class="badge badge-orange">Prático</span>
+                    </div>
+                    <div class="card">
+                        <h4>⚖️ Módulo 3 — Comparação e Decisão</h4>
+                        <p><strong>12h</strong> • Trade-offs, matrizes de decisão e critérios de escolha.</p>
+                        <span class="badge badge-purple">Analítico</span>
+                    </div>
+                    <div class="card">
+                        <h4>🚀 Módulo 4 — Aplicação</h4>
+                        <p><strong>12h</strong> • Desafios práticos, documentação e próximos passos.</p>
+                        <span class="badge badge-green">Projeto</span>
+                    </div>
+                </div>
+                <div class="info-box warning">
+                    <span class="info-box-icon">⚡</span>
+                    <div class="info-box-text">
+                        <strong>Dica:</strong> Use as setas do teclado (← →) ou deslize na tela para navegar entre os slides. Clique nos dots para ir direto a qualquer seção.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 3: O que é Arquitetura de Software -->
+        <div class="slide" data-slide="2">
+            <div class="slide-content">
+                <span class="module-indicator">Módulo 1 — Fundamentos</span>
+                <h2>O que é Arquitetura de Software?</h2>
+                <p>A arquitetura de software é a <strong>estrutura fundamental</strong> de um sistema, definindo seus componentes, suas relações e os princípios que guiam seu design e evolução.</p>
+                
+                <div class="info-box info">
+                    <span class="info-box-icon">💡</span>
+                    <div class="info-box-text">
+                        <strong>Analogia:</strong> Pense na arquitetura de software como a planta de um edifício. Antes de construir, você decide quantos andares terá, onde ficam as escadas, como a água e a energia serão distribuídas. A arquitetura define essas decisões fundamentais antes da implementação.
+                    </div>
+                </div>
+
+                <div class="card-grid">
+                    <div class="card">
+                        <h4>🧩 Componentes</h4>
+                        <p>Partes individuais do sistema que executam funções específicas.</p>
+                    </div>
+                    <div class="card">
+                        <h4>🔗 Conexões</h4>
+                        <p>Interações e comunicação entre os componentes do sistema.</p>
+                    </div>
+                    <div class="card">
+                        <h4>📐 Princípios</h4>
+                        <p>Regras e restrições que guiam o design e a evolução.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 4: Definições Formais -->
+        <div class="slide" data-slide="3">
+            <div class="slide-content">
+                <span class="module-indicator">Módulo 1 — Fundamentos</span>
+                <h2>Definições Formais</h2>
+                <p>Diferentes perspectivas acadêmicas e normativas sobre arquitetura de software.</p>
+
+                <div class="expandable-card" onclick="toggleExpand(this)">
+                    <div class="expandable-header">
+                        <h4>📋 ISO/IEC/IEEE 42010:2022</h4>
+                        <span class="expandable-icon">▼</span>
+                    </div>
+                    <div class="expandable-body">
+                        <p>"A estrutura fundamental ou o esqueleto de um sistema de software, que define seus componentes, suas relações e seus princípios de projeto e evolução."</p>
+                        <span class="badge badge-blue">Norma Internacional</span>
+                    </div>
+                </div>
+
+                <div class="expandable-card" onclick="toggleExpand(this)">
+                    <div class="expandable-header">
+                        <h4>📖 Perry e Wolf (1992)</h4>
+                        <span class="expandable-icon">▼</span>
+                    </div>
+                    <div class="expandable-body">
+                        <p>"Um conjunto de elementos arquiteturais (dados, processamento, conexão) organizados para satisfazer objetivos e restrições."</p>
+                        <span class="badge badge-purple">Referência Acadêmica</span>
+                    </div>
+                </div>
+
+                <div class="expandable-card" onclick="toggleExpand(this)">
+                    <div class="expandable-header">
+                        <h4>🏢 Padrões de Arquitetura Corporativa</h4>
+                        <span class="expandable-icon">▼</span>
+                    </div>
+                    <div class="expandable-body">
+                        <p><strong>TOGAF:</strong> Framework para desenvolvimento de arquitetura corporativa, amplamente adotado por grandes empresas.</p>
+                        <p><strong>Zachman:</strong> Estrutura para organizar artefatos de arquitetura em uma matriz 6×6.</p>
+                        <span class="badge badge-orange">Corporativo</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 5: MDA e MVC -->
+        <div class="slide" data-slide="4">
+            <div class="slide-content">
+                <span class="module-indicator">Módulo 1 — Fundamentos</span>
+                <h2>Abordagens de Desenvolvimento</h2>
+
+                <div class="tabs-container">
+                    <div class="tabs-header">
+                        <button class="tab-btn active" onclick="switchTab(event, 'tab-mda')">MDA</button>
+                        <button class="tab-btn" onclick="switchTab(event, 'tab-mvc')">MVC</button>
+                        <button class="tab-btn" onclick="switchTab(event, 'tab-soa')">SOA</button>
+                    </div>
+
+                    <div class="tab-content active" id="tab-mda">
+                        <h3>Model-Driven Architecture (MDA)</h3>
+                        <p>Abordagem que utiliza <strong>modelos</strong> para definir a estrutura e comportamento do software antes da implementação.</p>
+                        <h4>Modelo em três camadas:</h4>
+                        <div class="card-grid">
+                            <div class="card" style="border-top: 3px solid var(--azul-primario);">
+                                <h4>📱 Apresentação</h4>
+                                <p>Interface com o usuário, telas e formulários.</p>
+                            </div>
+                            <div class="card" style="border-top: 3px solid var(--laranja);">
+                                <h4>⚙️ Lógica de Negócio</h4>
+                                <p>Regras, validações e processamento central.</p>
+                            </div>
+                            <div class="card" style="border-top: 3px solid var(--roxo-claro);">
+                                <h4>💾 Dados</h4>
+                                <p>Persistência, bancos de dados e armazenamento.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-content" id="tab-mvc">
+                        <h3>Model-View-Controller (MVC)</h3>
+                        <p>Padrão que separa a aplicação em três componentes interconectados:</p>
+                        <div class="card-grid">
+                            <div class="card" style="border-left: 4px solid var(--azul-primario);">
+                                <h4>📦 Model</h4>
+                                <p>Representa os dados e a lógica de negócio. É a "fonte da verdade" da aplicação.</p>
+                            </div>
+                            <div class="card" style="border-left: 4px solid var(--laranja);">
+                                <h4>👁️ View</h4>
+                                <p>Interface visual que apresenta os dados ao usuário de forma formatada.</p>
+                            </div>
+                            <div class="card" style="border-left: 4px solid var(--roxo-claro);">
+                                <h4>🎮 Controller</h4>
+                                <p>Recebe entradas do usuário, processa e atualiza Model e View.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-content" id="tab-soa">
+                        <h3>Service-Oriented Architecture (SOA)</h3>
+                        <p>Princípios de serviços independentes que se comunicam através de protocolos padronizados.</p>
+                        <div class="info-box info">
+                            <span class="info-box-icon">🔑</span>
+                            <div class="info-box-text">
+                                <strong>Princípio-chave:</strong> Cada serviço é autônomo, possui uma interface bem definida e pode ser consumido por diferentes aplicações. É o precursor conceitual dos microservices.
+                            </div>
+                        </div>
+                        <div class="event-flow">
+                            <div class="sim-node mono">Serviço A</div>
+                            <span class="event-arrow">→</span>
+                            <div class="sim-node micro">ESB</div>
+                            <span class="event-arrow">→</span>
+                            <div class="sim-node mono">Serviço B</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 6: Documentação -->
+        <div class="slide" data-slide="5">
+            <div class="slide-content">
+                <span class="module-indicator">Módulo 1 — Fundamentos</span>
+                <h2>Documentando uma Arquitetura</h2>
+                <p>A documentação é essencial para comunicação, manutenção e evolução do sistema.</p>
+
+                <div class="card-grid">
+                    <div class="card">
+                        <h4>📝 ADLs</h4>
+                        <p><strong>Architectural Description Languages</strong> — Linguagens específicas para descrever arquiteturas de forma formal e precisa.</p>
+                        <span class="badge badge-blue">Formal</span>
+                    </div>
+                    <div class="card">
+                        <h4>📊 UML 2.0</h4>
+                        <p>Diagramas visuais para representar componentes, interações e estrutura do sistema.</p>
+                        <span class="badge badge-orange">Visual</span>
+                    </div>
+                    <div class="card">
+                        <h4>🧩 Diagrama de Componentes</h4>
+                        <p>Mostra a organização e interações entre os componentes do sistema.</p>
+                        <span class="badge badge-purple">Estrutural</span>
+                    </div>
+                </div>
+
+                <div class="info-box success">
+                    <span class="info-box-icon">✅</span>
+                    <div class="info-box-text">
+                        <strong>O que documentar:</strong> Componentes, Conexões, Padrões adotados, Decisões arquiteturais (ADRs), Restrições e Dependências externas.
+                    </div>
+                </div>
+
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+                    <pre><span class="syn-comment">// Exemplo: Documentando decisão arquitetural (ADR)</span>
+<span class="syn-keyword">ADR-001:</span> <span class="syn-string">Escolha do estilo arquitetural</span>
+
+<span class="syn-type">Contexto:</span> Sistema de e-commerce com pico sazonal
+<span class="syn-type">Decisão:</span> Adotar Microservices para módulos críticos
+<span class="syn-type">Consequências:</span>
+  <span class="syn-variable">+</span> Escalabilidade independente por serviço
+  <span class="syn-variable">+</span> Deploy sem downtime
+  <span class="syn-variable">-</span> Maior complexidade operacional
+  <span class="syn-variable">-</span> Necessidade de orquestração (Kubernetes)</pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 7: Escolhendo o Framework -->
+        <div class="slide" data-slide="6">
+            <div class="slide-content">
+                <span class="module-indicator">Módulo 1 — Fundamentos</span>
+                <h2>Escolhendo a Arquitetura</h2>
+                <p>Critérios fundamentais para a seleção do framework arquitetural e alocação de componentes.</p>
+
+                <div class="card-grid">
+                    <div class="card">
+                        <h4>📈 Escalabilidade</h4>
+                        <p>O sistema precisará crescer? Quantos usuários simultâneos? Picos de demanda?</p>
+                    </div>
+                    <div class="card">
+                        <h4>⚡ Desempenho</h4>
+                        <p>Latência aceitável? Throughput necessário? Tempo real ou batch?</p>
+                    </div>
+                    <div class="card">
+                        <h4>🔧 Manutenção</h4>
+                        <p>Tamanho da equipe? Frequência de mudanças? Complexidade do domínio?</p>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 24px;">Processo de Validação</h3>
+                <div class="card-grid">
+                    <div class="card" style="text-align: center;">
+                        <div style="font-size: 2rem; margin-bottom: 8px;">🧪</div>
+                        <h4>Testes</h4>
+                        <p>Protótipos e provas de conceito</p>
+                    </div>
+                    <div class="card" style="text-align: center;">
+                        <div style="font-size: 2rem; margin-bottom: 8px;">👥</div>
+                        <h4>Revisões</h4>
+                        <p>Peer review e análise de stakeholders</p>
+                    </div>
+                    <div class="card" style="text-align: center;">
+                        <div style="font-size: 2rem; margin-bottom: 8px;">🎮</div>
+                        <h4>Simulações</h4>
+                        <p>Modelagem de cenários de carga</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 8: Arquitetura Monolítica -->
+        <div class="slide" data-slide="7">
+            <div class="slide-content">
+                <span class="module-indicator">Módulo 2 — Estilos Arquiteturais</span>
+                <h2>Arquitetura Monolítica</h2>
+                <p><strong>Definição:</strong> Sistema único e indivisível, onde todos os componentes fazem parte de uma única unidade deployável.</p>
+
+                <div class="info-box info">
+                    <span class="info-box-icon">📜</span>
+                    <div class="info-box-text">
+                        <strong>História:</strong> Surgiu como abordagem padrão nas primeiras décadas da computação. A simplicidade e unificação de um único código-fonte facilitavam desenvolvimento e implantação. Ainda é amplamente usada em aplicações web tradicionais e sistemas ERP.
+                    </div>
+                </div>
+
+                <div class="comparison-visual">
+                    <div class="comparison-item mono">
+                        <div style="font-size: 2rem;">🏢</div>
+                        <h4>UI</h4>
+                        <p style="font-size: 0.85rem;">Interface</p>
+                    </div>
+                    <div class="comparison-item mono">
+                        <div style="font-size: 2rem;">⚙️</div>
+                        <h4>Business Logic</h4>
+                        <p style="font-size: 0.85rem;">Regras</p>
+                    </div>
+                    <div class="comparison-item mono">
+                        <div style="font-size: 2rem;">💾</div>
+                        <h4>Data Access</h4>
+                        <p style="font-size: 0.85rem;">Dados</p>
+                    </div>
+                </div>
+                <p style="text-align: center; font-weight: 600; color: var(--azul-primario);">↑ Tudo em um único deployável ↑</p>
+
+                <div class="card-grid">
+                    <div class="card" style="border-left: 4px solid var(--verde);">
+                        <h4>✅ Vantagens</h4>
+                        <ul style="padding-left: 16px; font-size: 0.9rem;">
+                            <li>Simplicidade inicial</li>
+                            <li>Menor complexidade de deploy</li>
+                            <li>Facilidade de teste em fases iniciais</li>
+                            <li>Debugging simplificado</li>
+                        </ul>
+                    </div>
+                    <div class="card" style="border-left: 4px solid var(--vermelho);">
+                        <h4>❌ Desvantagens</h4>
+                        <ul style="padding-left: 16px; font-size: 0.9rem;">
+                            <li>Dificuldade de escalabilidade</li>
+                            <li>Manutenção complexa com crescimento</li>
+                            <li>Risco de falha única afetar tudo</li>
+                            <li>Deploy requer reinício total</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 9: Simulação Monolítica -->
+        <div class="slide" data-slide="8">
+            <div class="slide-content">
+                <span class="module-indicator">Módulo 2 — Simulação</span>
+                <h2>🎮 Simulação: Monolito sob Carga</h2>
+                <p>Observe como um sistema monolítico responde a diferentes cenários de demanda.</p>
+
+                <div class="simulation">
+                    <h3>Simulador de Carga — Monolito</h3>
+                    <div class="sim-controls">
+                        <button class="sim-btn" onclick="simulateMono('normal')">Carga Normal</button>
+                        <button class="sim-btn" onclick="simulateMono('peak')">Pico de Acesso</button>
+                        <button class="sim-btn" onclick="simulateMono('error')">Falha no Módulo</button>
+                        <button class="sim-btn" onclick="simulateMono('scale')">Tentar Escalar</button>
+                    </div>
+
+                    <div class="sim-visual" id="monoVisual">
+                        <div class="sim-node mono" id="monoUI">UI</div>
+                        <div class="sim-node mono" id="monoBiz">Lógica</div>
+                        <div class="sim-node mono" id="monoData">Dados</div>
+                        <div class="sim-node mono" id="monoAuth">Auth</div>
+                    </div>
+
+                    <div class="sim-result" id="monoResult">
+                        <p style="color: var(--azul-escuro); text-align: center;">
+                            👆 Clique em um cenário acima para iniciar a simulação
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 10: Microservices -->
+        <div class="slide" data-slide="9">
+            <div class="slide-content">
+                <span class="module-indicator">Módulo 2 — Estilos Arquiteturais</span>
+                <h2>Arquitetura de Microservices</h2>
+                <p><strong>Definição:</strong> Conjunto de serviços pequenos e independentes, cada um executando um processo específico e comunicando-se por mecanismos leves.</p>
+
+                <div class="info-box info">
+                    <span class="info-box-icon">📜</span>
+                    <div class="info-box-text">
+                        <strong>História:</strong> Ganhou popularidade na última década como resposta aos desafios de escalabilidade do monolito. Empresas como <strong>Netflix</strong> e <strong>Amazon</strong> adotaram essa abordagem para permitir escalabilidade horizontal e independência de desenvolvimento.
+                    </div>
+                </div>
+
+                <div class="comparison-visual">
+                    <div class="comparison-item micro">
+                        <div style="font-size: 1.5rem;">🛒</div>
+                        <p style="font-size: 0.8rem;">Catálogo</p>
+                    </div>
+                    <div class="comparison-item micro">
+                        <div style="font-size: 1.5rem;">💳</div>
+                        <p style="font-size: 0.8rem;">Pagamento</p>
+                    </div>
+                    <div class="comparison-item micro">
+                        <div style="font-size: 1.5rem;">📦</div>
+                        <p style="font-size: 0.8rem;">Entrega</p>
+                    </div>
+                    <div class="comparison-item micro">
+                        <div style="font-size: 1.5rem;">👤</div>
+                        <p style="font-size: 0.8rem;">Usuário</p>
+                    </div>
+                    <div class="comparison-item micro">
+                        <div style="font-size: 1.5rem;">🔔</div>
+                        <p style="font-size: 0.8rem;">Notificação</p>
+                    </div>
+                </div>
+                <p style="text-align: center; font-weight: 600; color: var(--verde);">↑ Serviços independentes com deploy próprio ↑</p>
+
+                <div class="card-grid">
+                    <div class="card" style="border-left: 4px solid var(--verde);">
+                        <h4>✅ Vantagens</h4>
+                        <ul style="padding-left: 16px; font-size: 0.9rem;">
+                            <li>Escalabilidade horizontal</li>
+                            <li>Independência de deploy</li>
+                            <li>Resiliência a falhas</li>
+                            <li>Equipes autônomas</li>
+                        </ul>
+                    </div>
+                    <div class="card" style="border-left: 4px solid var(--vermelho);">
+                        <h4>❌ Desvantagens</h4>
+                        <ul style="padding-left: 16px; font-size: 0.9rem;">
+                            <li>Complexidade de gerenciamento</li>
+                            <li>Orquestração necessária</li>
+                            <li>Comunicação entre serviços</li>
+                            <li>Monitoramento distribuído</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 11: Simulação Microservices -->
+        <div class="slide" data-slide="10">
+            <div class="slide-content">
+                <span class="module-indicator">Módulo 2 — Simulação</span>
+                <h2>🎮 Simulação: Microservices em Ação</h2>
+                <p>Veja como serviços independentes respondem a falhas e picos de demanda.</p>
+
+                <div class="simulation">
+                    <h3>Simulador de Resiliência — Microservices</h3>
+                    <div class="sim-controls">
+                        <button class="sim-btn" onclick="simulateMicro('normal')">Operação Normal</button>
+                        <button class="sim-btn" onclick="simulateMicro('fail')">Falha no Pagamento</button>
+                        <button class="sim-btn" onclick="simulateMicro('scale')">Escalar Catálogo</button>
+                        <button class="sim-btn" onclick="simulateMicro('deploy')">Deploy Independente</button>
+                    </div>
+
+                    <div class="sim-visual" id="microVisual">
+                        <div class="sim-node micro" id="microCat">Catálogo</div>
+                        <div class="sim-node micro" id="microPay">Pagamento</div>
+                        <div class="sim-node micro" id="microShip">Entrega</div>
+                        <div class="sim-node micro" id="microUser">Usuário</div>
+                        <div class="sim-node micro" id="microNotif">Notif.</div>
+                    </div>
+
+                    <div class="sim-result" id="microResult">
+                        <p style="color: var(--azul-escuro); text-align: center;">
+                            👆 Clique em um cenário acima para iniciar a simulação
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 12: Event-Driven -->
+        <div class="slide" data-slide="11">
+            <div class="slide-content">
+                <span class="module-indicator">Módulo 2 — Estilos Arquiteturais</span>
+                <h2>Arquitetura Event-Driven</h2>
+                <p><strong>Definição:</strong> Baseada em eventos para comunicação assíncrona entre componentes. Os sistemas reagem a eventos conforme eles ocorrem.</p>
+
+                <div class="info-box info">
+                    <span class="info-box-icon">📜</span>
+                    <div class="info-box-text">
+                        <strong>Contexto:</strong> Surgiu como solução para sistemas que exigem alta flexibilidade e resposta rápida. Utilizada em processamento de dados em tempo real e aplicações de IoT, permitindo comunicação assíncrona e escalabilidade sem interrupções.
+                    </div>
+                </div>
+
+                <div class="event-flow">
+                    <div class="sim-node event">📡 Producer</div>
+                    <span class="event-arrow">→</span>
+                    <div class="sim-node event" style="background: #fff3e0; border-color: var(--laranja);">📨 Event Bus</div>
+                    <span class="event-arrow">→</span>
+                    <div class="sim-node event">🎯 Consumer A</div>
+                </div>
+                <div class="event-flow">
+                    <div class="sim-node event" style="opacity: 0;"></div>
+                    <span style="visibility: hidden;">→</span>
+                    <div class="sim-node event" style="background: #fff3e0; border-color: var(--laranja);">📨 Event Bus</div>
+                    <span class="event-arrow">→</span>
+                    <div class="sim-node event">🎯 Consumer B</div>
+                </div>
+
+                <div class="card-grid">
+                    <div class="card" style="border-left: 4px solid var(--verde);">
+                        <h4>✅ Vantagens</h4>
+                        <ul style="padding-left: 16px; font-size: 0.9rem;">
+                            <li>Alta escalabilidade</li>
+                            <li>Flexibilidade na adição de componentes</li>
+                            <li>Resposta rápida a eventos</li>
+                            <li>Desacoplamento forte</li>
+                        </ul>
+                    </div>
+                    <div class="card" style="border-left: 4px solid var(--vermelho);">
+                        <h4>❌ Desvantagens</h4>
+                        <ul style="padding-left: 16px; font-size: 0.9rem;">
+                            <li>Complexidade de implementação</li>
+                            <li>Dificuldade de depuração</li>
+                            <li>Gerenciamento de eventos</li>
+                            <li>Garantia de entrega</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 13: Simulação Event-Driven -->
+        <div class="slide" data-slide="12">
+            <div class="slide-content">
+                <span class="module-indicator">Módulo 2 — Simulação</span>
+                <h2>🎮 Simulação: Event-Driven em Ação</h2>
+                <p>Observe como eventos fluem entre produtores e consumidores assíncronos.</p>
+
+                <div class="simulation">
+                    <h3>Simulador de Eventos</h3>
+                    <div class="sim-controls">
+                        <button class="sim-btn" onclick="simulateEvent('order')">🛒 Novo Pedido</button>
+                        <button class="sim-btn" onclick="simulateEvent('payment')">💳 Pagamento</button>
+                        <button class="sim-btn" onclick="simulateEvent('ship')">📦 Envio</button>
+                        <button class="sim-btn" onclick="simulateEvent('flood')">🌊 Flood de Eventos</button>
+                    </div>
+
+                    <div class="sim-visual" id="eventVisual">
+                        <div class="sim-node event" id="evProducer">Producer</div>
+                        <div class="sim-node event" id="evBus" style="background: #fff3e0; border-color: var(--laranja);">Event Bus</div>
+                        <div class="sim-node event" id="evConsumerA">Consumer A</div>
+                        <div class="sim-node event" id="evConsumerB">Consumer B</div>
+                        <div class="sim-node event" id="evConsumerC">Consumer C</div>
+                    </div>
+
+                    <div class="sim-result" id="eventResult">
+                        <p style="color: var(--azul-escuro); text-align: center;">
+                            👆 Clique em um tipo de evento para ver o fluxo
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 14: Comparação -->
+        <div class="slide" data-slide="13">
+            <div class="slide-content">
+                <span class="module-indicator">Módulo 3 — Comparação</span>
+                <h2>Comparação entre os Estilos</h2>
+                <p>Análise comparativa dos três principais estilos arquiteturais abordados.</p>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Critério</th>
+                                <th>Monolítica</th>
+                                <th>Microservices</th>
+                                <th>Event-Driven</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Escalabilidade</strong></td>
+                                <td>Limitada (vertical)</td>
+                                <td>Alta (horizontal)</td>
+                                <td>Muito Alta</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Complexidade</strong></td>
+                                <td>Baixa (início)</td>
+                                <td>Alta</td>
+                                <td>Muito Alta</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Deploy</strong></td>
+                                <td>Único, reinício total</td>
+                                <td>Independente por serviço</td>
+                                <td>Contínuo e assíncrono</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Resiliência</strong></td>
+                                <td>Baixa (single point)</td>
+                                <td>Alta (isolamento)</td>
+                                <td>Alta (desacoplamento)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Custo Inicial</strong></td>
+                                <td>Baixo</td>
+                                <td>Alto</td>
+                                <td>Muito Alto</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Equipe</strong></td>
+                                <td>Pequena/Média</td>
+                                <td>Múltiplas squads</td>
+                                <td>Especializada</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Caso de Uso</strong></td>
+                                <td>MVP, ERP, apps simples</td>
+                                <td>E-commerce, streaming</td>
+                                <td>IoT, tempo real, filas</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="info-box warning">
+                    <span class="info-box-icon">💬</span>
+                    <div class="info-box-text">
+                        <strong>Discussão:</strong> Quando usar cada estilo? Quais são os trade-offs a considerar? Existem exemplos de casos de uso específicos para cada arquitetura no seu contexto profissional?
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 15: Matriz de Decisão Interativa -->
+        <div class="slide" data-slide="14">
+            <div class="slide-content">
+                <span class="module-indicator">Módulo 3 — Decisão</span>
+                <h2>Matriz de Decisão Interativa</h2>
+                <p>Selecione os critérios mais importantes para o seu cenário e veja a recomendação.</p>
+
+                <div class="simulation">
+                    <h3>🎯 Qual arquitetura escolher?</h3>
+                    <p>Marque os critérios relevantes para o seu projeto:</p>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 10px; margin: 16px 0;">
+                        <label style="display: flex; align-items: center; gap: 8px; padding: 8px; border-radius: 8px; cursor: pointer; border: 1px solid #e8e8e8;">
+                            <input type="checkbox" class="decision-check" data-style="mono" onchange="updateDecision()"> 
+                            <span>Equipe pequena (< 10 devs)</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; padding: 8px; border-radius: 8px; cursor: pointer; border: 1px solid #e8e8e8;">
+                            <input type="checkbox" class="decision-check" data-style="micro" onchange="updateDecision()">
+                            <span>Escalabilidade horizontal</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; padding: 8px; border-radius: 8px; cursor: pointer; border: 1px solid #e8e8e8;">
+                            <input type="checkbox" class="decision-check" data-style="mono" onchange="updateDecision()">
+                            <span>Time to market rápido</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; padding: 8px; border-radius: 8px; cursor: pointer; border: 1px solid #e8e8e8;">
+                            <input type="checkbox" class="decision-check" data-style="micro" onchange="updateDecision()">
+                            <span>Múltiplas equipes independentes</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; padding: 8px; border-radius: 8px; cursor: pointer; border: 1px solid #e8e8e8;">
+                            <input type="checkbox" class="decision-check" data-style="event" onchange="updateDecision()">
+                            <span>Processamento em tempo real</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; padding: 8px; border-radius: 8px; cursor: pointer; border: 1px solid #e8e8e8;">
+                            <input type="checkbox" class="decision-check" data-style="event" onchange="updateDecision()">
+                            <span>Alta flexibilidade de componentes</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; padding: 8px; border-radius: 8px; cursor: pointer; border: 1px solid #e8e8e8;">
+                            <input type="checkbox" class="decision-check" data-style="mono" onchange="updateDecision()">
+                            <span>Orçamento limitado</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; padding: 8px; border-radius: 8px; cursor: pointer; border: 1px solid #e8e8e8;">
+                            <input type="checkbox" class="decision-check" data-style="micro" onchange="updateDecision()">
+                            <span>Alta disponibilidade (99.9%+)</span>
+                        </label>
+                    </div>
+
+                    <div class="sim-result" id="decisionResult">
+                        <p style="text-align: center; color: var(--azul-escuro);">
+                            ☝️ Selecione os critérios acima para ver a recomendação
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 16: Quiz -->
+        <div class="slide" data-slide="15">
+            <div class="slide-content">
+                <span class="module-indicator">Módulo 3 — Avaliação</span>
+                <h2>🧠 Quiz Interativo</h2>
+                <p>Teste seus conhecimentos sobre os estilos arquiteturais.</p>
+
+                <div class="quiz-container" id="quiz1">
+                    <div class="quiz-question">1. Qual arquitetura é mais indicada para um MVP com equipe de 3 desenvolvedores?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" onclick="checkAnswer(this, false, 'quiz1')">Microservices — máxima escalabilidade</div>
+                        <div class="quiz-option" onclick="checkAnswer(this, true, 'quiz1')">Monolítica — simplicidade e rapidez</div>
+                        <div class="quiz-option" onclick="checkAnswer(this, false, 'quiz1')">Event-Driven — resposta em tempo real</div>
+                        <div class="quiz-option" onclick="checkAnswer(this, false, 'quiz1')">SOA com ESB — integração corporativa</div>
+                    </div>
+                    <div class="quiz-feedback" id="feedback-quiz1"></div>
+                </div>
+
+                <div class="quiz-container" id="quiz2">
+                    <div class="quiz-question">2. Qual a principal desvantagem da arquitetura monolítica?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" onclick="checkAnswer(this, false, 'quiz2')">Alto custo de infraestrutura inicial</div>
+                        <div class="quiz-option" onclick="checkAnswer(this, false, 'quiz2')">Dificuldade de comunicação entre módulos</div>
+                        <div class="quiz-option" onclick="checkAnswer(this, true, 'quiz2')">Dificuldade de escalabilidade e risco de falha única</div>
+                        <div class="quiz-option" onclick="checkAnswer(this, false, 'quiz2')">Impossibilidade de usar banco de dados</div>
+                    </div>
+                    <div class="quiz-feedback" id="feedback-quiz2"></div>
+                </div>
+
+                <div class="quiz-container" id="quiz3">
+                    <div class="quiz-question">3. Na arquitetura Event-Driven, como os componentes se comunicam?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" onclick="checkAnswer(this, false, 'quiz3')">Chamadas síncronas diretas (HTTP)</div>
+                        <div class="quiz-option" onclick="checkAnswer(this, true, 'quiz3')">Eventos assíncronos via Event Bus</div>
+                        <div class="quiz-option" onclick="checkAnswer(this, false, 'quiz3')">Banco de dados compartilhado</div>
+                        <div class="quiz-option" onclick="checkAnswer(this, false, 'quiz3')">Arquivos em disco compartilhado</div>
+                    </div>
+                    <div class="quiz-feedback" id="feedback-quiz3"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 17: Desafios Práticos -->
+        <div class="slide" data-slide="16">
+            <div class="slide-content">
+                <span class="module-indicator">Módulo 4 — Aplicação</span>
+                <h2>🏆 Desafios Práticos</h2>
+                <p>Atividades para aplicar os conceitos em cenários reais.</p>
+
+                <div class="challenge">
+                    <h4>Desafio 1: Análise de Cenário</h4>
+                    <p>Uma startup de food delivery precisa escolher sua arquitetura. Ela tem: 5 devs, orçamento limitado, previsão de crescimento de 10x em 6 meses.</p>
+                    <ul class="checklist">
+                        <li>Identificar o estilo arquitetural mais adequado para o momento atual</li>
+                        <li>Justificar a escolha com pelo menos 3 argumentos</li>
+                        <li>Propor uma estratégia de evolução para o futuro</li>
+                        <li>Apresentar riscos da escolha e mitigação</li>
+                    </ul>
+                </div>
+
+                <div class="challenge">
+                    <h4>Desafio 2: Decomposição de Monolito</h4>
+                    <p>Dado um sistema ERP monolítico com módulos de RH, Financeiro, Estoque e Vendas, proponha uma estratégia de migração para microservices.</p>
+                    <ul class="checklist">
+                        <li>Definir a ordem de extração dos serviços</li>
+                        <li>Identificar dependências entre módulos</li>
+                        <li>Propor estratégia de comunicação entre serviços</li>
+                        <li>Estimar impactos no time de desenvolvimento</li>
+                    </ul>
+                </div>
+
+                <div class="challenge">
+                    <h4>Desafio 3: Design Event-Driven</h4>
+                    <p>Projete um sistema de notificações para uma plataforma de streaming que precisa processar eventos de: play, pause, seek, buffer e complete.</p>
+                    <ul class="checklist">
+                        <li>Definir os produtores e consumidores de eventos</li>
+                        <li>Especificar o formato dos eventos</li>
+                        <li>Propor estratégia de garantia de entrega</li>
+                        <li>Desenhar o fluxo de pelo menos 2 cenários</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 18: Aprofundamento -->
+        <div class="slide" data-slide="17">
+            <div class="slide-content">
+                <span class="module-indicator">Módulo 4 — Aprofundamento</span>
+                <h2>🔬 Tópicos Avançados</h2>
+                <p>Conceitos que complementam e aprofundam o conhecimento em arquitetura de software.</p>
+
+                <div class="expandable-card" onclick="toggleExpand(this)">
+                    <div class="expandable-header">
+                        <h4>🐳 Containers e Orquestração</h4>
+                        <span class="expandable-icon">▼</span>
+                    </div>
+                    <div class="expandable-body">
+                        <p>Docker e Kubernetes revolucionaram a implementação de microservices, permitindo deploy isolado, escalabilidade automática e gerenciamento simplificado de centenas de serviços.</p>
+                        <span class="badge badge-blue">Infraestrutura</span>
+                    </div>
+                </div>
+
+                <div class="expandable-card" onclick="toggleExpand(this)">
+                    <div class="expandable-header">
+                        <h4>🔄 API Gateway e Service Mesh</h4>
+                        <span class="expandable-icon">▼</span>
+                    </div>
+                    <div class="expandable-body">
+                        <p>Padrões essenciais para gerenciar comunicação em arquiteturas distribuídas. API Gateway centraliza autenticação, rate limiting e roteamento. Service Mesh (Istio, Linkerd) gerencia comunicação service-to-service com observabilidade.</p>
+                        <span class="badge badge-orange">Comunicação</span>
+                    </div>
+                </div>
+
+                <div class="expandable-card" onclick="toggleExpand(this)">
+                    <div class="expandable-header">
+                        <h4>📊 Observabilidade Distribuída</h4>
+                        <span class="expandable-icon">▼</span>
+                    </div>
+                    <div class="expandable-body">
+                        <p>Em sistemas distribuídos, monitoramento tradicional não é suficiente. É necessário implementar os três pilares: <strong>Logs</strong> (centralizados), <strong>Métricas</strong> (Prometheus/Grafana) e <strong>Traces</strong> (distributed tracing com Jaeger/Zipkin).</p>
+                        <span class="badge badge-purple">Monitoramento</span>
+                    </div>
+                </div>
+
+                <div class="expandable-card" onclick="toggleExpand(this)">
+                    <div class="expandable-header">
+                        <h4>🏗️ Domain-Driven Design (DDD)</h4>
+                        <span class="expandable-icon">▼</span>
+                    </div>
+                    <div class="expandable-body">
+                        <p>Abordagem que alinha a arquitetura ao domínio de negócio. Conceitos-chave: Bounded Contexts, Aggregates, Entities, Value Objects. Essencial para definir boundaries corretos em microservices.</p>
+                        <span class="badge badge-green">Design</span>
+                    </div>
+                </div>
+
+                <div class="expandable-card" onclick="toggleExpand(this)">
+                    <div class="expandable-header">
+                        <h4>⚡ Event Sourcing e CQRS</h4>
+                        <span class="expandable-icon">▼</span>
+                    </div>
+                    <div class="expandable-body">
+                        <p><strong>Event Sourcing:</strong> Armazenar estado como sequência de eventos, não como estado atual. <strong>CQRS:</strong> Separar modelos de leitura e escrita. Juntos, oferecem auditabilidade completa e performance otimizada.</p>
+                        <span class="badge badge-pink">Padrão Avançado</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 19: Resumo Final -->
+        <div class="slide" data-slide="18">
+            <div class="slide-content">
+                <span class="module-indicator">Conclusão</span>
+                <h2>📋 Resumo e Próximos Passos</h2>
+                <p>Recapitulação dos conceitos fundamentais e direcionamento para continuidade do aprendizado.</p>
+
+                <h3>O que aprendemos:</h3>
+                <ul class="summary-list">
+                    <li>
+                        <span class="summary-icon" style="background: #e3f2fd;">📘</span>
+                        <span><strong>Fundamentos:</strong> Arquitetura define componentes, conexões e princípios de um sistema</span>
+                    </li>
+                    <li>
+                        <span class="summary-icon" style="background: #e8f5e9;">🏢</span>
+                        <span><strong>Monolítica:</strong> Simples no início, desafia na escala — ideal para MVPs e equipes pequenas</span>
+                    </li>
+                    <li>
+                        <span class="summary-icon" style="background: #f3e5f5;">🔌</span>
+                        <span><strong>Microservices:</strong> Escalável e resiliente, mas complexo — para sistemas maduros com múltiplas equipes</span>
+                    </li>
+                    <li>
+                        <span class="summary-icon" style="background: #fff3e0;">📨</span>
+                        <span><strong>Event-Driven:</strong> Assíncrono e flexível — para tempo real, IoT e alto desacoplamento</span>
+                    </li>
+                    <li>
+                        <span class="summary-icon" style="background: #fce4ec;">⚖️</span>
+                        <span><strong>Decisão:</strong> Não existe "melhor" arquitetura — existe a mais adequada para cada contexto</span>
+                    </li>
+                </ul>
+
+                <div class="info-box success" style="margin-top: 24px;">
+                    <span class="info-box-icon">🚀</span>
+                    <div class="info-box-text">
+                        <strong>Próximos passos recomendados:</strong>
+                        <br>• Pratique decompondo um sistema monolítico em serviços
+                        <br>• Implemente um pequeno sistema event-driven com RabbitMQ ou Kafka
+                        <br>• Estude Domain-Driven Design para melhorar definição de boundaries
+                        <br>• Explore Kubernetes para orquestração de containers
+                    </div>
+                </div>
+
+                <div class="info-box info" style="margin-top: 12px;">
+                    <span class="info-box-icon">📚</span>
+                    <div class="info-box-text">
+                        <strong>Referências:</strong> "Building Microservices" (Sam Newman) • "Designing Data-Intensive Applications" (Martin Kleppmann) • "Fundamentals of Software Architecture" (Mark Richards)
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Slide Navigation
+        let currentSlide = 0;
+        const totalSlides = 19;
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        // Initialize
+        function init() {
+            createDots();
+            updateProgress();
+            updatePageCounter();
+        }
+
+        function createDots() {
+            const dotsContainer = document.getElementById('navDots');
+            for (let i = 0; i < totalSlides; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+                dot.onclick = () => goToSlide(i);
+                dotsContainer.appendChild(dot);
+            }
+        }
+
+        function changeSlide(direction) {
+            const newSlide = currentSlide + direction;
+            if (newSlide >= 0 && newSlide < totalSlides) {
+                goToSlide(newSlide);
+            }
+        }
+
+        function goToSlide(index) {
+            const slides = document.querySelectorAll('.slide');
+            const dots = document.querySelectorAll('.nav-dot');
+
+            slides[currentSlide].classList.remove('active');
+            slides[currentSlide].classList.add(index > currentSlide ? 'prev' : '');
+            
+            setTimeout(() => {
+                slides[currentSlide].classList.remove('prev');
+            }, 500);
+
+            dots[currentSlide].classList.remove('active');
+
+            currentSlide = index;
+
+            slides[currentSlide].classList.add('active');
+            dots[currentSlide].classList.add('active');
+
+            updateProgress();
+            updatePageCounter();
+        }
+
+        function updateProgress() {
+            const progress = ((currentSlide + 1) / totalSlides) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function updatePageCounter() {
+            document.getElementById('pageCounter').textContent = (currentSlide + 1) + ' / ' + totalSlides;
+        }
+
+        // Keyboard Navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                changeSlide(1);
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                changeSlide(-1);
+            }
+        });
+
+        // Touch/Swipe Support
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+
+        document.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+
+        function handleSwipe() {
+            const diff = touchStartX - touchEndX;
+            if (Math.abs(diff) > 50) {
+                if (diff > 0) {
+                    changeSlide(1);
+                } else {
+                    changeSlide(-1);
+                }
+            }
+        }
+
+        // Expandable Cards
+        function toggleExpand(card) {
+            card.classList.toggle('open');
+        }
+
+        // Tabs
+        function switchTab(event, tabId) {
+            const container = event.target.closest('.tabs-container');
+            const buttons = container.querySelectorAll('.tab-btn');
+            const contents = container.querySelectorAll('.tab-content');
+
+            buttons.forEach(btn => btn.classList.remove('active'));
+            contents.forEach(content => content.classList.remove('active'));
+
+            event.target.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        // Copy Code
+        function copyCode(btn) {
+            const codeBlock = btn.closest('.code-block');
+            const pre = codeBlock.querySelector('pre');
+            const text = pre.textContent;
+
+            navigator.clipboard.writeText(text).then(() => {
+                btn.textContent = '✓ Copiado!';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.textContent = 'Copiar';
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
+        }
+
+        // Monolith Simulation
+        function simulateMono(scenario) {
+            const result = document.getElementById('monoResult');
+            const nodes = document.querySelectorAll('#monoVisual .sim-node');
+
+            nodes.forEach(n => {
+                n.classList.remove('active-node', 'error-node');
+            });
+
+            switch(scenario) {
+                case 'normal':
+                    nodes.forEach(n => n.classList.add('active-node'));
+                    result.innerHTML = `
+                        <h4 style="color: var(--verde);">✅ Carga Normal</h4>
+                        <p>Todos os módulos operando normalmente. O monolito processa requisições de forma centralizada.</p>
+                        <div class="metric-bar"><div class="metric-fill high" style="width: 45%;"></div></div>
+                        <small>CPU: 45% | Memória: 60% | Latência: 120ms</small>
+                    `;
+                    break;
+                case 'peak':
+                    nodes.forEach(n => n.classList.add('active-node'));
+                    result.innerHTML = `
+                        <h4 style="color: var(--laranja);">⚠️ Pico de Acesso</h4>
+                        <p>O monolito precisa escalar <strong>inteiro</strong>, mesmo que apenas o módulo de dados precise de mais recursos. Ineficiência na alocação.</p>
+                        <div class="metric-bar"><div class="metric-fill medium" style="width: 92%;"></div></div>
+                        <small>CPU: 92% | Memória: 88% | Latência: 2500ms ⚠️</small>
+                        <p style="color: var(--vermelho); font-size: 0.85rem; margin-top: 8px;"><strong>Problema:</strong> Não é possível escalar apenas o módulo sobrecarregado.</p>
+                    `;
+                    break;
+                case 'error':
+                    const randomNode = nodes[Math.floor(Math.random() * nodes.length)];
+                    randomNode.classList.add('error-node');
+                    result.innerHTML = `
+                        <h4 style="color: var(--vermelho);">❌ Falha no Módulo</h4>
+                        <p>Uma falha em qualquer módulo <strong>derruba todo o sistema</strong>. Single point of failure.</p>
+                        <div class="metric-bar"><div class="metric-fill low" style="width: 100%;"></div></div>
+                        <small>Status: SISTEMA INDISPONÍVEL | Todos os módulos afetados</small>
+                        <p style="color: var(--vermelho); font-size: 0.85rem; margin-top: 8px;"><strong>Impacto:</strong> 100% dos usuários afetados. Recovery time: ~15min.</p>
+                    `;
+                    break;
+                case 'scale':
+                    nodes.forEach(n => n.classList.add('active-node'));
+                    result.innerHTML = `
+                        <h4 style="color: var(--laranja);">📈 Tentativa de Escalar</h4>
+                        <p>Para escalar, é necessário duplicar <strong>toda a aplicação</strong>. Custo elevado e ineficiente.</p>
+                        <div style="display: flex; gap: 16px; margin-top: 12px; flex-wrap: wrap;">
+                            <div style="padding: 8px 12px; background: #fff3e0; border-radius: 8px; font-size: 0.85rem;">
+                                <strong>Instância 1:</strong> UI + Lógica + Dados + Auth
+                            </div>
+                            <div style="padding: 8px 12px; background: #fff3e0; border-radius: 8px; font-size: 0.85rem;">
+                                <strong>Instância 2:</strong> UI + Lógica + Dados + Auth
+                            </div>
+                        </div>
+                        <p style="color: var(--laranja); font-size: 0.85rem; margin-top: 8px;"><strong>Custo:</strong> 2x recursos para possivelmente 1 módulo que precisa de mais capacidade.</p>
+                    `;
+                    break;
+            }
+        }
+
+        // Microservices Simulation
+        function simulateMicro(scenario) {
+            const result = document.getElementById('microResult');
+            const nodes = document.querySelectorAll('#microVisual .sim-node');
+
+            nodes.forEach(n => {
+                n.classList.remove('active-node', 'error-node');
+            });
+
+            switch(scenario) {
+                case 'normal':
+                    nodes.forEach(n => n.classList.add('active-node'));
+                    result.innerHTML = `
+                        <h4 style="color: var(--verde);">✅ Operação Normal</h4>
+                        <p>Todos os serviços operando independentemente. Cada um com seus recursos próprios.</p>
+                        <div class="metric-bar"><div class="metric-fill high" style="width: 35%;"></div></div>
+                        <small>Carga média por serviço: 35% | Latência: 45ms</small>
+                    `;
+                    break;
+                case 'fail':
+                    document.getElementById('microPay').classList.add('error-node');
+                    nodes.forEach(n => {
+                        if (n.id !== 'microPay') n.classList.add('active-node');
+                    });
+                    result.innerHTML = `
+                        <h4 style="color: var(--laranja);">⚠️ Falha no Pagamento</h4>
+                        <p>Apenas o serviço de pagamento está indisponível. Os demais continuam operando normalmente.</p>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px;">
+                            <span class="badge badge-green">Catálogo ✓</span>
+                            <span class="badge badge-pink">Pagamento ✗</span>
+                            <span class="badge badge-green">Entrega ✓</span>
+                            <span class="badge badge-green">Usuário ✓</span>
+                            <span class="badge badge-green">Notif. ✓</span>
+                        </div>
+                        <p style="color: var(--laranja); font-size: 0.85rem; margin-top: 8px;"><strong>Resiliência:</strong> 80% do sistema continua funcional. Circuit breaker ativo.</p>
+                    `;
+                    break;
+                case 'scale':
+                    document.getElementById('microCat').classList.add('active-node');
+                    result.innerHTML = `
+                        <h4 style="color: var(--verde);">📈 Escalar Catálogo</h4>
+                        <p>Apenas o serviço de Catálogo é escalado horizontalmente. Recursos alocados de forma eficiente.</p>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px;">
+                            <span class="badge badge-blue">Catálogo x3 instâncias</span>
+                            <span class="badge badge-green">Demais: 1 instância cada</span>
+                        </div>
+                        <div class="metric-bar"><div class="metric-fill high" style="width: 40%;"></div></div>
+                        <small>Custo adicional: +30% (vs +200% no monolito)</small>
+                        <p style="color: var(--verde); font-size: 0.85rem; margin-top: 8px;"><strong>Eficiência:</strong> Escala sob demanda apenas onde necessário.</p>
+                    `;
+                    break;
+                case 'deploy':
+                    document.getElementById('microNotif').classList.add('active-node');
+                    result.innerHTML = `
+                        <h4 style="color: var(--verde);">🚀 Deploy Independente</h4>
+                        <p>Nova versão do serviço de Notificações deployada sem afetar os demais serviços. Zero downtime.</p>
+                        <div style="margin-top: 8px; padding: 10px; background: #e8f5e9; border-radius: 8px; font-size: 0.85rem;">
+                            <strong>Deploy:</strong> Notificação v2.3.1 → v2.4.0<br>
+                            <strong>Tempo:</strong> 45 segundos<br>
+                            <strong>Impacto:</strong> Nenhum outro serviço afetado<br>
+                            <strong>Rollback:</strong> Disponível em 30s se necessário
+                        </div>
+                    `;
+                    break;
+            }
+        }
+
+        // Event-Driven Simulation
+        function simulateEvent(type) {
+            const result = document.getElementById('eventResult');
+            const nodes = document.querySelectorAll('#eventVisual .sim-node');
+
+            nodes.forEach(n => n.classList.remove('active-node', 'error-node'));
+
+            const producer = document.getElementById('evProducer');
+            const bus = document.getElementById('evBus');
+            const consumerA = document.getElementById('evConsumerA');
+            const consumerB = document.getElementById('evConsumerB');
+            const consumerC = document.getElementById('evConsumerC');
+
+            switch(type) {
+                case 'order':
+                    producer.classList.add('active-node');
+                    setTimeout(() => bus.classList.add('active-node'), 300);
+                    setTimeout(() => {
+                        consumerA.classList.add('active-node');
+                        consumerB.classList.add('active-node');
+                        consumerC.classList.add('active-node');
+                    }, 600);
+                    result.innerHTML = `
+                        <h4 style="color: var(--azul-primario);">🛒 Evento: Novo Pedido Criado</h4>
+                        <p>O producer emite o evento "OrderCreated". O Event Bus distribui para todos os consumidores interessados:</p>
+                        <div style="margin-top: 10px; font-size: 0.9rem;">
+                            <p>→ <strong>Consumer A (Estoque):</strong> Reserva itens</p>
+                            <p>→ <strong>Consumer B (Notificação):</strong> Envia email de confirmação</p>
+                            <p>→ <strong>Consumer C (Analytics):</strong> Registra métrica de venda</p>
+                        </div>
+                        <p style="color: var(--verde); font-size: 0.85rem; margin-top: 8px;"><strong>Assíncrono:</strong> Producer não espera resposta. Fire and forget.</p>
+                    `;
+                    break;
+                case 'payment':
+                    producer.classList.add('active-node');
+                    setTimeout(() => bus.classList.add('active-node'), 300);
+                    setTimeout(() => {
+                        consumerA.classList.add('active-node');
+                        consumerC.classList.add('active-node');
+                    }, 600);
+                    result.innerHTML = `
+                        <h4 style="color: var(--verde);">💳 Evento: Pagamento Aprovado</h4>
+                        <p>Apenas consumidores relevantes processam o evento:</p>
+                        <div style="margin-top: 10px; font-size: 0.9rem;">
+                            <p>→ <strong>Consumer A (Entrega):</strong> Inicia processo de shipping</p>
+                            <p>→ <strong>Consumer B (Notificação):</strong> <em style="color: #999;">Não consome este evento</em></p>
+                            <p>→ <strong>Consumer C (Financeiro):</strong> Registra receita</p>
+                        </div>
+                        <p style="color: var(--azul-primario); font-size: 0.85rem; margin-top: 8px;"><strong>Seletividade:</strong> Cada consumer filtra eventos de seu interesse.</p>
+                    `;
+                    break;
+                case 'ship':
+                    producer.classList.add('active-node');
+                    setTimeout(() => bus.classList.add('active-node'), 300);
+                    setTimeout(() => {
+                        consumerB.classList.add('active-node');
+                    }, 600);
+                    result.innerHTML = `
+                        <h4 style="color: var(--laranja);">📦 Evento: Produto Enviado</h4>
+                        <p>Evento de envio processado apenas pelo consumer de notificações:</p>
+                        <div style="margin-top: 10px; font-size: 0.9rem;">
+                            <p>→ <strong>Consumer A:</strong> <em style="color: #999;">Não consome</em></p>
+                            <p>→ <strong>Consumer B (Notificação):</strong> Envia tracking ao cliente</p>
+                            <p>→ <strong>Consumer C:</strong> <em style="color: #999;">Não consome</em></p>
+                        </div>
+                    `;
+                    break;
+                case 'flood':
+                    producer.classList.add('active-node');
+                    bus.classList.add('active-node');
+                    consumerA.classList.add('active-node');
+                    consumerB.classList.add('active-node');
+                    consumerC.classList.add('active-node');
+                    result.innerHTML = `
+                        <h4 style="color: var(--vermelho);">🌊 Flood de Eventos</h4>
+                        <p>Alto volume de eventos pode sobrecarregar consumidores. Estratégias de mitigação:</p>
+                        <div style="margin-top: 10px; font-size: 0.9rem;">
+                            <p>✅ <strong>Dead Letter Queue:</strong> Eventos não processados vão para fila de retry</p>
+                            <p>✅ <strong>Rate Limiting:</strong> Limita taxa de processamento por consumer</p>
+                            <p>✅ <strong>Auto-scaling:</strong> Novas instâncias de consumers sob demanda</p>
+                            <p>✅ <strong>Backpressure:</strong> Producer reduz velocidade quando bus está cheio</p>
+                        </div>
+                        <div class="metric-bar"><div class="metric-fill medium" style="width: 85%;"></div></div>
+                        <small>Event Bus: 85% capacity | Consumers escalando...</small>
+                    `;
+                    break;
+            }
+        }
+
+        // Decision Matrix
+        function updateDecision() {
+            const checks = document.querySelectorAll('.decision-check:checked');
+            const result = document.getElementById('decisionResult');
+
+            if (checks.length === 0) {
+                result.innerHTML = '<p style="text-align: center; color: var(--azul-escuro);">☝️ Selecione os critérios acima para ver a recomendação</p>';
+                return;
+            }
+
+            let scores = { mono: 0, micro: 0, event: 0 };
+            checks.forEach(check => {
+                const style = check.dataset.style;
+                scores[style]++;
+            });
+
+            const max = Math.max(scores.mono, scores.micro, scores.event);
+            let recommendation = '';
+            let color = '';
+
+            if (scores.mono === max && scores.mono > 0) {
+                recommendation = 'Monolítica';
+                color = 'var(--azul-primario)';
+            } else if (scores.micro === max && scores.micro > 0) {
+                recommendation = 'Microservices';
+                color = 'var(--verde)';
+            } else if (scores.event === max && scores.event > 0) {
+                recommendation = 'Event-Driven';
+                color = 'var(--roxo-claro)';
+            }
+
+            result.innerHTML = `
+                <h4 style="color: ${color};">🎯 Recomendação: ${recommendation}</h4>
+                <div style="display: flex; gap: 16px; margin-top: 12px; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 120px;">
+                        <small>Monolítica</small>
+                        <div class="metric-bar"><div class="metric-fill" style="width: ${(scores.mono / checks.length) * 100}%; background: var(--azul-primario);"></div></div>
+                        <small>${scores.mono}/${checks.length} critérios</small>
+                    </div>
+                    <div style="flex: 1; min-width: 120px;">
+                        <small>Microservices</small>
+                        <div class="metric-bar"><div class="metric-fill" style="width: ${(scores.micro / checks.length) * 100}%; background: var(--verde);"></div></div>
+                        <small>${scores.micro}/${checks.length} critérios</small>
+                    </div>
+                    <div style="flex: 1; min-width: 120px;">
+                        <small>Event-Driven</small>
+                        <div class="metric-bar"><div class="metric-fill" style="width: ${(scores.event / checks.length) * 100}%; background: var(--roxo-claro);"></div></div>
+                        <small>${scores.event}/${checks.length} critérios</small>
+                    </div>
+                </div>
+                <p style="font-size: 0.85rem; margin-top: 12px; color: var(--azul-escuro);"><em>Lembre-se: a decisão final deve considerar contexto, equipe, orçamento e prazo.</em></p>
+            `;
+        }
+
+        // Quiz
+        function checkAnswer(option, isCorrect, quizId) {
+            const container = document.getElementById(quizId);
+            const options = container.querySelectorAll('.quiz-option');
+            const feedback = document.getElementById('feedback-' + quizId);
+
+            // Prevent re-answering
+            if (container.dataset.answered) return;
+            container.dataset.answered = 'true';
+
+            options.forEach(opt => {
+                opt.style.pointerEvents = 'none';
+            });
+
+            if (isCorrect) {
+                option.classList.add('correct');
+                feedback.className = 'quiz-feedback show';
+                feedback.style.background = '#e8f5e9';
+                feedback.style.color = '#1b5e20';
+                feedback.innerHTML = '✅ <strong>Correto!</strong> Excelente compreensão do conceito.';
+            } else {
+                option.classList.add('wrong');
+                // Highlight correct answer
+                options.forEach(opt => {
+                    if (opt.onclick.toString().includes('true')) {
+                        opt.classList.add('correct');
+                    }
+                });
+                feedback.className = 'quiz-feedback show';
+                feedback.style.background = '#fce4ec';
+                feedback.style.color = '#b71c1c';
+                feedback.innerHTML = '❌ <strong>Incorreto.</strong> Revise o conteúdo e tente entender o raciocínio por trás da resposta correta.';
+            }
+        }
+
+        // Initialize on load
+        init();
+    </script>
+</body>
+</html>
