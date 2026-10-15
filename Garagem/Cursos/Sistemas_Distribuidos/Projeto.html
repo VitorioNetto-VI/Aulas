@@ -1,0 +1,194 @@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+    .moodle-projeto-container {
+        font-family: 'Inter', sans-serif;
+    }
+</style>
+
+<div class="moodle-projeto-container p-2 md:p-6 text-gray-800 bg-transparent">
+    <main class="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
+        
+        <header class="bg-gradient-to-r from-blue-700 to-indigo-800 p-8 text-white">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h1 class="text-3xl font-bold mb-2">Projeto Final: Ecossistema Distribuído</h1>
+                    <p class="text-blue-100 flex items-center gap-2 text-lg">
+                        <i class="fas fa-book"></i> Disciplina: Desenvolvimento de Sistemas Distribuídos
+                    </p>
+                    <p class="text-blue-100 flex items-center gap-2">
+                        <i class="fas fa-chalkboard-teacher"></i> Professor: Vitório Neto
+                    </p>
+                </div>
+                <div class="bg-white/20 backdrop-blur-sm px-6 py-4 rounded-xl border border-white/30 text-center shadow-inner">
+                    <p class="text-sm font-semibold uppercase tracking-wider text-blue-100 mb-1">Data de Entrega</p>
+                    <p class="text-2xl font-bold flex items-center gap-2 justify-center">
+                        <i class="far fa-calendar-alt"></i> 12/11/2026
+                    </p>
+                </div>
+            </div>
+        </header>
+
+        <div class="p-8 space-y-10">
+            
+            <section>
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3 border-b pb-2">
+                    <i class="fas fa-box-open text-indigo-600"></i> Artefatos de Entrega
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 flex items-start gap-4 hover:shadow-md transition-shadow">
+                        <div class="bg-blue-100 text-blue-700 p-3 rounded-full shrink-0">
+                            <i class="fas fa-project-diagram fa-fw"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-900">Arquitetura de Solução</h3>
+                            <p class="text-sm text-gray-600">Diagramas UML detalhando a arquitetura. Deve ficar claro a topologia distribuída adotada para o sistema.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 flex items-start gap-4 hover:shadow-md transition-shadow">
+                        <div class="bg-gray-800 text-white p-3 rounded-full shrink-0">
+                            <i class="fab fa-github fa-fw"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-900">Código Fonte (GitHub)</h3>
+                            <p class="text-sm text-gray-600">Link do repositório. <strong>Atenção:</strong> O <code>README.md</code> do projeto deve conter obrigatoriamente o <strong>POP (Passo a Passo)</strong> instruindo como subir e rodar o projeto através do Docker.</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 flex items-start gap-4 hover:shadow-md transition-shadow">
+                        <div class="bg-blue-500 text-white p-3 rounded-full shrink-0">
+                            <i class="fab fa-docker fa-fw"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-900">Configuração Docker</h3>
+                            <p class="text-sm text-gray-600">O projeto deve rodar via Docker. É <strong>obrigatório</strong> que dentro do ecossistema do Docker fiquem explícitos os nós <strong>Manager</strong> (coordenador) e <strong>Workers</strong> (processamento).</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 flex items-start gap-4 hover:shadow-md transition-shadow">
+                        <div class="bg-purple-100 text-purple-700 p-3 rounded-full shrink-0">
+                            <i class="fas fa-microphone-alt fa-fw"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-900">Pitch (Max: 10 min)</h3>
+                            <p class="text-sm text-gray-600">Apresentação demonstrando o projeto, com foco na arquitetura e nas tecnologias utilizadas.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="bg-indigo-50 rounded-xl p-6 border border-indigo-100">
+                <h2 class="text-xl font-bold text-indigo-900 mb-4 flex items-center gap-2">
+                    <i class="fas fa-presentation text-indigo-600"></i> Diretrizes do Pitch
+                </h2>
+                <ul class="list-disc list-inside space-y-2 text-indigo-900">
+                    <li><strong>Duração:</strong> Máximo de 10 minutos.</li>
+                    <li><strong>Contexto Arquitetural:</strong> Explicação clara de como o sistema foi estruturado e justifique suas escolhas de design.</li>
+                    <li><strong>Tecnologias:</strong> Apresente as tecnologias aplicadas e como os nós distribuídos comunicam-se.</li>
+                    <li><strong>Alinhamento Temático:</strong> Explicar a relação dos dados consumidos com os temas de <strong>ESG</strong> ou <strong>Agronegócio</strong> (Indústria / Agro).</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3 border-b pb-2">
+                    <i class="fas fa-database text-green-600"></i> Fontes de Dados (APIs)
+                </h2>
+                <p class="mb-4 text-gray-700">O sistema deve obrigatoriamente consumir dados através da API do SIDRA (IBGE), focando em uma das seguintes pesquisas:</p>
+                
+                <div class="flex flex-col space-y-3">
+                    <a href="https://sidra.ibge.gov.br/home/pmc/brasil" target="_blank" class="block p-4 border-l-4 border-green-500 bg-white shadow-sm hover:shadow-md hover:bg-gray-50 transition-all rounded-r-lg group">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="font-bold text-gray-900 group-hover:text-green-600 transition-colors">API Geral do SIDRA</h3>
+                                <p class="text-sm text-gray-500">Documentação oficial para construção dos endpoints e requisições.</p>
+                            </div>
+                            <i class="fas fa-external-link-alt text-gray-400 group-hover:text-green-500"></i>
+                        </div>
+                    </a>
+
+                    <a href="https://sidra.ibge.gov.br/pesquisa/pim-pf-brasil/tabelas" target="_blank" class="block p-4 border-l-4 border-blue-500 bg-white shadow-sm hover:shadow-md hover:bg-gray-50 transition-all rounded-r-lg group">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="font-bold text-gray-900 group-hover:text-blue-600 transition-colors">PIM-PF (Pesquisa Industrial Mensal)</h3>
+                                <p class="text-sm text-gray-500">Indicadores de Produção Física, ideal para análises voltadas à Indústria/ESG.</p>
+                            </div>
+                            <i class="fas fa-external-link-alt text-gray-400 group-hover:text-blue-500"></i>
+                        </div>
+                    </a>
+
+                    <a href="https://sidra.ibge.gov.br/pesquisa/lspa/tabelas" target="_blank" class="block p-4 border-l-4 border-amber-500 bg-white shadow-sm hover:shadow-md hover:bg-gray-50 transition-all rounded-r-lg group">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="font-bold text-gray-900 group-hover:text-amber-600 transition-colors">LSPA (Levantamento Sistemático da Produção Agrícola)</h3>
+                                <p class="text-sm text-gray-500">Previsões e safras agrícolas, ideal para o tema de Agronegócio.</p>
+                            </div>
+                            <i class="fas fa-external-link-alt text-gray-400 group-hover:text-amber-500"></i>
+                        </div>
+                    </a>
+                </div>
+            </section>
+
+            <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Grupos -->
+                <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm flex flex-col items-center text-center">
+                    <div class="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-2xl mb-4">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3 class="font-bold text-gray-900 text-lg mb-2">Composição dos Grupos</h3>
+                    <p class="text-gray-600">O projeto deve ser desenvolvido em grupos de <strong>no máximo 6 integrantes</strong>.</p>
+                </div>
+
+                <!-- Nota -->
+                <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm flex flex-col items-center text-center">
+                    <div class="w-16 h-16 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center text-2xl mb-4">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <h3 class="font-bold text-gray-900 text-lg mb-2">Pontuação Total</h3>
+                    <p class="text-gray-600">O projeto compõe a nota da disciplina valendo até <strong class="text-2xl text-yellow-600 block mt-1">4.0 Pontos</strong></p>
+                </div>
+
+                <!-- Critérios -->
+                <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm lg:col-span-3">
+                    <h3 class="font-bold text-gray-900 text-lg mb-4 border-b pb-2">Critérios de Avaliação (Rubrica)</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8">
+                        <div class="flex gap-3">
+                            <span class="text-indigo-600 font-bold bg-indigo-50 rounded px-2 py-1 h-fit">1</span>
+                            <div>
+                                <h4 class="font-semibold text-gray-800">Comprometimento</h4>
+                                <p class="text-sm text-gray-600">Participação da equipe, histórico de commits no repositório e entregas nos prazos.</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-3">
+                            <span class="text-indigo-600 font-bold bg-indigo-50 rounded px-2 py-1 h-fit">2</span>
+                            <div>
+                                <h4 class="font-semibold text-gray-800">Nível da Arquitetura</h4>
+                                <p class="text-sm text-gray-600">Qualidade da modelagem, clareza do UML e topologia (Docker).</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-3">
+                            <span class="text-indigo-600 font-bold bg-indigo-50 rounded px-2 py-1 h-fit">3</span>
+                            <div>
+                                <h4 class="font-semibold text-gray-800">Técnicas Empregadas</h4>
+                                <p class="text-sm text-gray-600">Correta implementação da computação distribuída e utilização efetiva de paralelismo interno (multithreading/assíncrono).</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-3">
+                            <span class="text-indigo-600 font-bold bg-indigo-50 rounded px-2 py-1 h-fit">4</span>
+                            <div>
+                                <h4 class="font-semibold text-gray-800">Apresentação (Pitch)</h4>
+                                <p class="text-sm text-gray-600">Clareza na comunicação, alinhamento aos temas, domínio tecnológico e demonstração do funcionamento.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+        
+        <footer class="bg-gray-50 border-t border-gray-200 p-4 text-center text-sm text-gray-500">
+            Dúvidas? Utilize o fórum de discussões da disciplina ou entre em contato com o Professor Vitório. Bom trabalho!
+        </footer>
+    </main>
+</div>
