@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador de Governança - TMO Campo Digital</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Tahoma, sans-serif;
+    background: linear-gradient(135deg, #1a3a6c 0%, #2d5a9e 100%);
+    min-height: 100vh;
+    padding: 20px;
+    color: #1a1a1a;
+  }
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  .header {
+    background: white;
+    border-radius: 12px;
+    padding: 25px 30px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    border-left: 8px solid #e85d26;
+  }
+  .header h1 {
+    color: #1a3a6c;
+    font-size: 22pt;
+    margin-bottom: 6px;
+  }
+  .header .subtitle {
+    color: #e85d26;
+    font-size: 11pt;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .header .meta {
+    margin-top: 12px;
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    font-size: 9pt;
+    color: #555;
+  }
+  .header .meta span {
+    background: #f0f4fa;
+    padding: 5px 10px;
+    border-radius: 15px;
+  }
+  .progress-bar {
+    background: white;
+    border-radius: 12px;
+    padding: 15px 25px;
+    margin-bottom: 20px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+  .progress-track {
+    flex: 1;
+    height: 12px;
+    background: #e0e0e0;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #e85d26, #f39c12);
+    transition: width 0.4s ease;
+    border-radius: 6px;
+  }
+  .progress-text {
+    font-size: 11pt;
+    font-weight: bold;
+    color: #1a3a6c;
+    min-width: 80px;
+    text-align: right;
+  }
+  .score-display {
+    background: white;
+    border-radius: 12px;
+    padding: 12px 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .score-item {
+    text-align: center;
+  }
+  .score-item .label {
+    font-size: 8pt;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .score-item .value {
+    font-size: 18pt;
+    font-weight: bold;
+  }
+  .score-correct .value { color: #27ae60; }
+  .score-wrong .value { color: #c0392b; }
+  .score-total .value { color: #1a3a6c; }
+  .scenario-card {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    border-top: 6px solid #1a3a6c;
+    animation: slideIn 0.4s ease;
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .scenario-number {
+    display: inline-block;
+    background: #1a3a6c;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 9pt;
+    font-weight: bold;
+    margin-bottom: 12px;
+    letter-spacing: 1px;
+  }
+  .scenario-requester {
+    font-size: 10pt;
+    color: #e85d26;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .scenario-title {
+    font-size: 16pt;
+    color: #1a3a6c;
+    font-weight: bold;
+    margin-bottom: 15px;
+    line-height: 1.3;
+  }
+  .scenario-context {
+    background: #f8f9fc;
+    border-left: 4px solid #e85d26;
+    padding: 12px 15px;
+    border-radius: 6px;
+    font-size: 10pt;
+    color: #444;
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+  .options-grid {
+    display: grid;
+    gap: 12px;
+    margin-bottom: 15px;
+  }
+  .option-btn {
+    padding: 15px 20px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    background: white;
+    cursor: pointer;
+    text-align: left;
+    font-size: 11pt;
+    transition: all 0.2s;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .option-btn:hover:not(.disabled) {
+    border-color: #1a3a6c;
+    background: #f0f4fa;
+    transform: translateX(4px);
+  }
+  .option-btn .option-letter {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #e0e0e0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 10pt;
+    flex-shrink: 0;
+    color: #555;
+  }
+  .option-btn.correct {
+    border-color: #27ae60;
+    background: #e8f5e9;
+    animation: pulseGreen 0.6s ease;
+  }
+  .option-btn.correct .option-letter {
+    background: #27ae60;
+    color: white;
+  }
+  .option-btn.wrong {
+    border-color: #c0392b;
+    background: #fde8e8;
+    animation: shake 0.4s ease;
+  }
+  .option-btn.wrong .option-letter {
+    background: #c0392b;
+    color: white;
+  }
+  .option-btn.disabled {
+    cursor: default;
+    opacity: 0.7;
+  }
+  .option-btn.disabled:hover {
+    transform: none;
+    border-color: #e0e0e0;
+    background: white;
+  }
+  @keyframes pulseGreen {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(39,174,96,0.4); }
+    50% { box-shadow: 0 0 0 8px rgba(39,174,96,0); }
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-8px); }
+    75% { transform: translateX(8px); }
+  }
+  .feedback-box {
+    padding: 15px 20px;
+    border-radius: 8px;
+    margin-top: 15px;
+    font-size: 10pt;
+    line-height: 1.5;
+    animation: slideIn 0.3s ease;
+  }
+  .feedback-box.correct {
+    background: #e8f5e9;
+    border-left: 5px solid #27ae60;
+    color: #1b5e20;
+  }
+  .feedback-box.wrong {
+    background: #fde8e8;
+    border-left: 5px solid #c0392b;
+    color: #b71c1c;
+  }
+  .feedback-box .feedback-title {
+    font-weight: bold;
+    font-size: 11pt;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .feedback-box .feedback-data {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(0,0,0,0.1);
+  }
+  .feedback-box .feedback-data strong {
+    color: #1a3a6c;
+  }
+  .next-btn {
+    margin-top: 15px;
+    padding: 12px 30px;
+    background: #1a3a6c;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 11pt;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .next-btn:hover {
+    background: #e85d26;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  }
+  .final-screen {
+    background: white;
+    border-radius: 12px;
+    padding: 40px;
+    text-align: center;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    animation: slideIn 0.5s ease;
+  }
+  .final-screen h2 {
+    color: #1a3a6c;
+    font-size: 24pt;
+    margin-bottom: 10px;
+  }
+  .final-score-circle {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    margin: 20px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    background: conic-gradient(#27ae60 0deg, #e0e0e0 0deg);
+    position: relative;
+  }
+  .final-score-circle::before {
+    content: '';
+    position: absolute;
+    width: 140px;
+    height: 140px;
+    background: white;
+    border-radius: 50%;
+  }
+  .final-score-value {
+    position: relative;
+    z-index: 1;
+    font-size: 42pt;
+    font-weight: bold;
+    color: #1a3a6c;
+  }
+  .final-score-label {
+    position: relative;
+    z-index: 1;
+    font-size: 10pt;
+    color: #888;
+  }
+  .final-message {
+    font-size: 12pt;
+    color: #555;
+    margin: 20px 0;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.5;
+  }
+  .restart-btn {
+    padding: 14px 40px;
+    background: #e85d26;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 12pt;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 10px;
+  }
+  .restart-btn:hover {
+    background: #1a3a6c;
+    transform: translateY(-2px);
+  }
+  .formula-badge {
+    display: inline-block;
+    background: #fff3e0;
+    border: 1px solid #e85d26;
+    color: #e85d26;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 8pt;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="subtitle">🛑 Simulador de Governança · TMO</div>
+    <h1>Memorando de Decisões - Projeto Campo Digital</h1>
+    <div class="meta">
+      <span>📋 5 pedidos da diretoria</span>
+      <span>️ Fórmula: NÃO + Dado + Alternativa</span>
+      <span>🎯 Escolha a decisão correta</span>
+    </div>
+  </div>
+
+  <div class="progress-bar">
+    <div style="font-size: 9pt; color: #888; min-width: 60px;">Progresso</div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+    </div>
+    <div class="progress-text" id="progress-text">0/5</div>
+  </div>
+
+  <div class="score-display">
+    <div class="score-item score-correct">
+      <div class="label">Corretas</div>
+      <div class="value" id="score-correct">0</div>
+    </div>
+    <div class="score-item score-wrong">
+      <div class="label">Incorretas</div>
+      <div class="value" id="score-wrong">0</div>
+    </div>
+    <div class="score-item score-total">
+      <div class="label">Pontuação</div>
+      <div class="value" id="score-total">0%</div>
+    </div>
+  </div>
+
+  <div id="game-area"></div>
+
+</div>
+
+<script>
+const scenarios = [
+  {
+    id: 1,
+    requester: "Ricardo Almeida · Diretor de Operações (Sponsor)",
+    title: "Comunicado de advertência para quem registrar em papel a partir de 01/11",
+    context: "Ricardo enviou e-mail: 'Seis semanas e ainda tem papel circulando na planta. Isso é falta de disciplina. Quero comunicado oficial informando que, a partir de 1º de novembro, registro em papel gera advertência.' O Turno B está com apenas 31% de adoção e o áudio do WhatsApp do Valdir revela medo de vigilância.",
+    options: [
+      {
+        text: "SIM - Emitir o comunicado de advertência. A coerção é necessária para quebrar a resistência e garantir a meta de 100% sem papel até 30/11.",
+        correct: false,
+        feedback: " ERRADO! A coerção confirma exatamente o medo do Valdir ('o app é para vigiar e cortar prêmio'), destrói a segurança psicológica e viola o Ofício 087/2026 do Sindicato, gerando passivo trabalhista imediato. A resistência silenciosa do Turno B (69%) se transformaria em hostilidade declarada.",
+        data: "DADO: Resistência silenciosa no Turno B em 69%. Áudio do Valdir prova que o medo da 'vigilância para cortar prêmio' é a causa raiz. Coerção = confirma o boato.",
+        alternative: "ALTERNATIVA CORRETA: Substituir a ameaça por Engajamento via Co-criação. Anunciar que o Turno B será o 'Piloto de Ajuste Fino'. Quem usar o app e reportar erro de tela, ganha pontos para o prêmio coletivo do turno."
+      },
+      {
+        text: "NÃO - Substituir a ameaça por Engajamento via Co-criação. Anunciar o Turno B como 'Piloto de Ajuste Fino' e dar pontos ao prêmio coletivo para quem reportar erros de tela.",
+        correct: true,
+        feedback: "✅ CORRETO! Você aplicou a fórmula NÃO + DADO + ALTERNATIVA com maestria. A co-criação transforma o crítico em coautor, e ninguém sabota a própria obra. O prêmio coletivo remove o medo individual.",
+        data: "DADO: Resistência silenciosa no Turno B em 69%. Áudio do Valdir prova que o medo da 'vigilância para cortar prêmio' é a causa raiz.",
+        alternative: "ALTERNATIVA: Engajamento via Co-criação. Turno B como 'Piloto de Ajuste Fino' com pontos para o prêmio coletivo."
+      },
+      {
+        text: "SIM, mas apenas para o Turno C (noturno), já que o Turno B precisa de mais tempo de adaptação.",
+        correct: false,
+        feedback: "❌ ERRADO! Qualquer uso de coerção, mesmo segmentado, valida a narrativa de vigilância. O Turno C já tem 64% de adoção e não precisa de ameaça. O problema real é o medo, não a disciplina.",
+        data: "DADO: O medo é sistêmico (WhatsApp do Valdir circula entre turnos). Coerção parcial ainda gera passivo sindical.",
+        alternative: "ALTERNATIVA CORRETA: Co-criação com o Turno B como piloto de ajustes, com premiação coletiva."
+      }
+    ]
+  },
+  {
+    id: 2,
+    requester: "Ricardo Almeida · Diretor de Operações (Sponsor)",
+    title: "Painel na TV do refeitório com ranking individual de OS por técnico",
+    context: "Ricardo quer 'criar uma competição saudável' expondo publicamente a produtividade individual de cada técnico. O RH está estudando uma nova política de variável individual 'baseada em dados objetivos'. Um slide vazado já gerou pânico no WhatsApp.",
+    options: [
+      {
+        text: "SIM - O ranking individual cria competição saudável e acelera a adoção. Quem está no topo se motiva, e quem está embaixo se esforça.",
+        correct: false,
+        feedback: "❌ ERRADO! Expor individualmente a produtividade em um momento de 'estudo de nova variável' é a materialização exata do medo do Valdir. Gera boicote imediato, queda na qualidade (34% de fotos já estão fora do padrão) e possível ação do Sindicato por violação da LGPD e do acordo coletivo.",
+        data: "DADO: Acordo coletivo e LGPD exigem cuidado extremo. 34% das fotos já estão fora do padrão - exposição individual pioraria a qualidade.",
+        alternative: "ALTERNATIVA CORRETA: Ranking por TURNO (A, B e C). Premiação mensal coletiva para o turno que atingir 90% de adoção e qualidade."
+      },
+      {
+        text: "NÃO - Substituir por Ranking por TURNO. Criar competição saudável entre Turno A, B e C com premiação mensal coletiva para quem atingir 90% de adoção e qualidade.",
+        correct: true,
+        feedback: "✅ CORRETO! O ranking por turno une a equipe em vez de fragmentá-la. Remove o medo individual, respeita o acordo coletivo e a LGPD, e gera engajamento coletivo. É um Quick Win em 15 dias.",
+        data: "DADO: Acordo coletivo e LGPD exigem cuidado. Expor individualmente gera boicote e queda na qualidade.",
+        alternative: "ALTERNATIVA: Ranking por TURNO com premiação mensal coletiva. Meta: 90% de adoção e qualidade."
+      },
+      {
+        text: "SIM, mas apenas mostrando os 3 primeiros colocados (top performers), para não expor os de baixo desempenho.",
+        correct: false,
+        feedback: "❌ ERRADO! Mesmo mostrar apenas o top 3 ainda é exposição individual de produtividade, o que viola o acordo coletivo (que exige comunicação prévia ao sindicato sobre controle de produtividade). Além disso, alimenta a competição tóxica.",
+        data: "DADO: Qualquer exposição individual de produtividade exige comunicação prévia ao sindicato (Ofício 087/2026).",
+        alternative: "ALTERNATIVA CORRETA: Ranking coletivo por TURNO, sem expor indivíduos."
+      }
+    ]
+  },
+  {
+    id: 3,
+    requester: "Sandra Lopes · Gerente da Planta Várzea Grande",
+    title: "Dispensar qualquer treinamento prático, porque 'não dá para parar a linha'",
+    context: "Sandra apoia o projeto mas diz que não pode parar a linha para treinamento. O treinamento inicial foi de 4 horas em sala, com 92% de presença, mas sem avaliação prática. A taxa de fotos fora do padrão está em 34%.",
+    options: [
+      {
+        text: "SIM - Respeitar a decisão de Sandra. O treinamento em sala já foi feito e a operação não pode parar. Os superusuários podem ajudar no dia a dia.",
+        correct: false,
+        feedback: "❌ ERRADO! Treinamento de 4h em sala já falhou (evidência: 34% de fotos fora do padrão, 58% de OS no app vs meta de 90%). Sem Ability, as pessoas sabem a teoria mas travam na prática. A auditoria da montadora em 15/12 é inegociável e representa 22% do faturamento.",
+        data: "DADO: Taxa de erro de qualidade em 34%. Auditoria da montadora em 15/12 é inegociável (22% do faturamento). Treinamento de 4h em sala já falhou (falta de Ability).",
+        alternative: "ALTERNATIVA CORRETA: Micro-treinamento no posto (Gemba). 'Pílulas' de 15 minutos no início do turno, na própria linha, sem parar a produção."
+      },
+      {
+        text: "NÃO - Implementar Micro-treinamento no posto (Gemba). Usar superusuários para dar 'pílulas' de 15 minutos no início do turno, na própria linha, simulando o erro da foto.",
+        correct: true,
+        feedback: "✅ CORRETO! Você não para a linha, treina na rotina. O Gemba training é a intervenção correta para a barreira de Ability no ADKAR. 15 minutos no início do turno é viável operacionalmente e resolve o problema das fotos fora do padrão antes da auditoria.",
+        data: "DADO: 34% de fotos fora do padrão. Auditoria 15/12 inegociável (22% do faturamento).",
+        alternative: "ALTERNATIVA: Micro-treinamento Gemba de 15 min no início do turno, com superusuários."
+      },
+      {
+        text: "NÃO - Agendar um treinamento intensivo de 8 horas no sábado, com hora extra paga, para não impactar a produção durante a semana.",
+        correct: false,
+        feedback: "❌ ERRADO! Treinamento longo e distante do posto de trabalho não gera Ability real. A pessoa aprende na sala e esquece/trava na segunda-feira. Além disso, hora extra no sábado gera resistência e custo elevado. O problema é a barreira de Ability, não de Knowledge.",
+        data: "DADO: Treinamento de 4h em sala já falhou. Mais sala não resolve Ability. A meta de produção não será reduzida no 4º trimestre.",
+        alternative: "ALTERNATIVA CORRETA: Micro-treinamento no posto (Gemba), 15 min, na rotina."
+      }
+    ]
+  },
+  {
+    id: 4,
+    requester: "Juliana Castro · Business Partner de RH",
+    title: "Usar dados do app já no fechamento da variável de novembro, 'como teste'",
+    context: "Juliana sugere usar os dados do app para calcular a variável de novembro 'apenas como teste', já que o RH está estudando uma nova política de variável individual. O áudio do WhatsApp do Valdir mostra que esse é exatamente o medo dos operadores.",
+    options: [
+      {
+        text: "SIM - Fazer o teste em novembro é uma boa forma de validar os dados antes de implementar a nova política em 2027. Os operadores precisam se adaptar.",
+        correct: false,
+        feedback: "❌ ERRADO! Fazer isso agora é a materialização exata do medo do Valdir ('é para cortar o prêmio'). Quebraria qualquer confiança construída. Além disso, o acordo coletivo exige comunicação prévia ao sindicato sobre controle de produtividade, o que não foi feito. Risco de greve e ação judicial.",
+        data: "DADO: Materializa o medo do Valdir. Acordo coletivo exige comunicação prévia ao sindicato (Ofício 087/2026). Quebra total de confiança.",
+        alternative: "ALTERNATIVA CORRETA: Congelamento da Regra Atual. Variável de 2026 paga pela planilha do supervisor. Coletar dados em paralelo (sombra) no 4º trimestre para desenhar nova regra com o Sindicato para 2027."
+      },
+      {
+        text: "NÃO - Congelar a Regra Atual. Garantir por escrito que a variável de 2026 será paga pela planilha do supervisor. Usar o 4º trimestre apenas para coletar dados em paralelo (sombra) e desenhar, junto com o Sindicato, a nova regra para 2027.",
+        correct: true,
+        feedback: "✅ CORRETO! Você protegeu a segurança psicológica e cumpriu o acordo coletivo. Coletar dados em paralelo (sombra) é a forma correta de preparar a transição sem quebrar confiança. Envolver o Sindicato desde o início é essencial.",
+        data: "DADO: Materializa o medo do Valdir. Acordo coletivo exige comunicação prévia ao sindicato.",
+        alternative: "ALTERNATIVA: Congelamento da regra atual + coleta em paralelo (sombra) + desenho com Sindicato para 2027."
+      },
+      {
+        text: "SIM, mas apenas para o Turno A (que tem 79% de adoção), como piloto voluntário.",
+        correct: false,
+        feedback: "❌ ERRADO! Mesmo voluntário, criar um piloto de variável baseada em dados do app valida a narrativa de vigilância. O Turno A tem 79% de adoção justamente porque a Joana explica o porquê - não porque quer ser vigiado. Além disso, ainda viola o acordo coletivo.",
+        data: "DADO: Qualquer uso de dados do app para variável exige comunicação prévia ao sindicato. Piloto parcial ainda gera desconfiança sistêmica.",
+        alternative: "ALTERNATIVA CORRETA: Congelamento total + coleta em sombra + negociação com Sindicato."
+      }
+    ]
+  },
+  {
+    id: 5,
+    requester: "Ricardo Almeida e Paula Nogueira · Diretor de Operações e Gerente de TI",
+    title: "Antecipar a onda 2 (campo) de 16/11 para 19/10",
+    context: "Ricardo quer antecipar a onda 2 porque 'o conselho quer ver resultado'. Paula (TI) diz que o app funciona. No piloto de campo (2 das 14 equipes), a cobertura de sinal nas rotas é de 61%. Os técnicos fecham as OS à noite, no hotel, 'de memória'. O modo offline existe mas não foi treinado.",
+    options: [
+      {
+        text: "SIM - Antecipar para 19/10 atende o conselho e mostra agilidade. Os técnicos de campo são profissionais experientes e se adaptam rápido.",
+        correct: false,
+        feedback: "❌ ERRADO! Antecipar a onda sem infraestrutura (61% de sinal) e sem Ability (modo offline não treinado) é garantir o colapso operacional. Os 120 técnicos de campo recebem variável de até 25% do salário - se as OS não subirem, eles perdem renda. Resultado: fuga de talentos e Edson 'Paraná' liderando a resistência.",
+        data: "DADO: Cobertura de sinal no campo é de 61%. Modo offline existe mas não foi treinado. 120 técnicos com variável de até 25% do salário em risco.",
+        alternative: "ALTERNATIVA CORRETA: Manter 16/11. Usar orçamento de GMO (R$ 180k) para aprovar R$ 48k dos 6 pontos de acesso Wi-Fi agora. Realizar 'Capacitação Relâmpago de Modo Offline' nas próximas 3 semanas."
+      },
+      {
+        text: "NÃO - Manter 16/11 e usar o orçamento de GMO (R$ 180k). Aprovar R$ 48k para os 6 pontos de acesso Wi-Fi agora. Realizar 'Capacitação Relâmpago de Modo Offline' com as equipes de campo nas próximas 3 semanas.",
+        correct: true,
+        feedback: "✅ CORRETO! Você protegeu o ROI do projeto. Antecipar sem Ability e infraestrutura destruiria a credibilidade do app no campo. O investimento de R$ 48k em Wi-Fi é menor que o custo de retrabalho e fuga de técnicos. A capacitação relâmpago resolve a barreira de Awareness e Ability.",
+        data: "DADO: Sinal 61%, modo offline não treinado, variável de 25% em risco.",
+        alternative: "ALTERNATIVA: Manter 16/11 + R$ 48k Wi-Fi + Capacitação Relâmpago de Modo Offline."
+      },
+      {
+        text: "SIM, mas apenas para 4 das 14 equipes (as que têm melhor sinal), como piloto ampliado.",
+        correct: false,
+        feedback: "❌ ERRADO! Mesmo com melhor sinal, o modo offline não foi treinado. As equipes que forem para o campo sem saber usar o modo offline vão voltar com OS não registradas, perdendo variável. Isso gera resistência em todas as 14 equipes, não só nas 4 do piloto.",
+        data: "DADO: Modo offline não foi apresentado no treinamento. Qualquer equipe no campo sem treinamento de offline vai perder OS e variável.",
+        alternative: "ALTERNATIVA CORRETA: Manter 16/11 + Wi-Fi + Capacitação Relâmpago para TODAS as 14 equipes."
+      }
+    ]
+  }
+];
+
+let currentScenario = 0;
+let correctCount = 0;
+let wrongCount = 0;
+let answered = false;
+
+function renderScenario() {
+  answered = false;
+  const scenario = scenarios[currentScenario];
+  const area = document.getElementById('game-area');
+  
+  let optionsHTML = '';
+  const letters = ['A', 'B', 'C'];
+  scenario.options.forEach((opt, idx) => {
+    optionsHTML += `
+      <button class="option-btn" id="opt-${idx}" onclick="selectOption(${idx})">
+        <div class="option-letter">${letters[idx]}</div>
+        <div>${opt.text}</div>
+      </button>
+    `;
+  });
+
+  area.innerHTML = `
+    <div class="scenario-card">
+      <div class="scenario-number">PEDIDO ${scenario.id} DE 5</div>
+      <div class="formula-badge">FÓRMULA: NÃO + DADO + ALTERNATIVA</div>
+      <div class="scenario-requester"> ${scenario.requester}</div>
+      <div class="scenario-title">${scenario.title}</div>
+      <div class="scenario-context">${scenario.context}</div>
+      <div class="options-grid" id="options-grid">
+        ${optionsHTML}
+      </div>
+      <div id="feedback-area"></div>
+    </div>
+  `;
+
+  updateProgress();
+}
+
+function selectOption(idx) {
+  if (answered) return;
+  answered = true;
+
+  const scenario = scenarios[currentScenario];
+  const option = scenario.options[idx];
+  const isCorrect = option.correct;
+
+  // Marca visual
+  document.querySelectorAll('.option-btn').forEach((btn, i) => {
+    btn.classList.add('disabled');
+    if (scenarios[currentScenario].options[i].correct) {
+      btn.classList.add('correct');
+    }
+  });
+
+  if (!isCorrect) {
+    document.getElementById(`opt-${idx}`).classList.add('wrong');
+    wrongCount++;
+  } else {
+    correctCount++;
+  }
+
+  // Feedback
+  const feedbackArea = document.getElementById('feedback-area');
+  feedbackArea.innerHTML = `
+    <div class="feedback-box ${isCorrect ? 'correct' : 'wrong'}">
+      <div class="feedback-title">
+        ${isCorrect ? '✅ DECISÃO CORRETA!' : '❌ DECISÃO INCORRETA!'}
+      </div>
+      <div>${option.feedback}</div>
+      <div class="feedback-data">
+        <strong>📊 ${option.data}</strong><br><br>
+        <strong>💡 ${option.alternative}</strong>
+      </div>
+    </div>
+    <button class="next-btn" onclick="nextScenario()">
+      ${currentScenario < scenarios.length - 1 ? '➡️ Próximo Pedido' : '🏆 Ver Resultado Final'}
+    </button>
+  `;
+
+  updateScore();
+}
+
+function nextScenario() {
+  currentScenario++;
+  if (currentScenario < scenarios.length) {
+    renderScenario();
+  } else {
+    showFinal();
+  }
+}
+
+function updateProgress() {
+  const pct = (currentScenario / scenarios.length) * 100;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-text').textContent = `${currentScenario}/${scenarios.length}`;
+}
+
+function updateScore() {
+  document.getElementById('score-correct').textContent = correctCount;
+  document.getElementById('score-wrong').textContent = wrongCount;
+  const total = correctCount + wrongCount;
+  const pct = total > 0 ? Math.round((correctCount / total) * 100) : 0;
+  document.getElementById('score-total').textContent = pct + '%';
+}
+
+function showFinal() {
+  const total = scenarios.length;
+  const pct = Math.round((correctCount / total) * 100);
+  const deg = (pct / 100) * 360;
+  const color = pct < 40 ? '#c0392b' : pct < 70 ? '#e67e22' : '#27ae60';
+  
+  let message = '';
+  if (pct === 100) {
+    message = '🏆 Performance de ELITE! Você domina a fórmula NÃO + DADO + ALTERNATIVA e está pronto para defender o plano diante da banca. O TMO tem em você um líder de governança exemplar.';
+  } else if (pct >= 80) {
+    message = '🌟 Excelente desempenho! Você entende a lógica de governança e sabe proteger o ROI do projeto. Revise os pontos que errou para chegar à perfeição.';
+  } else if (pct >= 60) {
+    message = '👍 Bom progresso! Você capturou a essência da governança, mas precisa refinar a aplicação da fórmula NÃO + DADO + ALTERNATIVA em cenários de pressão.';
+  } else if (pct >= 40) {
+    message = ' Continue treinando. Lembre-se: coerção está fora do jogo, e toda decisão precisa de DADO (evidência do case) + ALTERNATIVA concreta.';
+  } else {
+    message = '🔴 Precisa revisar os conceitos. Releia o Memorando de Governança e o Case Grupo 1. A banca vai cobrar a fórmula NÃO + DADO + ALTERNATIVA em todos os 5 pedidos.';
+  }
+
+  const area = document.getElementById('game-area');
+  area.innerHTML = `
+    <div class="final-screen">
+      <h2> Simulação Concluída!</h2>
+      <div class="final-score-circle" style="background: conic-gradient(${color} ${deg}deg, #e0e0e0 ${deg}deg)">
+        <div class="final-score-value">${pct}%</div>
+        <div class="final-score-label">de acerto</div>
+      </div>
+      <div style="display: flex; justify-content: center; gap: 30px; margin: 20px 0;">
+        <div class="score-item score-correct">
+          <div class="label">Corretas</div>
+          <div class="value">${correctCount}</div>
+        </div>
+        <div class="score-item score-wrong">
+          <div class="label">Incorretas</div>
+          <div class="value">${wrongCount}</div>
+        </div>
+      </div>
+      <div class="final-message">${message}</div>
+      <button class="restart-btn" onclick="restart()">🔄 Jogar Novamente</button>
+    </div>
+  `;
+
+  document.getElementById('progress-fill').style.width = '100%';
+  document.getElementById('progress-text').textContent = '5/5';
+}
+
+function restart() {
+  currentScenario = 0;
+  correctCount = 0;
+  wrongCount = 0;
+  updateScore();
+  renderScenario();
+}
+
+// Inicia
+renderScenario();
+</script>
+</body>
+</html>
