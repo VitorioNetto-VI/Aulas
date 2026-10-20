@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Canvas A3 - GMO | Projeto Campo Digital</title>
+<style>
+  /* RESET E BASE */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  /* CONFIGURAÇÃO DE PÁGINA A3 PAISAGEM */
+  @page {
+    size: 420mm 297mm;
+    margin: 0;
+  }
+  
+  @media print {
+    body {
+      width: 420mm;
+      height: 297mm;
+      margin: 0;
+      padding: 0;
+      background: white !important;
+    }
+    .canvas {
+      box-shadow: none !important;
+      border: none !important;
+    }
+  }
+  
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #d0d0d0;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 20px;
+    min-height: 100vh;
+  }
+  
+  .canvas {
+    /* DIMENSÕES EXATAS DO A3 PAISAGEM */
+    width: 420mm;
+    height: 297mm;
+    background: white;
+    padding: 10mm 12mm 8mm 12mm;
+    position: relative;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  
+  /* HEADER */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 6mm;
+    border-bottom: 4px solid #1a3a6c;
+    padding-bottom: 4mm;
+    flex-shrink: 0;
+  }
+  .header-left h1 {
+    font-size: 24pt;
+    color: #1a3a6c;
+    margin-bottom: 2mm;
+    letter-spacing: -0.5px;
+  }
+  .header-left .sub {
+    font-size: 11pt;
+    color: #444;
+  }
+  .header-left .sub strong { color: #e85d26; }
+  .header-right {
+    background: #1a3a6c;
+    color: white;
+    padding: 4mm 8mm;
+    font-size: 16pt;
+    font-weight: bold;
+    border-radius: 5px;
+    letter-spacing: 1px;
+  }
+  
+  /* GRID 2x3 ASSIMÉTRICO */
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1.3fr 1.3fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 4mm;
+    flex: 1;
+  }
+  
+  .block {
+    border-radius: 8px;
+    padding: 5mm 6mm;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .block-blue {
+    background: linear-gradient(145deg, #e4ecf7 0%, #f3f7fc 100%);
+    border-left: 6px solid #1a3a6c;
+  }
+  .block-orange {
+    background: linear-gradient(145deg, #fce5d6 0%, #fef6f0 100%);
+    border-left: 6px solid #e85d26;
+  }
+  
+  .block-header {
+    display: flex;
+    align-items: center;
+    gap: 3mm;
+    margin-bottom: 3mm;
+    flex-shrink: 0;
+  }
+  .block-num {
+    width: 10mm;
+    height: 10mm;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 13pt;
+    flex-shrink: 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+  .blue-num { background: #1a3a6c; }
+  .orange-num { background: #e85d26; }
+  .block-title {
+    font-size: 15pt;
+    font-weight: bold;
+    color: #1a3a6c;
+    line-height: 1.1;
+  }
+  .block-subtitle {
+    font-size: 9pt;
+    color: #666;
+    font-style: italic;
+    margin-top: 1mm;
+  }
+  .block-content {
+    font-size: 10.5pt;
+    color: #1a1a1a;
+    flex: 1;
+    line-height: 1.25;
+  }
+  .block-content p { margin-bottom: 2mm; }
+  .block-content strong { color: #1a3a6c; }
+  .block-orange .block-content strong { color: #c04a1a; }
+  
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 9.5pt;
+    margin-top: 2mm;
+  }
+  table th {
+    background: #1a3a6c;
+    color: white;
+    padding: 2mm 2.5mm;
+    text-align: left;
+    font-size: 9pt;
+    font-weight: 600;
+  }
+  .block-orange table th { background: #e85d26; }
+  table td {
+    padding: 2mm 2.5mm;
+    border-bottom: 1px solid #d0d0d0;
+    vertical-align: top;
+    line-height: 1.25;
+  }
+  table tr:nth-child(even) td { background: rgba(255,255,255,0.4); }
+  
+  .tag {
+    display: inline-block;
+    padding: 1mm 2.5mm;
+    border-radius: 3px;
+    font-size: 8.5pt;
+    font-weight: bold;
+    color: white;
+    white-space: nowrap;
+  }
+  .tag-critica { background: #c0392b; }
+  .tag-alta { background: #e67e22; }
+  .tag-resistente { background: #c0392b; }
+  .tag-apoiador { background: #27ae60; }
+  .tag-lider { background: #2980b9; }
+  .tag-neutro { background: #7f8c8d; }
+  
+  .footer {
+    margin-top: 4mm;
+    padding: 3mm 5mm;
+    background: #fff3e0;
+    border-left: 5px solid #e85d26;
+    font-size: 9pt;
+    color: #555;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+  .footer strong { color: #e85d26; }
+  
+  ul { margin-left: 4mm; margin-bottom: 2mm; }
+  li { margin-bottom: 1mm; }
+  
+  .highlight-box {
+    background: white;
+    border: 2px solid #e85d26;
+    border-radius: 5px;
+    padding: 2.5mm 3.5mm;
+    margin-top: 2.5mm;
+    font-size: 10pt;
+    box-shadow: 0 2px 4px rgba(232,93,38,0.15);
+  }
+  .highlight-box strong { color: #e85d26; }
+  .highlight-box.blue {
+    border-color: #1a3a6c;
+    box-shadow: 0 2px 4px rgba(26,58,108,0.15);
+  }
+  .highlight-box.blue strong { color: #1a3a6c; }
+</style>
+</head>
+<body>
+<div class="canvas">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-left">
+      <h1>🎯 Canvas de Gestão da Mudança (GMO)</h1>
+      <div class="sub">
+        <strong>Projeto:</strong> Campo Digital &nbsp;|&nbsp;
+        <strong>Grupo:</strong> 1 (Operacional) &nbsp;|&nbsp;
+        <strong>Empresa:</strong> Grupo Industrial Horizonte &nbsp;|&nbsp;
+        <strong>Auditoria Crítica:</strong> 15/12
+      </div>
+    </div>
+    <div class="header-right">A3</div>
+  </div>
+
+  <!-- GRID 2x3 -->
+  <div class="grid">
+
+    <!-- BLOCO 1 -->
+    <div class="block block-blue">
+      <div class="block-header">
+        <div class="block-num blue-num">1</div>
+        <div>
+          <div class="block-title">Problema</div>
+          <div class="block-subtitle">A dor de negócio em uma frase</div>
+        </div>
+      </div>
+      <div class="block-content">
+        <p>A transição digital do chão de fábrica está travada por <strong>resistência cultural e medo de coerção punitiva</strong> — simbolizada pelo Turno B a apenas 31% de adoção, pelo uso do papel como "porto seguro" e pelo slide vazado de produtividade individual.</p>
+        <p>Isso ameaça diretamente:</p>
+        <ul>
+          <li>✅ A meta de <strong>100% sem papel</strong></li>
+          <li>✅ A <strong>auditoria da montadora em 15/12</strong> (22% do faturamento)</li>
+          <li>✅ A margem EBITDA (atual 7%)</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- BLOCO 2 -->
+    <div class="block block-orange">
+      <div class="block-header">
+        <div class="block-num orange-num">2</div>
+        <div>
+          <div class="block-title">Gap As-Is / To-Be</div>
+          <div class="block-subtitle">O que muda, para quem, com que severidade</div>
+        </div>
+      </div>
+      <div class="block-content">
+        <table>
+          <tr>
+            <th>Dimensão</th>
+            <th>As-Is (Atual)</th>
+            <th>To-Be (30/11)</th>
+            <th>Sev.</th>
+          </tr>
+          <tr>
+            <td><strong>Processos</strong></td>
+            <td>71% dos registros feitos nos últimos 40min do turno (transcrição do papel)</td>
+            <td>100% das OS abertas e fechadas em tempo real no app</td>
+            <td><span class="tag tag-alta">ALTA</span></td>
+          </tr>
+          <tr>
+            <td><strong>Sistemas</strong></td>
+            <td>34% fotos fora do padrão; Wi-Fi instável; Modo Offline desconhecido</td>
+            <td>&lt;5% erro em fotos; Modo Offline dominado pelo campo</td>
+            <td><span class="tag tag-critica">CRÍTICA</span></td>
+          </tr>
+          <tr>
+            <td><strong>Cultura</strong></td>
+            <td>Medo de vigilância e corte de prêmio (WhatsApp do Valdir)</td>
+            <td>Segurança psicológica: app visto como proteção, não punição</td>
+            <td><span class="tag tag-critica">CRÍTICA</span></td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- BLOCO 3 -->
+    <div class="block block-blue">
+      <div class="block-header">
+        <div class="block-num blue-num">3</div>
+        <div>
+          <div class="block-title">Poder e Medos</div>
+          <div class="block-subtitle">Quem aprova, acelera ou bloqueia, e o que teme (C → D)</div>
+        </div>
+      </div>
+      <div class="block-content">
+        <table>
+          <tr>
+            <th>Stakeholder</th>
+            <th>Medo Real</th>
+            <th>C</th>
+            <th>D</th>
+            <th>Rota</th>
+          </tr>
+          <tr>
+            <td><strong>Valdir Ramos</strong><br><em>Técnico Sênior, Turno B</em></td>
+            <td>Parecer obsoleto e perder o prêmio</td>
+            <td><span class="tag tag-resistente">RESIST.</span></td>
+            <td><span class="tag tag-apoiador">APOIADOR</span></td>
+            <td>Co-criação das telas</td>
+          </tr>
+          <tr>
+            <td><strong>Edson "Paraná"</strong><br><em>Líder de Campo</em></td>
+            <td>Perder variável por falta de sinal</td>
+            <td><span class="tag tag-resistente">RESIST.</span></td>
+            <td><span class="tag tag-apoiador">APOIADOR</span></td>
+            <td>Treinamento Offline + Garantia escrita</td>
+          </tr>
+          <tr>
+            <td><strong>Ricardo Almeida</strong><br><em>Sponsor</em></td>
+            <td>Não entregar ao Conselho</td>
+            <td><span class="tag tag-apoiador">APOIADOR</span></td>
+            <td><span class="tag tag-lider">LÍDER</span></td>
+            <td>De fiscal para protetor</td>
+          </tr>
+          <tr>
+            <td><strong>Sindicato</strong><br><em>Externo</em></td>
+            <td>Mudança unilateral de regras</td>
+            <td><span class="tag tag-neutro">NEUTRO</span></td>
+            <td><span class="tag tag-apoiador">APOIADOR</span></td>
+            <td>Ofício respondido formalmente</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- BLOCO 4 -->
+    <div class="block block-orange">
+      <div class="block-header">
+        <div class="block-num orange-num">4</div>
+        <div>
+          <div class="block-title">Rota ADKAR</div>
+          <div class="block-subtitle">Ponto de barreira e intervenção por público</div>
+        </div>
+      </div>
+      <div class="block-content">
+        <p><strong>🔴 Planta (Operadores):</strong> Barreira = <strong>Ability</strong> (treinamento foi só teórico, 4h sem prática)</p>
+        <p><strong>🌾 Campo (Técnicos):</strong> Barreira = <strong>Awareness</strong> (não sabem que o modo offline existe)</p>
+        <p><strong>🛠️ Intervenção:</strong> Oficinas de 30 min no posto (Gemba) com Superusuários + Guia de bolso do Modo Offline</p>
+        <div class="highlight-box">
+          <strong> QUICK WIN (15 dias):</strong> Implementação do "Ranking de Produtividade por TURNO" (não individual) com premiação mensal coletiva. Remove o medo individual e gera união.
+        </div>
+      </div>
+    </div>
+
+    <!-- BLOCO 5 -->
+    <div class="block block-blue">
+      <div class="block-header">
+        <div class="block-num blue-num">5</div>
+        <div>
+          <div class="block-title">Storytelling</div>
+          <div class="block-subtitle">Framework escolhido, público e momento</div>
+        </div>
+      </div>
+      <div class="block-content">
+        <p><strong>Framework:</strong> 🦸 <strong>A Jornada do Herói</strong> (Adaptada)</p>
+        <p><strong>Público:</strong> Chão de fábrica (Valdir e Edson como protagonistas)</p>
+        <p><strong>Momento:</strong> Reunião de turno e Town Hall pré-Onda 2</p>
+        <div class="highlight-box blue">
+          <strong>💬 Mensagem-Chave:</strong><br>
+          "Vocês são os heróis que seguram essa planta. O app não é o fiscal; é a espada que protege o conhecimento de vocês contra auditorias e garante que o prêmio do turno chegue inteiro, sem burocracia de papel."
+        </div>
+      </div>
+    </div>
+
+    <!-- BLOCO 6 -->
+    <div class="block block-orange">
+      <div class="block-header">
+        <div class="block-num orange-num">6</div>
+        <div>
+          <div class="block-title">Métricas P5</div>
+          <div class="block-subtitle">Adoção, negócio e impactos em pessoas, planeta e prosperidade</div>
+        </div>
+      </div>
+      <div class="block-content">
+        <table>
+          <tr>
+            <th>Pilar P5</th>
+            <th>Indicador (Meta 30/11)</th>
+          </tr>
+          <tr>
+            <td><strong>👥 Pessoas</strong></td>
+            <td>100% treinados no Gemba; 0 ofícios de protesto; privacidade garantida (Ofício 087/2026)</td>
+          </tr>
+          <tr>
+            <td><strong>🌍 Planeta</strong></td>
+            <td>Redução de 100% dos formulários impressos (-38 mil folhas/mês)</td>
+          </tr>
+          <tr>
+            <td><strong>💰 Prosperidade</strong></td>
+            <td>Faturamento de campo: 12 para 3 dias; Prêmio coletivo mantido</td>
+          </tr>
+          <tr>
+            <td><strong>️ Processo</strong></td>
+            <td>&lt;5% fotos fora do padrão; 90% OS em tempo real</td>
+          </tr>
+          <tr>
+            <td><strong>📦 Produto</strong></td>
+            <td>100% conformidade na rastreabilidade (auditoria 15/12)</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <strong>️ Nota da Banca:</strong> A banca lê o canvas antes do pitch — coerência entre os 6 blocos vale mais do que estética. Todos os dados citados são extraídos do Case Grupo 1 (Operacional).
+  </div>
+
+</div>
+</body>
+</html>

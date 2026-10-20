@@ -1,0 +1,1347 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Slide 6 & 8 · Projeto Campo Digital</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.0/index.min.css" />
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0a0e14;
+    --bg-2: #111820;
+    --bg-3: #1a2330;
+    --border: #2a3545;
+    --text: #e6edf3;
+    --text-dim: #8b949e;
+    --red: #ef4444;
+    --red-dim: #7f1d1d;
+    --green: #10b981;
+    --green-dim: #064e3b;
+    --blue: #3b82f6;
+    --blue-dim: #1e3a8a;
+    --yellow: #f59e0b;
+    --yellow-dim: #78350f;
+    --purple: #a855f7;
+  }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(239,68,68,0.08) 0%, transparent 40%),
+      radial-gradient(circle at 80% 80%, rgba(16,185,129,0.06) 0%, transparent 40%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .app { position: relative; z-index: 1; max-width: 1400px; margin: 0 auto; padding: 24px; }
+
+  /* HEADER */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .logo-badge {
+    width: 44px; height: 44px;
+    background: linear-gradient(135deg, var(--red), #b91c1c);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 18px;
+    box-shadow: 0 4px 20px rgba(239,68,68,0.3);
+  }
+  .logo-text h1 { font-size: 16px; font-weight: 700; }
+  .logo-text p { font-size: 12px; color: var(--text-dim); }
+
+  .nav-tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--bg-2);
+    padding: 4px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+  }
+  .nav-tab {
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.2s;
+    color: var(--text-dim);
+    border: none;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .nav-tab:hover { color: var(--text); }
+  .nav-tab.active {
+    background: var(--bg-3);
+    color: var(--text);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+  .nav-tab .num {
+    width: 22px; height: 22px;
+    background: var(--bg);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+  }
+  .nav-tab.active .num { background: var(--red); color: white; }
+
+  .kbd-hint {
+    font-size: 11px;
+    color: var(--text-dim);
+    display: flex;
+    gap: 12px;
+  }
+  .kbd {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: monospace;
+  }
+
+  /* SLIDES */
+  .slide { display: none; animation: fadeIn 0.4s ease; }
+  .slide.active { display: block; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .slide-header {
+    margin-bottom: 28px;
+  }
+  .slide-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    background: rgba(239,68,68,0.1);
+    border: 1px solid rgba(239,68,68,0.3);
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--red);
+    margin-bottom: 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .slide-title {
+    font-size: clamp(24px, 3.5vw, 36px);
+    font-weight: 800;
+    line-height: 1.15;
+    margin-bottom: 12px;
+    letter-spacing: -0.5px;
+  }
+  .slide-title .accent { color: var(--red); }
+  .slide-subtitle {
+    color: var(--text-dim);
+    font-size: 15px;
+    max-width: 800px;
+    line-height: 1.6;
+  }
+
+  /* DIAGNOSTIC CARD */
+  .diag-card {
+    background: linear-gradient(135deg, rgba(239,68,68,0.08), rgba(239,68,68,0.02));
+    border: 1px solid rgba(239,68,68,0.25);
+    border-left: 4px solid var(--red);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 32px;
+  }
+  .diag-card h3 {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--red);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .diag-card .email {
+    font-family: 'Courier New', monospace;
+    background: var(--bg);
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin: 10px 0;
+    border-left: 2px solid var(--yellow);
+    color: #fbbf24;
+  }
+  .diag-card p { font-size: 14px; line-height: 1.6; color: var(--text-dim); }
+
+  /* ABC SECTIONS */
+  .abc-grid {
+    display: grid;
+    gap: 24px;
+    margin-bottom: 32px;
+  }
+  .abc-card {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: all 0.3s;
+  }
+  .abc-card:hover {
+    border-color: var(--text-dim);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.4);
+  }
+  .abc-header {
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .abc-letter {
+    width: 56px; height: 56px;
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; font-weight: 800;
+    flex-shrink: 0;
+  }
+  .abc-a .abc-letter { background: linear-gradient(135deg, var(--red), #b91c1c); color: white; }
+  .abc-b .abc-letter { background: linear-gradient(135deg, var(--blue), #1e3a8a); color: white; }
+  .abc-c .abc-letter { background: linear-gradient(135deg, var(--green), #064e3b); color: white; }
+  .abc-title h3 { font-size: 18px; font-weight: 700; margin-bottom: 2px; }
+  .abc-title p { font-size: 12px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; }
+
+  .abc-body { padding: 24px; }
+  .abc-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .abc-table th {
+    text-align: left;
+    padding: 10px 14px;
+    background: var(--bg-3);
+    color: var(--text-dim);
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border);
+  }
+  .abc-table th:first-child { border-radius: 8px 0 0 0; }
+  .abc-table th:last-child { border-radius: 0 8px 0 0; }
+  .abc-table td {
+    padding: 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .abc-table tr:last-child td { border-bottom: none; }
+  .abc-table tr:hover td { background: rgba(255,255,255,0.02); }
+  .abc-table .action {
+    font-weight: 600;
+    color: var(--text);
+  }
+  .abc-table .date {
+    font-family: 'Courier New', monospace;
+    background: var(--bg);
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    color: var(--yellow);
+    white-space: nowrap;
+  }
+  .abc-table .deliverable {
+    color: var(--text-dim);
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .abc-message {
+    margin-top: 16px;
+    padding: 14px 18px;
+    background: var(--bg);
+    border-radius: 10px;
+    border-left: 3px solid var(--green);
+    font-size: 13px;
+    line-height: 1.6;
+    font-style: italic;
+    color: var(--text);
+  }
+  .abc-message strong { color: var(--green); font-style: normal; }
+
+  .abc-result {
+    margin-top: 16px;
+    padding: 14px 18px;
+    background: rgba(16,185,129,0.08);
+    border: 1px solid rgba(16,185,129,0.25);
+    border-radius: 10px;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .abc-result strong { color: var(--green); }
+
+  /* STOP DOING */
+  .stop-card {
+    background: linear-gradient(135deg, rgba(245,158,11,0.08), rgba(245,158,11,0.02));
+    border: 1px solid rgba(245,158,11,0.25);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 32px;
+  }
+  .stop-card h3 {
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--yellow);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .stop-list { display: grid; gap: 12px; }
+  .stop-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 18px;
+    background: var(--bg-2);
+    border-radius: 10px;
+    border-left: 3px solid var(--yellow);
+  }
+  .stop-item .bad {
+    color: var(--red);
+    text-decoration: line-through;
+    font-size: 14px;
+    flex: 1;
+  }
+  .stop-item .arrow { color: var(--text-dim); }
+  .stop-item .good {
+    color: var(--green);
+    font-weight: 600;
+    font-size: 14px;
+    flex: 1;
+  }
+
+  /* METRICS */
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .metric-card {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .metric-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--red), var(--green));
+  }
+  .metric-label {
+    font-size: 12px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+  }
+  .metric-value {
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .metric-value .from { color: var(--red); }
+  .metric-value .arrow { color: var(--text-dim); font-size: 18px; }
+  .metric-value .to { color: var(--green); }
+  .metric-deadline {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 10px;
+  }
+  .metric-owner {
+    display: inline-block;
+    padding: 3px 10px;
+    background: var(--bg-3);
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--blue);
+  }
+
+  /* SLIDE 8 - SCRIPT */
+  .script-meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .meta-item {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 18px;
+  }
+  .meta-item .label {
+    font-size: 11px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+  .meta-item .value {
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .script-timeline {
+    position: relative;
+    padding-left: 32px;
+    margin-bottom: 32px;
+  }
+  .script-timeline::before {
+    content: '';
+    position: absolute;
+    left: 11px;
+    top: 0; bottom: 0;
+    width: 2px;
+    background: linear-gradient(180deg, var(--red), var(--blue), var(--green), var(--purple));
+  }
+  .scene {
+    position: relative;
+    margin-bottom: 24px;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    transition: all 0.3s;
+  }
+  .scene:hover {
+    border-color: var(--text-dim);
+    transform: translateX(4px);
+  }
+  .scene::before {
+    content: '';
+    position: absolute;
+    left: -32px;
+    top: 24px;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 3px solid var(--red);
+  }
+  .scene:nth-child(2)::before { border-color: var(--blue); }
+  .scene:nth-child(3)::before { border-color: var(--green); }
+  .scene:nth-child(4)::before { border-color: var(--purple); }
+  .scene:nth-child(5)::before { border-color: var(--yellow); }
+
+  .scene-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .scene-title {
+    font-size: 14px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .scene-title .icon {
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+  }
+  .scene:nth-child(1) .icon { background: rgba(239,68,68,0.15); }
+  .scene:nth-child(2) .icon { background: rgba(59,130,246,0.15); }
+  .scene:nth-child(3) .icon { background: rgba(16,185,129,0.15); }
+  .scene:nth-child(4) .icon { background: rgba(168,85,247,0.15); }
+  .scene:nth-child(5) .icon { background: rgba(245,158,11,0.15); }
+
+  .scene-time {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    color: var(--text-dim);
+    background: var(--bg);
+    padding: 4px 10px;
+    border-radius: 6px;
+  }
+
+  .scene-body { padding: 20px; }
+  .dialogue {
+    margin-bottom: 16px;
+  }
+  .dialogue:last-child { margin-bottom: 0; }
+  .speaker {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .speaker.gmo { color: var(--green); }
+  .speaker.valdir { color: var(--blue); }
+  .speaker .tag {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: none;
+  }
+  .speaker.gmo .tag { background: rgba(16,185,129,0.15); color: var(--green); }
+  .speaker.valdir .tag { background: rgba(59,130,246,0.15); color: var(--blue); }
+
+  .stage-dir {
+    font-size: 12px;
+    color: var(--text-dim);
+    font-style: italic;
+    margin-bottom: 6px;
+    padding-left: 12px;
+    border-left: 2px solid var(--border);
+  }
+  .dialogue-text {
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--text);
+    padding: 12px 16px;
+    background: var(--bg);
+    border-radius: 10px;
+    border-left: 3px solid var(--border);
+  }
+  .dialogue-text strong { color: var(--yellow); }
+  .dialogue-text em { color: var(--green); font-style: normal; font-weight: 600; }
+
+  /* HERO JOURNEY VISUAL */
+  .hero-journey {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 32px;
+  }
+  .hero-journey h3 {
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--purple);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .journey-steps {
+    display: grid;
+    gap: 12px;
+  }
+  .journey-step {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 16px;
+    padding: 16px;
+    background: var(--bg);
+    border-radius: 10px;
+    border-left: 4px solid var(--border);
+    align-items: center;
+  }
+  .journey-step:nth-child(1) { border-color: var(--red); }
+  .journey-step:nth-child(2) { border-color: var(--blue); }
+  .journey-step:nth-child(3) { border-color: var(--green); }
+  .journey-step:nth-child(4) { border-color: var(--purple); }
+  .journey-step:nth-child(5) { border-color: var(--yellow); }
+
+  .journey-label {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-dim);
+  }
+  .journey-step:nth-child(1) .journey-label { color: var(--red); }
+  .journey-step:nth-child(2) .journey-label { color: var(--blue); }
+  .journey-step:nth-child(3) .journey-label { color: var(--green); }
+  .journey-step:nth-child(4) .journey-label { color: var(--purple); }
+  .journey-step:nth-child(5) .journey-label { color: var(--yellow); }
+
+  .journey-text {
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--text);
+  }
+
+  /* CHECKLIST */
+  .checklist-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .checklist-card {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+  }
+  .checklist-card h4 {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--green);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 0;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--text-dim);
+  }
+  .check-item .check {
+    color: var(--green);
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* INSTRUCTIONS */
+  .instructions-card {
+    background: linear-gradient(135deg, rgba(168,85,247,0.08), rgba(168,85,247,0.02));
+    border: 1px solid rgba(168,85,247,0.25);
+    border-radius: 16px;
+    padding: 24px;
+  }
+  .instructions-card h3 {
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--purple);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .inst-list {
+    display: grid;
+    gap: 12px;
+  }
+  .inst-item {
+    display: flex;
+    gap: 14px;
+    padding: 14px 18px;
+    background: var(--bg-2);
+    border-radius: 10px;
+    border-left: 3px solid var(--purple);
+  }
+  .inst-num {
+    width: 24px; height: 24px;
+    background: var(--purple);
+    color: white;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .inst-text {
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--text);
+  }
+  .inst-text strong { color: var(--purple); }
+
+  /* FOOTER */
+  .footer {
+    margin-top: 48px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+  .footer-badges {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .badge {
+    padding: 4px 10px;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .badge.ok { color: var(--green); border-color: rgba(16,185,129,0.3); }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    .app { padding: 16px; }
+    .abc-table { font-size: 11px; }
+    .abc-table th, .abc-table td { padding: 8px; }
+    .journey-step { grid-template-columns: 1fr; }
+    .scene { padding-left: 0; }
+    .script-timeline { padding-left: 20px; }
+    .scene::before { left: -20px; width: 10px; height: 10px; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="logo">
+      <div class="logo-badge">TMO</div>
+      <div class="logo-text">
+        <h1>Projeto Campo Digital</h1>
+        <p>Gestão de Mudanças · MBA Grupo 1</p>
+      </div>
+    </div>
+    <div class="nav-tabs">
+      <button class="nav-tab active" data-slide="6">
+        <span class="num">6</span>
+        <span>Plano ABC Sponsor</span>
+      </button>
+      <button class="nav-tab" data-slide="8">
+        <span class="num">8</span>
+        <span>Script Role-Play</span>
+      </button>
+    </div>
+    <div class="kbd-hint">
+      <span><span class="kbd">←</span> <span class="kbd">→</span> navegar</span>
+    </div>
+  </header>
+
+  <!-- ===================== SLIDE 6 ===================== -->
+  <section class="slide active" id="slide-6">
+    <div class="slide-header">
+      <div class="slide-tag">🎯 Slide 6 · Patrocínio Executivo</div>
+      <h2 class="slide-title">O Plano ABC para <span class="accent">Ricardo Almeida</span></h2>
+      <p class="slide-subtitle">Transformando o Sponsor de <strong>Fiscal</strong> para <strong>Protetor</strong> — com ações concretas, datas e entregáveis.</p>
+    </div>
+
+    <!-- DIAGNOSTIC -->
+    <div class="diag-card">
+      <h3>⚠️ Diagnóstico Atual do Sponsor</h3>
+      <p>Ricardo está atuando como <strong style="color:var(--red)">Fiscal</strong>, não como Protetor.</p>
+      <div class="email">📧 E-mail de 22/09: "Quero advertência para quem usar papel. Não quero relatório de adaptação."</div>
+      <p><strong style="color:var(--yellow)">Risco:</strong> Cada ação coercitiva de Ricardo alimenta a resistência silenciosa do Turno B e valida o medo do WhatsApp do Valdir.</p>
+    </div>
+
+    <!-- ABC GRID -->
+    <div class="abc-grid">
+
+      <!-- A -->
+      <div class="abc-card abc-a">
+        <div class="abc-header">
+          <div class="abc-letter">A</div>
+          <div class="abc-title">
+            <h3>Ativo e Visível</h3>
+            <p>Active & Visible · Presença física e simbólica</p>
+          </div>
+        </div>
+        <div class="abc-body">
+          <table class="abc-table">
+            <thead>
+              <tr><th>Ação</th><th>Data</th><th>Público</th><th>Entregável</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="action">Visita ao Gemba do Turno B</td>
+                <td><span class="date">05/11</span></td>
+                <td>Valdir Ramos + 5 técnicos</td>
+                <td class="deliverable">Foto no app com Valdir, postada no mural da planta</td>
+              </tr>
+              <tr>
+                <td class="action">Abertura do Town Hall da Onda 2</td>
+                <td><span class="date">10/11</span></td>
+                <td>120 técnicos + 420 operadores</td>
+                <td class="deliverable">Vídeo gravado de 3 min: "O app protege o prêmio de vocês"</td>
+              </tr>
+              <tr>
+                <td class="action">Presença no Comitê de Qualidade</td>
+                <td><span class="date">12/11</span></td>
+                <td>Fernando Lima (Qualidade) + TMO</td>
+                <td class="deliverable">Aprovação formal do plano de fotos padronizadas</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="abc-message">
+            <strong>Mensagem-chave de Ricardo:</strong> "Eu não estou aqui para vigiar vocês. Estou aqui para garantir que o app funcione para vocês, não contra vocês."
+          </div>
+        </div>
+      </div>
+
+      <!-- B -->
+      <div class="abc-card abc-b">
+        <div class="abc-header">
+          <div class="abc-letter">B</div>
+          <div class="abc-title">
+            <h3>Construção de Coalizão</h3>
+            <p>Build Coalition · Alinhamento de stakeholders</p>
+          </div>
+        </div>
+        <div class="abc-body">
+          <table class="abc-table">
+            <thead>
+              <tr><th>Ação</th><th>Data</th><th>Stakeholder</th><th>Objetivo</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="action">Reunião com Sindicato</td>
+                <td><span class="date">20/10</span></td>
+                <td>Sindicato dos Metalúrgicos</td>
+                <td class="deliverable">Assinar termo: app não será usado para corte de variável em 2026</td>
+              </tr>
+              <tr>
+                <td class="action">Alinhamento com RH</td>
+                <td><span class="date">22/10</span></td>
+                <td>Juliana Castro (RH)</td>
+                <td class="deliverable">Congelar estudo de variável individual até Q2/2027</td>
+              </tr>
+              <tr>
+                <td class="action">Briefing com Gerentes de Planta</td>
+                <td><span class="date">25/10</span></td>
+                <td>Sandra Lopes + 3 supervisores</td>
+                <td class="deliverable">Treinamento de 30 min: como responder ao medo da vigilância</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="abc-result">
+            <strong>Resultado esperado:</strong> Ofício 087/2026 do Sindicato respondido formalmente até 25/10, com compromisso público de não uso punitivo dos dados.
+          </div>
+        </div>
+      </div>
+
+      <!-- C -->
+      <div class="abc-card abc-c">
+        <div class="abc-header">
+          <div class="abc-letter">C</div>
+          <div class="abc-title">
+            <h3>Comunicação Direta</h3>
+            <p>Communicate Directly · Transparência radical</p>
+          </div>
+        </div>
+        <div class="abc-body">
+          <table class="abc-table">
+            <thead>
+              <tr><th>Ação</th><th>Data</th><th>Canal</th><th>Conteúdo</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="action">Vídeo de 2 min</td>
+                <td><span class="date">08/11</span></td>
+                <td>WhatsApp corporativo + TV refeitório</td>
+                <td class="deliverable">Ricardo fala diretamente: "O app é para proteger o prêmio do turno, não para cortar"</td>
+              </tr>
+              <tr>
+                <td class="action">E-mail aberto</td>
+                <td><span class="date">15/11</span></td>
+                <td>Todos os 540 impactados</td>
+                <td class="deliverable">"Regras do jogo: o que o app mede e o que ele NÃO mede"</td>
+              </tr>
+              <tr>
+                <td class="action">Q&A ao vivo</td>
+                <td><span class="date">18/11</span></td>
+                <td>Reunião de turno (3 turnos)</td>
+                <td class="deliverable">Ricardo responde perguntas sem filtro, com TMO como mediador</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="abc-message" style="border-color:var(--blue)">
+            <strong style="color:var(--blue)">Tom da comunicação:</strong> Transparência radical. Sem eufemismos. Reconhecimento do erro passado (slide vazado sem contexto).
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- STOP DOING -->
+    <div class="stop-card">
+      <h3>⚠️ O que Ricardo precisa PARAR de fazer</h3>
+      <div class="stop-list">
+        <div class="stop-item">
+          <span class="bad">Enviar e-mails com tom de ameaça</span>
+          <span class="arrow">→</span>
+          <span class="good">Substituir por visitas ao Gemba</span>
+        </div>
+        <div class="stop-item">
+          <span class="bad">Exigir ranking individual</span>
+          <span class="arrow">→</span>
+          <span class="good">Substituir por ranking coletivo de turno</span>
+        </div>
+        <div class="stop-item">
+          <span class="bad">Pedir antecipação de Go-Live sem readiness</span>
+          <span class="arrow">→</span>
+          <span class="good">Substituir por métricas de adoção</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- METRICS -->
+    <h3 style="font-size:14px;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);margin-bottom:16px;display:flex;align-items:center;gap:8px">📊 Métricas de Sucesso do Sponsor</h3>
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-label">Adoção Turno B</div>
+        <div class="metric-value">
+          <span class="from">31%</span>
+          <span class="arrow">→</span>
+          <span class="to">70%</span>
+        </div>
+        <div class="metric-deadline">📅 Meta até 30/11</div>
+        <span class="metric-owner">TMO</span>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Ofícios do Sindicato</div>
+        <div class="metric-value">
+          <span class="from">3</span>
+          <span class="arrow">→</span>
+          <span class="to">0</span>
+        </div>
+        <div class="metric-deadline">📅 Novos ofícios de protesto</div>
+        <span class="metric-owner">Jurídico</span>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">NPS interno do app</div>
+        <div class="metric-value">
+          <span class="from">-15</span>
+          <span class="arrow">→</span>
+          <span class="to">+20</span>
+        </div>
+        <div class="metric-deadline">📅 Meta até 15/12</div>
+        <span class="metric-owner">TMO</span>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ===================== SLIDE 8 ===================== -->
+  <section class="slide" id="slide-8">
+    <div class="slide-header">
+      <div class="slide-tag">🎭 Slide 8 · Role-Play Executivo</div>
+      <h2 class="slide-title">Dramatização: <span class="accent">A Conversa com Valdir</span></h2>
+      <p class="slide-subtitle">Script palavra por palavra usando a <strong>Jornada do Herói Adaptada</strong> — 5 minutos de diálogo estratégico no refeitório da planta.</p>
+    </div>
+
+    <!-- META -->
+    <div class="script-meta">
+      <div class="meta-item">
+        <div class="label">Framework</div>
+        <div class="value">Jornada do Herói (Adaptada)</div>
+      </div>
+      <div class="meta-item">
+        <div class="label">Duração</div>
+        <div class="value">5 minutos</div>
+      </div>
+      <div class="meta-item">
+        <div class="label">Cenário</div>
+        <div class="value">Refeitório da planta, pós-turno</div>
+      </div>
+      <div class="meta-item">
+        <div class="label">Personagens</div>
+        <div class="value">Líder GMO · Valdir Ramos</div>
+      </div>
+    </div>
+
+    <!-- TIMELINE SCRIPT -->
+    <div class="script-timeline">
+
+      <!-- SCENE 1 -->
+      <div class="scene">
+        <div class="scene-header">
+          <div class="scene-title">
+            <span class="icon">🌍</span>
+            <span>Abertura: Reconhecimento do Mundo Antigo</span>
+          </div>
+          <div class="scene-time">00:00 - 00:30</div>
+        </div>
+        <div class="scene-body">
+          <div class="dialogue">
+            <div class="speaker gmo">
+              Líder de GMO
+              <span class="tag">Tom respeitoso</span>
+            </div>
+            <div class="stage-dir">Sentando de frente para Valdir, sem celular na mesa</div>
+            <div class="dialogue-text">
+              "Valdir, antes de qualquer coisa, eu quero te agradecer por ter aceitado conversar comigo. Eu sei que você tem <strong>27 anos de casa</strong>, que você é chamado de <em>'professor'</em> pelos mais novos, e que você foi eleito para a CIPA três vezes. Isso não é à toa. Você carrega essa planta nas costas.<br><br>
+              Eu não estou aqui para te convencer de nada. Estou aqui para ouvir. Porque se o app não está funcionando para o Turno B, a culpa não é sua. <em>É minha.</em> E eu quero entender o que está errado."
+            </div>
+            <div class="stage-dir">⏸️ Pausa de 3 segundos. Olhar direto. Aguardar reação.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCENE 2 -->
+      <div class="scene">
+        <div class="scene-header">
+          <div class="scene-title">
+            <span class="icon">⚔️</span>
+            <span>A Provação: Nomeando o Medo</span>
+          </div>
+          <div class="scene-time">00:30 - 01:30</div>
+        </div>
+        <div class="scene-body">
+          <div class="dialogue">
+            <div class="speaker valdir">
+              Valdir Ramos
+              <span class="tag">Tom irônico, braços cruzados</span>
+            </div>
+            <div class="dialogue-text">
+              "Olha, moço, eu já vi esse filme antes. Veio um sistema novo em 2010, disseram que ia facilitar a vida. Resultado? Ninguém usou, voltamos pro papel, e ninguém assumiu o erro. Agora vem esse app, e a diretoria já vazou que é para medir produtividade individual. <strong>Eu não sou bobo. Sei que querem cortar o prêmio do turno.</strong>"
+            </div>
+          </div>
+          <div class="dialogue">
+            <div class="speaker gmo">
+              Líder de GMO
+              <span class="tag">Tom sério, sem defensividade</span>
+            </div>
+            <div class="dialogue-text">
+              "Valdir, você está certo em estar desconfiado. O slide que vazou no WhatsApp foi um erro. A diretoria não deveria ter colocado aquilo no ar sem contexto. E eu vou ser direto com você: <em>se a intenção fosse usar o app para cortar o prêmio de vocês, eu não estaria aqui conversando. Eu estaria com a polícia corporativa.</em><br><br>
+              Mas não é isso que está acontecendo. E eu vou te provar."
+            </div>
+            <div class="stage-dir"> Pausa. Tira uma folha impressa do bolso.</div>
+            <div class="dialogue-text" style="border-left-color:var(--green)">
+              "Isso aqui é um termo que o Ricardo, o diretor de operações, vai assinar na sexta-feira. Está escrito: <em>'Os dados do app HZ Campo não serão usados para alteração da variável individual ou coletiva até o final de 2027.'</em> Tem a assinatura dele, do RH, e do sindicato. <strong>Você pode levar uma cópia para o seu grupo do WhatsApp hoje à noite.</strong>"
+            </div>
+            <div class="stage-dir"> Entrega a folha para Valdir. Aguarda ele ler.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCENE 3 -->
+      <div class="scene">
+        <div class="scene-header">
+          <div class="scene-title">
+            <span class="icon">🧙</span>
+            <span>O Guia: O App como Espada, não como Açoite</span>
+          </div>
+          <div class="scene-time">01:30 - 02:30</div>
+        </div>
+        <div class="scene-body">
+          <div class="dialogue">
+            <div class="speaker valdir">
+              Valdir Ramos
+              <span class="tag">Lendo o termo, tom mais calmo</span>
+            </div>
+            <div class="dialogue-text">
+              "Tá, mas e a lentidão? E o Wi-Fi que não funciona? <strong>Eu perco 11 minutos por OS no app.</strong> No papel, eu fazia em 6. Quem vai pagar esse tempo?"
+            </div>
+          </div>
+          <div class="dialogue">
+            <div class="speaker gmo">
+              Líder de GMO
+              <span class="tag">Tom de parceria</span>
+            </div>
+            <div class="dialogue-text">
+              "Esse é o ponto, Valdir. Você está certo de novo. O Wi-Fi da usinagem tem pontos cegos, e a gente sabe disso. A Paula, da TI, já mediu. E a solução já está aprovada: <em>R$ 48 mil para instalar 6 novos pontos de acesso, com prazo de 3 semanas.</em> Isso começa na segunda-feira.<br><br>
+              Mas eu quero te perguntar uma coisa: quando você faz uma OS no papel e depois transcreve no fim do turno, quanto tempo você leva no total?"
+            </div>
+          </div>
+          <div class="dialogue">
+            <div class="speaker valdir">
+              Valdir Ramos
+              <span class="tag">Pensando</span>
+            </div>
+            <div class="dialogue-text">"Hum... uns 15 minutos, contando a transcrição."</div>
+          </div>
+          <div class="dialogue">
+            <div class="speaker gmo">
+              Líder de GMO
+            </div>
+            <div class="dialogue-text" style="border-left-color:var(--green)">
+              "Então o app, mesmo com a lentidão, ainda te economiza <strong>4 minutos por OS</strong>. E tem mais: quando a montadora vier auditar em 15 de dezembro, e eles pedirem a foto da peça com a etiqueta, você vai ter no app. No papel, você não tem. E se a montadora reprovar, o contrato de <em>22% do faturamento da planta</em> vai para o concorrente. Aí sim, o prêmio do turno vai para o espaço.<br><br>
+              <strong>O app não é o fiscal, Valdir. O app é a espada que protege o conhecimento de vocês contra auditorias.</strong>"
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCENE 4 -->
+      <div class="scene">
+        <div class="scene-header">
+          <div class="scene-title">
+            <span class="icon"></span>
+            <span>O Elixir: O WIIFM Real</span>
+          </div>
+          <div class="scene-time">02:30 - 03:30</div>
+        </div>
+        <div class="scene-body">
+          <div class="dialogue">
+            <div class="speaker valdir">
+              Valdir Ramos
+              <span class="tag">Tom mais aberto</span>
+            </div>
+            <div class="dialogue-text">"Tá, mas e o modo offline? Eu ouvi dizer que existe, mas ninguém treinou a gente."</div>
+          </div>
+          <div class="dialogue">
+            <div class="speaker gmo">
+              Líder de GMO
+              <span class="tag">Sorri, tira o celular do bolso</span>
+            </div>
+            <div class="dialogue-text">
+              "Você está certo de novo. O modo offline existe, e a gente errou em não treinar. Olha aqui: <em>(mostra o app)</em>. Você abre a OS, trabalha normal, e quando voltar para o Wi-Fi, ele sincroniza sozinho. <strong>Nenhuma OS fica para trás, mesmo sem sinal.</strong><br><br>
+              E tem mais: a gente vai fazer oficinas de 30 minutos no posto de trabalho, com os superusuários, a partir da semana que vem. Não é treinamento em sala. É no Gemba, com a peça na frente. E você, Valdir, vai ser um dos superusuários do Turno B. <em>Porque ninguém conhece essa planta melhor que você.</em>"
+            </div>
+          </div>
+          <div class="dialogue">
+            <div class="speaker valdir">
+              Valdir Ramos
+              <span class="tag">Surpreso</span>
+            </div>
+            <div class="dialogue-text">"Eu? Superusuário? Mas eu nem sei usar direito..."</div>
+          </div>
+          <div class="dialogue">
+            <div class="speaker gmo">
+              Líder de GMO
+            </div>
+            <div class="dialogue-text" style="border-left-color:var(--purple)">
+              "Exatamente por isso. Se você aprender e ensinar os outros, ninguém mais vai dizer que o app é difícil. <em>Você vai ser a referência do novo, assim como é a referência do antigo.</em> E tem mais: o prêmio do turno vai ser mantido, e a gente vai criar um <strong>ranking coletivo por turno</strong>, não individual. O Turno B que tiver 90% de adoção e qualidade ganha um bônus mensal. Isso está no termo que eu te mostrei."
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCENE 5 -->
+      <div class="scene">
+        <div class="scene-header">
+          <div class="scene-title">
+            <span class="icon">🎯</span>
+            <span>O Retorno + Fechamento: Compromisso Público</span>
+          </div>
+          <div class="scene-time">03:30 - 05:00</div>
+        </div>
+        <div class="scene-body">
+          <div class="dialogue">
+            <div class="speaker valdir">
+              Valdir Ramos
+              <span class="tag">Pensativo</span>
+            </div>
+            <div class="dialogue-text">"E se o Wi-Fi não resolver? E se o app continuar travando?"</div>
+          </div>
+          <div class="dialogue">
+            <div class="speaker gmo">
+              Líder de GMO
+              <span class="tag">Tom de compromisso</span>
+            </div>
+            <div class="dialogue-text">
+              "Então a gente volta pro papel, sem advertência, sem punição. <em>Eu te dou a minha palavra.</em> Mas eu te peço uma coisa: <strong>vamos testar juntos por duas semanas no seu turno.</strong> Eu venho pessoalmente, todo dia, ver os números com você. Se não funcionar, eu sou o primeiro a dizer para o Ricardo que o app não está pronto.<br><br>
+              Mas se funcionar, Valdir, você vai ser o cara que salvou o prêmio do turno e garantiu a auditoria da montadora. <em>Isso é legado.</em>"
+            </div>
+            <div class="stage-dir">🤝 Estende a mão. "O que você me diz?"</div>
+          </div>
+          <div class="dialogue">
+            <div class="speaker valdir">
+              Valdir Ramos
+              <span class="tag">Aperta a mão, tom firme</span>
+            </div>
+            <div class="dialogue-text">"Tá. Duas semanas. Mas eu quero o termo assinado antes."</div>
+          </div>
+          <div class="dialogue">
+            <div class="speaker gmo">
+              Líder de GMO
+            </div>
+            <div class="dialogue-text" style="border-left-color:var(--yellow)">
+              "Feito. Amanhã você tem a cópia assinada no seu armário. E na segunda-feira, às 7h, eu estou aqui com o superusuário para o primeiro teste. <strong>Obrigado, Valdir. De verdade.</strong>"
+            </div>
+            <div class="stage-dir">🚪 Levanta, aperta a mão de novo, sai.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- HERO JOURNEY VISUAL -->
+    <div class="hero-journey">
+      <h3> Resumo Visual: Jornada do Herói</h3>
+      <div class="journey-steps">
+        <div class="journey-step">
+          <div class="journey-label">🌍 Mundo Antigo</div>
+          <div class="journey-text">"Você carrega essa planta nas costas há 27 anos"</div>
+        </div>
+        <div class="journey-step">
+          <div class="journey-label">⚔️ Provação</div>
+          <div class="journey-text">"O slide vazou. A diretoria errou. Eu vou provar que o app não é para cortar o prêmio."</div>
+        </div>
+        <div class="journey-step">
+          <div class="journey-label">🧙 Guia</div>
+          <div class="journey-text">"O app é a espada que protege contra auditorias" · "Modo offline + Wi-Fi novo + oficinas no Gemba"</div>
+        </div>
+        <div class="journey-step">
+          <div class="journey-label">🏆 Elixir</div>
+          <div class="journey-text">"Você será superusuário. Ranking coletivo. Prêmio mantido. Legado construído."</div>
+        </div>
+        <div class="journey-step">
+          <div class="journey-label">🎯 Próximo Passo</div>
+          <div class="journey-text">"2 semanas de teste. Termo assinado amanhã. Eu venho todo dia ver os números com você."</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHECKLIST -->
+    <h3 style="font-size:14px;text-transform:uppercase;letter-spacing:1px;color:var(--text-dim);margin-bottom:16px;display:flex;align-items:center;gap:8px">📋 Checklist do Script (Para a Banca)</h3>
+    <div class="checklist-grid">
+      <div class="checklist-card">
+        <h4>✅ Jornada do Herói aplicada</h4>
+        <div class="check-item"><span class="check">✓</span><span>Mundo Antigo: Valdir como referência do papel</span></div>
+        <div class="check-item"><span class="check">✓</span><span>Provação: Medo da vigilância e corte do prêmio</span></div>
+        <div class="check-item"><span class="check">✓</span><span>Guia: TMO como mentor, app como espada</span></div>
+        <div class="check-item"><span class="check">✓</span><span>Elixir: Superusuário + prêmio coletivo mantido</span></div>
+      </div>
+      <div class="checklist-card">
+        <h4>✅ WIIFM respondido</h4>
+        <div class="check-item"><span class="check">✓</span><span>App protege contra auditoria da montadora</span></div>
+        <div class="check-item"><span class="check">✓</span><span>Modo offline resolve falta de sinal</span></div>
+        <div class="check-item"><span class="check">✓</span><span>Ranking coletivo, não individual</span></div>
+        <div class="check-item"><span class="check">✓</span><span>Termo assinado garantindo variável</span></div>
+      </div>
+      <div class="checklist-card">
+        <h4>✅ Próximo passo concreto</h4>
+        <div class="check-item"><span class="check">✓</span><span>2 semanas de teste no Turno B</span></div>
+        <div class="check-item"><span class="check">✓</span><span>TMO presente todo dia no Gemba</span></div>
+        <div class="check-item"><span class="check">✓</span><span>Cópia assinada no armário amanhã</span></div>
+      </div>
+      <div class="checklist-card">
+        <h4>✅ Sem corporativês</h4>
+        <div class="check-item"><span class="check">✓</span><span>Linguagem do chão de fábrica</span></div>
+        <div class="check-item"><span class="check">✓</span><span>Tom de parceria, não de imposição</span></div>
+        <div class="check-item"><span class="check">✓</span><span>Reconhecimento do erro passado</span></div>
+      </div>
+    </div>
+
+    <!-- INSTRUCTIONS -->
+    <div class="instructions-card">
+      <h3> Instruções para o Role-Play</h3>
+      <div class="inst-list">
+        <div class="inst-item">
+          <div class="inst-num">1</div>
+          <div class="inst-text"><strong>Não decore o script.</strong> Domine a estrutura e use suas próprias palavras.</div>
+        </div>
+        <div class="inst-item">
+          <div class="inst-num">2</div>
+          <div class="inst-text"><strong>Reconheça o sentimento antes de argumentar.</strong> "Você está certo" abre mais portas que qualquer gráfico.</div>
+        </div>
+        <div class="inst-item">
+          <div class="inst-num">3</div>
+          <div class="inst-text"><strong>Entregue o termo físico.</strong> Leve uma folha impressa com o termo de compromisso.</div>
+        </div>
+        <div class="inst-item">
+          <div class="inst-num">4</div>
+          <div class="inst-text"><strong>Mantenha contato visual.</strong> Não olhe para o slide.</div>
+        </div>
+        <div class="inst-item">
+          <div class="inst-num">5</div>
+          <div class="inst-text"><strong>Se a banca assumir o papel de Valdir,</strong> adapte-se. Use a estrutura, não o texto.</div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div>TMO · Grupo 1 · MBA Gestão de Projetos · Gestão de Mudanças</div>
+    <div class="footer-badges">
+      <span class="badge ok">✓ Alinhado à rubrica (25 pts)</span>
+      <span class="badge ok">✓ Dados reais do case</span>
+      <span class="badge ok">✓ Sem corporativês</span>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  // Navegação entre slides
+  const tabs = document.querySelectorAll('.nav-tab');
+  const slides = document.querySelectorAll('.slide');
+
+  function goToSlide(num) {
+    slides.forEach(s => s.classList.remove('active'));
+    tabs.forEach(t => t.classList.remove('active'));
+    document.getElementById('slide-' + num).classList.add('active');
+    document.querySelector(`.nav-tab[data-slide="${num}"]`).classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      goToSlide(tab.dataset.slide);
+    });
+  });
+
+  // Navegação por teclado
+  document.addEventListener('keydown', (e) => {
+    const current = document.querySelector('.nav-tab.active').dataset.slide;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      goToSlide(current === '6' ? '8' : '6');
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      goToSlide(current === '8' ? '6' : '8');
+    }
+  });
+
+  // Animação de entrada dos elementos
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.abc-card, .scene, .metric-card, .checklist-card, .journey-step').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(20px)';
+    el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+    observer.observe(el);
+  });
+</script>
+</body>
+</html>

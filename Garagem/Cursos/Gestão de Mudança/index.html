@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TMO · Campo Digital · Hub de Entregas</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.0/index.min.css" />
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0a0e14;
+    --bg-2: #111820;
+    --bg-3: #1a2330;
+    --border: #2a3545;
+    --text: #e6edf3;
+    --text-dim: #8b949e;
+    --red: #ef4444;
+    --green: #10b981;
+    --sidebar-w: 280px;
+  }
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    transition: all 0.3s ease;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background:
+      radial-gradient(circle at 10% 10%, rgba(239,68,68,0.06) 0%, transparent 40%),
+      radial-gradient(circle at 90% 90%, rgba(16,185,129,0.04) 0%, transparent 40%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .sidebar {
+    width: var(--sidebar-w);
+    height: 100vh;
+    background: var(--bg-2);
+    border-right: 1px solid var(--border);
+    position: fixed;
+    left: 0; top: 0;
+    display: flex;
+    flex-direction: column;
+    z-index: 10;
+    overflow-y: auto;
+    transition: transform 0.3s ease;
+  }
+  .sidebar.collapsed { transform: translateX(-100%); }
+  .sidebar-header { padding: 20px; border-bottom: 1px solid var(--border); }
+  .sidebar-logo { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .sidebar-badge {
+    width: 42px; height: 42px;
+    background: linear-gradient(135deg, var(--red), #b91c1c);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 16px;
+    box-shadow: 0 4px 20px rgba(239,68,68,0.3);
+    flex-shrink: 0;
+  }
+  .sidebar-logo-text h1 { font-size: 14px; font-weight: 700; }
+  .sidebar-logo-text p { font-size: 11px; color: var(--text-dim); }
+  .sidebar-context {
+    background: var(--bg-3);
+    border-radius: 10px;
+    padding: 12px;
+    font-size: 11px;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+  .sidebar-context strong { color: var(--text); }
+  .sidebar-nav { padding: 16px; flex: 1; }
+  .nav-section-title {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+    margin-bottom: 10px;
+    padding-left: 12px;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    margin-bottom: 4px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+    background: transparent;
+    width: 100%;
+    text-align: left;
+    color: var(--text-dim);
+    font-family: inherit;
+    font-size: 13px;
+  }
+  .nav-item:hover { background: var(--bg-3); color: var(--text); }
+  .nav-item.active {
+    background: rgba(239,68,68,0.1);
+    border-color: rgba(239,68,68,0.3);
+    color: var(--text);
+  }
+  .nav-item .icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+    background: var(--bg);
+  }
+  .nav-item.active .icon { background: var(--red); color: white; }
+  .nav-item .label { font-weight: 600; font-size: 13px; }
+  .nav-item .sublabel { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
+  .sidebar-footer {
+    padding: 16px 20px;
+    border-top: 1px solid var(--border);
+    font-size: 10px;
+    color: var(--text-dim);
+  }
+  .sidebar-footer .status { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .sidebar-footer .dot {
+    width: 8px; height: 8px;
+    background: var(--green);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--green);
+  }
+  .sidebar-footer .kbd {
+    background: var(--bg-3);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 10px;
+  }
+
+  .sidebar-toggle {
+    position: fixed;
+    top: 50%;
+    left: var(--sidebar-w);
+    transform: translateY(-50%);
+    width: 28px;
+    height: 60px;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-left: none;
+    border-radius: 0 8px 8px 0;
+    cursor: pointer;
+    z-index: 15;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-dim);
+    font-size: 12px;
+    transition: all 0.3s ease;
+  }
+  .sidebar-toggle:hover { background: var(--bg-3); color: var(--text); width: 32px; }
+  .sidebar-toggle.collapsed { left: 0; }
+  .sidebar-toggle .arrow { transition: transform 0.3s ease; display: inline-block; }
+  .sidebar-toggle.collapsed .arrow { transform: rotate(180deg); }
+
+  .main {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    height: 100vh;
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    transition: margin-left 0.3s ease;
+  }
+  .main.expanded { margin-left: 0; }
+  .topbar {
+    height: 56px;
+    background: var(--bg-2);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    flex-shrink: 0;
+  }
+  .topbar-title { display: flex; align-items: center; gap: 12px; }
+  .topbar-title .crumb { font-size: 12px; color: var(--text-dim); }
+  .topbar-title .crumb.active { color: var(--text); font-weight: 600; }
+  .topbar-title .sep { color: var(--text-dim); }
+  .topbar-actions { display: flex; gap: 8px; }
+  .topbar-btn {
+    padding: 6px 12px;
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-dim);
+    font-size: 11px;
+    font-family: inherit;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+  }
+  .topbar-btn:hover { color: var(--text); border-color: var(--text-dim); }
+  .topbar-btn.primary { background: var(--red); border-color: var(--red); color: white; }
+  .topbar-btn.primary:hover { background: #dc2626; }
+
+  .iframe-container { flex: 1; position: relative; overflow: hidden; }
+  .iframe-view {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    overflow: auto;
+  }
+  .iframe-view.active { opacity: 1; pointer-events: auto; }
+  
+  /* Iframes normais (HTML) */
+  .iframe-view iframe {
+    width: 100%;
+    min-width: 1200px;
+    height: 100%;
+    border: none;
+    background: var(--bg);
+  }
+
+  /* --- CORREÇÃO PARA A IMAGEM (ROI) --- */
+  .iframe-view.image-view {
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: auto;
+    padding: 20px;
+  }
+  .iframe-view.image-view img {
+    width: 100%;
+    max-width: 1200px; /* Tamanho máximo de 1200px, mas encolhe se a tela for menor */
+    height: auto;
+    max-height: 100%;
+    object-fit: contain; /* Garante que a imagem inteira apareça sem distorcer */
+    display: block;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+  }
+
+  .scroll-indicator {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 8px 14px;
+    font-size: 11px;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+    z-index: 5;
+  }
+  .scroll-indicator.visible { opacity: 1; }
+  .scroll-indicator .arrow-hint { animation: slideHint 1.5s ease-in-out infinite; }
+  @keyframes slideHint {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(5px); }
+  }
+
+  .iframe-loading {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: var(--text-dim);
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .mobile-toggle {
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 56px; height: 56px;
+    background: var(--red);
+    border: none;
+    border-radius: 50%;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 20;
+    box-shadow: 0 4px 20px rgba(239,68,68,0.4);
+  }
+
+  @media (max-width: 900px) {
+    .sidebar { transform: translateX(-100%); }
+    .sidebar.open { transform: translateX(0); }
+    .sidebar-toggle { display: none; }
+    .main { margin-left: 0; }
+    .mobile-toggle { display: flex; align-items: center; justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">
+      <div class="sidebar-badge">TMO</div>
+      <div class="sidebar-logo-text">
+        <h1>Campo Digital</h1>
+        <p>Hub de Entregas · Grupo 1</p>
+      </div>
+    </div>
+    <div class="sidebar-context">
+      <strong>Projeto:</strong> HZ Campo<br>
+      <strong>Auditoria:</strong> 15/12/2026<br>
+      <strong>Orçamento GMO:</strong> R$ 180k<br>
+      <strong>Adoção Turno B:</strong> 31% → 70%
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section-title">Entregáveis Principais</div>
+    <button class="nav-item active" data-view="canva">
+      <div class="icon">📊</div>
+      <div>
+        <div class="label">1 - Canvas</div>
+        <div class="sublabel">A3 · 6 blocos · Sala de guerra</div>
+      </div>
+    </button>
+    <button class="nav-item" data-view="governanca">
+      <div class="icon">🎭</div>
+      <div>
+        <div class="label">2 - ABC & Role-Play</div>
+        <div class="sublabel">Plano Sponsor + Script</div>
+      </div>
+    </button>
+    <button class="nav-item" data-view="roi">
+      <div class="icon">📈</div>
+      <div>
+        <div class="label">3 - ROI</div>
+        <div class="sublabel">Governança · 5 NÃO</div>
+      </div>
+    </button>
+
+    <div class="nav-section-title" style="margin-top:20px">Navegação Rápida</div>
+    <button class="nav-item" data-view="canva">
+      <div class="icon">📋</div>
+      <div>
+        <div class="label">Diagnóstico</div>
+        <div class="sublabel">Gap As-Is → To-Be</div>
+      </div>
+    </button>
+    <button class="nav-item" data-view="governanca">
+      <div class="icon">🅰️</div>
+      <div>
+        <div class="label">Sponsor ABC</div>
+        <div class="sublabel">Ricardo Almeida</div>
+      </div>
+    </button>
+    <button class="nav-item" data-view="governanca">
+      <div class="icon">🎬</div>
+      <div>
+        <div class="label">Script Valdir</div>
+        <div class="sublabel">Jornada do Herói</div>
+      </div>
+    </button>
+    <button class="nav-item" data-view="roi">
+      <div class="icon">⚖️</div>
+      <div>
+        <div class="label">5 Decisões TMO</div>
+        <div class="sublabel">Dados e alternativas</div>
+      </div>
+    </button>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="status">
+      <span class="dot"></span>
+      <span>Sistema pronto · 3/3 entregáveis</span>
+    </div>
+    <div style="margin-top:8px">
+      <span class="kbd">1</span> Canvas · <span class="kbd">2</span> ABC · <span class="kbd">3</span> ROI
+    </div>
+    <div style="margin-top:8px; font-size:9px; color:var(--text-dim)">
+      💡 Use scroll horizontal para ver conteúdo A3
+    </div>
+  </div>
+</aside>
+
+<button class="sidebar-toggle" id="sidebar-toggle" title="Esconder/Mostrar navegação (H)">
+  <span class="arrow">◀</span>
+</button>
+
+<main class="main" id="main">
+  <div class="topbar">
+    <div class="topbar-title">
+      <span class="crumb">TMO</span>
+      <span class="sep">/</span>
+      <span class="crumb">Entregáveis</span>
+      <span class="sep">/</span>
+      <span class="crumb active" id="topbar-current">1 - Canvas de GMO</span>
+    </div>
+    <div class="topbar-actions">
+      <button class="topbar-btn" id="btn-reload">↻ Recarregar</button>
+      <button class="topbar-btn primary" id="btn-fullscreen">⛶ Tela cheia</button>
+    </div>
+  </div>
+
+  <div class="iframe-container">
+    <!-- CANVA -->
+    <div class="iframe-view active" id="view-canva">
+      <div class="iframe-loading" id="loading-canva">
+        <div class="spinner"></div>
+        <div>Carregando Canvas de GMO...</div>
+      </div>
+      <iframe id="iframe-canva" src="canva.html" onload="hideLoading('canva')"></iframe>
+    </div>
+
+    <!-- GOVERNANCA -->
+    <div class="iframe-view" id="view-governanca">
+      <div class="iframe-loading" id="loading-governanca">
+        <div class="spinner"></div>
+        <div>Carregando Plano ABC & Role-Play...</div>
+      </div>
+      <iframe id="iframe-governanca" src="governanca.html" onload="hideLoading('governanca')"></iframe>
+    </div>
+
+    <!-- ROI (IMAGEM PNG AJUSTADA) -->
+    <div class="iframe-view image-view" id="view-roi">
+      <div class="iframe-loading" id="loading-roi">
+        <div class="spinner"></div>
+        <div>Carregando Slide ROI...</div>
+        <div style="font-size:11px; margin-top:8px; color:var(--text-dim)">🖼️ Governanca.png</div>
+      </div>
+      <!-- Substituído iframe por img para controle total de tamanho -->
+      <img id="img-roi" src="Governanca.png" alt="Slide ROI" onload="hideLoading('roi')" />
+    </div>
+
+    <div class="scroll-indicator" id="scroll-indicator">
+      <span class="arrow-hint">→</span>
+      <span>Arraste para ver mais</span>
+    </div>
+  </div>
+</main>
+
+<button class="mobile-toggle" id="mobile-toggle">☰</button>
+
+<script>
+  const navItems = document.querySelectorAll('.nav-item');
+  const views = document.querySelectorAll('.iframe-view');
+  const topbarCurrent = document.getElementById('topbar-current');
+  const sidebar = document.getElementById('sidebar');
+  const main = document.getElementById('main');
+  const toggleBtn = document.getElementById('sidebar-toggle');
+  const scrollIndicator = document.getElementById('scroll-indicator');
+
+  const viewLabels = {
+    canva: '1 - Canvas de GMO',
+    governanca: '2 - ABC & Role-Play',
+    roi: '3 - ROI · Governança (PNG)'
+  };
+
+  function switchView(viewName) {
+    views.forEach(v => v.classList.remove('active'));
+    navItems.forEach(n => n.classList.remove('active'));
+
+    const targetView = document.getElementById('view-' + viewName);
+    if (targetView) targetView.classList.add('active');
+
+    navItems.forEach(n => {
+      if (n.dataset.view === viewName) n.classList.add('active');
+    });
+
+    topbarCurrent.textContent = viewLabels[viewName] || viewName;
+    sidebar.classList.remove('open');
+  }
+
+  navItems.forEach(item => {
+    item.addEventListener('click', () => {
+      switchView(item.dataset.view);
+    });
+  });
+
+  function hideLoading(name) {
+    const loading = document.getElementById('loading-' + name);
+    if (loading) loading.style.display = 'none';
+  }
+
+  toggleBtn.addEventListener('click', () => {
+    sidebar.classList.toggle('collapsed');
+    main.classList.toggle('expanded');
+    toggleBtn.classList.toggle('collapsed');
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === '1') switchView('canva');
+    if (e.key === '2') switchView('governanca');
+    if (e.key === '3') switchView('roi');
+    if (e.key === 'h' || e.key === 'H') {
+      sidebar.classList.toggle('collapsed');
+      main.classList.toggle('expanded');
+      toggleBtn.classList.toggle('collapsed');
+    }
+  });
+
+  document.getElementById('btn-reload').addEventListener('click', () => {
+    const activeView = document.querySelector('.iframe-view.active');
+    if (activeView) {
+      const iframe = activeView.querySelector('iframe');
+      const img = activeView.querySelector('img');
+      if (iframe) iframe.src = iframe.src;
+      if (img) {
+        // Força o recarregamento da imagem
+        const currentSrc = img.src;
+        img.src = '';
+        setTimeout(() => { img.src = currentSrc; }, 50);
+      }
+    }
+  });
+
+  document.getElementById('btn-fullscreen').addEventListener('click', () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    } else {
+      document.exitFullscreen();
+    }
+  });
+
+  document.getElementById('mobile-toggle').addEventListener('click', () => {
+    sidebar.classList.toggle('open');
+  });
+
+  document.addEventListener('click', (e) => {
+    if (window.innerWidth <= 900 && !sidebar.contains(e.target) && !document.getElementById('mobile-toggle').contains(e.target)) {
+      sidebar.classList.remove('open');
+    }
+  });
+
+  // Scroll indicator for canva (A3)
+  const canvaIframe = document.getElementById('iframe-canva');
+  canvaIframe.addEventListener('load', () => {
+    setTimeout(() => {
+      try {
+        const iframeDoc = canvaIframe.contentDocument || canvaIframe.contentWindow.document;
+        if (iframeDoc && iframeDoc.body.scrollWidth > iframeDoc.body.clientWidth) {
+          scrollIndicator.classList.add('visible');
+          setTimeout(() => { scrollIndicator.classList.remove('visible'); }, 4000);
+        }
+      } catch (err) { /* cross-origin */ }
+    }, 500);
+  });
+</script>
+</body>
+</html>
