@@ -1,0 +1,1866 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TMO · Campo Digital · Hub de Estudos</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.0/index.min.css" />
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0a0e14;
+    --bg-2: #111820;
+    --bg-3: #1a2330;
+    --border: #2a3545;
+    --text: #e6edf3;
+    --text-dim: #8b949e;
+    --red: #ef4444;
+    --green: #10b981;
+    --yellow: #f59e0b;
+    --blue: #3b82f6;
+    --purple: #8b5cf6;
+    --sidebar-w: 280px;
+  }
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    transition: all 0.3s ease;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background:
+      radial-gradient(circle at 10% 10%, rgba(239,68,68,0.06) 0%, transparent 40%),
+      radial-gradient(circle at 90% 90%, rgba(16,185,129,0.04) 0%, transparent 40%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: var(--sidebar-w);
+    height: 100vh;
+    background: var(--bg-2);
+    border-right: 1px solid var(--border);
+    position: fixed;
+    left: 0; top: 0;
+    display: flex;
+    flex-direction: column;
+    z-index: 10;
+    overflow-y: auto;
+    transition: transform 0.3s ease;
+  }
+  .sidebar.collapsed { transform: translateX(-100%); }
+  .sidebar-header { padding: 20px; border-bottom: 1px solid var(--border); }
+  .sidebar-logo { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .sidebar-badge {
+    width: 42px; height: 42px;
+    background: linear-gradient(135deg, var(--red), #b91c1c);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 16px;
+    box-shadow: 0 4px 20px rgba(239,68,68,0.3);
+    flex-shrink: 0;
+  }
+  .sidebar-logo-text h1 { font-size: 14px; font-weight: 700; }
+  .sidebar-logo-text p { font-size: 11px; color: var(--text-dim); }
+  .sidebar-context {
+    background: var(--bg-3);
+    border-radius: 10px;
+    padding: 12px;
+    font-size: 11px;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+  .sidebar-context strong { color: var(--text); }
+  .sidebar-nav { padding: 16px; flex: 1; }
+  .nav-section-title {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+    margin-bottom: 10px;
+    padding-left: 12px;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    margin-bottom: 4px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+    background: transparent;
+    width: 100%;
+    text-align: left;
+    color: var(--text-dim);
+    font-family: inherit;
+    font-size: 13px;
+  }
+  .nav-item:hover { background: var(--bg-3); color: var(--text); }
+  .nav-item.active {
+    background: rgba(239,68,68,0.1);
+    border-color: rgba(239,68,68,0.3);
+    color: var(--text);
+  }
+  .nav-item .icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+    background: var(--bg);
+  }
+  .nav-item.active .icon { background: var(--red); color: white; }
+  .nav-item .label { font-weight: 600; font-size: 13px; }
+  .nav-item .sublabel { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
+  .sidebar-footer {
+    padding: 16px 20px;
+    border-top: 1px solid var(--border);
+    font-size: 10px;
+    color: var(--text-dim);
+  }
+  .sidebar-footer .status { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .sidebar-footer .dot {
+    width: 8px; height: 8px;
+    background: var(--green);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--green);
+  }
+  .sidebar-footer .kbd {
+    background: var(--bg-3);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 10px;
+  }
+
+  .sidebar-toggle {
+    position: fixed;
+    top: 50%;
+    left: var(--sidebar-w);
+    transform: translateY(-50%);
+    width: 28px;
+    height: 60px;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-left: none;
+    border-radius: 0 8px 8px 0;
+    cursor: pointer;
+    z-index: 15;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-dim);
+    font-size: 12px;
+    transition: all 0.3s ease;
+  }
+  .sidebar-toggle:hover { background: var(--bg-3); color: var(--text); width: 32px; }
+  .sidebar-toggle.collapsed { left: 0; }
+  .sidebar-toggle .arrow { transition: transform 0.3s ease; display: inline-block; }
+  .sidebar-toggle.collapsed .arrow { transform: rotate(180deg); }
+
+  /* MAIN */
+  .main {
+    margin-left: var(--sidebar-w);
+    flex: 1;
+    height: 100vh;
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    transition: margin-left 0.3s ease;
+  }
+  .main.expanded { margin-left: 0; }
+  .topbar {
+    height: 56px;
+    background: var(--bg-2);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    flex-shrink: 0;
+  }
+  .topbar-title { display: flex; align-items: center; gap: 12px; }
+  .topbar-title .crumb { font-size: 12px; color: var(--text-dim); }
+  .topbar-title .crumb.active { color: var(--text); font-weight: 600; }
+  .topbar-title .sep { color: var(--text-dim); }
+  .topbar-actions { display: flex; gap: 8px; }
+  .topbar-btn {
+    padding: 6px 12px;
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-dim);
+    font-size: 11px;
+    font-family: inherit;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+  }
+  .topbar-btn:hover { color: var(--text); border-color: var(--text-dim); }
+  .topbar-btn.primary { background: var(--red); border-color: var(--red); color: white; }
+  .topbar-btn.primary:hover { background: #dc2626; }
+
+  .content-container { flex: 1; position: relative; overflow: hidden; }
+  .content-view {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    overflow: auto;
+  }
+  .content-view.active { opacity: 1; pointer-events: auto; }
+  .content-view iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: var(--bg);
+  }
+
+  /* ===================== HOME - JOGO DO MILHÃO ===================== */
+  .home-view {
+    padding: 30px 40px;
+    overflow-y: auto;
+  }
+  .home-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 30px 20px;
+    background: linear-gradient(135deg, rgba(239,68,68,0.1), rgba(139,92,246,0.1));
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  .home-header::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: conic-gradient(from 0deg, transparent, rgba(239,68,68,0.05), transparent, rgba(139,92,246,0.05), transparent);
+    animation: rotateBg 20s linear infinite;
+  }
+  @keyframes rotateBg { to { transform: rotate(360deg); } }
+  .home-header > * { position: relative; z-index: 1; }
+  .home-header h1 {
+    font-size: 28px;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--red), var(--purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+  }
+  .home-header p { color: var(--text-dim); font-size: 13px; }
+  .home-header .emoji-big { font-size: 48px; margin-bottom: 12px; display: block; }
+
+  /* Scoreboard */
+  .scoreboard {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 30px;
+  }
+  .score-card {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+    transition: all 0.3s;
+  }
+  .score-card:hover { border-color: var(--red); transform: translateY(-2px); }
+  .score-card .num {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--red);
+    line-height: 1;
+  }
+  .score-card .lbl {
+    font-size: 10px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 6px;
+  }
+  .score-card.green .num { color: var(--green); }
+  .score-card.yellow .num { color: var(--yellow); }
+  .score-card.blue .num { color: var(--blue); }
+
+  /* Block tabs */
+  .block-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .block-tab {
+    padding: 8px 16px;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    font-size: 11px;
+    font-family: inherit;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .block-tab:hover { color: var(--text); border-color: var(--text-dim); }
+  .block-tab.active {
+    background: var(--red);
+    border-color: var(--red);
+    color: white;
+  }
+  .block-tab .count {
+    background: rgba(255,255,255,0.2);
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: 9px;
+    font-weight: 700;
+  }
+  .block-tab.active .count { background: rgba(255,255,255,0.3); }
+
+  /* Question card */
+  .question-area {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 30px;
+    margin-bottom: 20px;
+    position: relative;
+  }
+  .question-number {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg-3);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-bottom: 16px;
+  }
+  .question-number .block-badge {
+    background: var(--red);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 10px;
+  }
+  .question-text {
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.5;
+    margin-bottom: 24px;
+    color: var(--text);
+  }
+  .options-grid {
+    display: grid;
+    gap: 10px;
+  }
+  .option-btn {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 20px;
+    background: var(--bg-3);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 14px;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s;
+    width: 100%;
+  }
+  .option-btn:hover:not(:disabled) {
+    border-color: var(--red);
+    background: rgba(239,68,68,0.05);
+    transform: translateX(4px);
+  }
+  .option-btn .letter {
+    width: 32px; height: 32px;
+    background: var(--bg);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800;
+    font-size: 14px;
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+  .option-btn:hover:not(:disabled) .letter {
+    background: var(--red);
+    color: white;
+  }
+  .option-btn.correct {
+    border-color: var(--green);
+    background: rgba(16,185,129,0.1);
+    animation: pulseCorrect 0.5s ease;
+  }
+  .option-btn.correct .letter { background: var(--green); color: white; }
+  .option-btn.wrong {
+    border-color: var(--red);
+    background: rgba(239,68,68,0.1);
+    animation: shake 0.4s ease;
+  }
+  .option-btn.wrong .letter { background: var(--red); color: white; }
+  .option-btn:disabled { cursor: default; opacity: 0.7; }
+  .option-btn.correct:disabled, .option-btn.wrong:disabled { opacity: 1; }
+
+  @keyframes pulseCorrect {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+  }
+
+  /* Feedback */
+  .feedback-box {
+    margin-top: 20px;
+    padding: 16px 20px;
+    border-radius: 12px;
+    font-size: 13px;
+    line-height: 1.6;
+    display: none;
+    animation: fadeIn 0.3s ease;
+  }
+  .feedback-box.show { display: block; }
+  .feedback-box.correct {
+    background: rgba(16,185,129,0.1);
+    border: 1px solid rgba(16,185,129,0.3);
+    color: var(--green);
+  }
+  .feedback-box.wrong {
+    background: rgba(239,68,68,0.1);
+    border: 1px solid rgba(239,68,68,0.3);
+    color: #fca5a5;
+  }
+  .feedback-box strong { display: block; margin-bottom: 4px; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* Navigation buttons */
+  .quiz-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    gap: 12px;
+  }
+  .quiz-btn {
+    padding: 10px 20px;
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .quiz-btn:hover { border-color: var(--red); background: rgba(239,68,68,0.1); }
+  .quiz-btn.primary { background: var(--red); border-color: var(--red); color: white; }
+  .quiz-btn.primary:hover { background: #dc2626; }
+  .quiz-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* Progress dots */
+  .progress-dots {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+  .progress-dot {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+  .progress-dot.current { background: var(--red); border-color: var(--red); transform: scale(1.3); }
+  .progress-dot.correct { background: var(--green); border-color: var(--green); }
+  .progress-dot.wrong { background: var(--red); border-color: var(--red); opacity: 0.5; }
+
+  /* Result screen */
+  .result-screen {
+    text-align: center;
+    padding: 40px 20px;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    display: none;
+  }
+  .result-screen.show { display: block; animation: fadeIn 0.5s ease; }
+  .result-screen .trophy { font-size: 64px; margin-bottom: 16px; }
+  .result-screen h2 { font-size: 24px; margin-bottom: 8px; }
+  .result-screen .final-score {
+    font-size: 48px;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--green), var(--blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 16px 0;
+  }
+
+  /* ===================== ESTUDO CANVA ===================== */
+  .study-view {
+    padding: 30px 40px;
+    overflow-y: auto;
+  }
+  .study-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 24px 20px;
+    background: linear-gradient(135deg, rgba(59,130,246,0.1), rgba(16,185,129,0.1));
+    border: 1px solid var(--border);
+    border-radius: 16px;
+  }
+  .study-header h1 {
+    font-size: 24px;
+    font-weight: 800;
+    margin-bottom: 8px;
+  }
+  .study-header p { color: var(--text-dim); font-size: 13px; }
+
+  .study-block {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    margin-bottom: 20px;
+    overflow: hidden;
+    transition: all 0.3s;
+  }
+  .study-block:hover { border-color: var(--blue); }
+  .study-block-header {
+    padding: 20px 24px;
+    background: var(--bg-3);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .study-block-header:hover { background: rgba(59,130,246,0.05); }
+  .study-block-num {
+    width: 40px; height: 40px;
+    background: var(--blue);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .study-block-title {
+    flex: 1;
+  }
+  .study-block-title h3 { font-size: 15px; font-weight: 700; margin-bottom: 2px; }
+  .study-block-title p { font-size: 11px; color: var(--text-dim); }
+  .study-block-toggle {
+    font-size: 18px;
+    color: var(--text-dim);
+    transition: transform 0.3s;
+  }
+  .study-block.open .study-block-toggle { transform: rotate(180deg); }
+  .study-block-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease;
+  }
+  .study-block.open .study-block-body {
+    max-height: 3000px;
+  }
+  .study-block-content {
+    padding: 24px;
+  }
+  .study-section {
+    margin-bottom: 20px;
+  }
+  .study-section:last-child { margin-bottom: 0; }
+  .study-section h4 {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--blue);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .study-section p, .study-section li {
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--text);
+  }
+  .study-section ul {
+    padding-left: 20px;
+    margin-top: 6px;
+  }
+  .study-section li { margin-bottom: 6px; }
+  .study-section li::marker { color: var(--blue); }
+
+  .ref-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 10px;
+    color: var(--text-dim);
+    margin: 2px;
+  }
+  .ref-badge strong { color: var(--yellow); }
+  .refs-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 8px;
+  }
+
+  .highlight-box {
+    background: rgba(245,158,11,0.08);
+    border-left: 3px solid var(--yellow);
+    padding: 12px 16px;
+    border-radius: 0 8px 8px 0;
+    margin: 12px 0;
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+  .highlight-box strong { color: var(--yellow); }
+
+  .key-concept {
+    background: rgba(139,92,246,0.08);
+    border: 1px solid rgba(139,92,246,0.2);
+    padding: 12px 16px;
+    border-radius: 10px;
+    margin: 10px 0;
+    font-size: 12px;
+    line-height: 1.6;
+  }
+  .key-concept strong { color: var(--purple); }
+
+  /* Mobile */
+  .mobile-toggle {
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 56px; height: 56px;
+    background: var(--red);
+    border: none;
+    border-radius: 50%;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 20;
+    box-shadow: 0 4px 20px rgba(239,68,68,0.4);
+  }
+  @media (max-width: 900px) {
+    .sidebar { transform: translateX(-100%); }
+    .sidebar.open { transform: translateX(0); }
+    .sidebar-toggle { display: none; }
+    .main { margin-left: 0; }
+    .mobile-toggle { display: flex; align-items: center; justify-content: center; }
+    .home-view, .study-view { padding: 20px; }
+    .question-text { font-size: 15px; }
+    .home-header h1 { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">
+      <div class="sidebar-badge">TMO</div>
+      <div class="sidebar-logo-text">
+        <h1>Campo Digital</h1>
+        <p>Hub de Estudos · Grupo 1</p>
+      </div>
+    </div>
+    <div class="sidebar-context">
+      <strong>Modo:</strong> Preparação para Banca<br>
+      <strong>Desafio:</strong> 24 perguntas simuladas<br>
+      <strong>Ferramentas:</strong> Quiz · Role-Play · Guia
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section-title">Módulos de Preparação</div>
+    <button class="nav-item active" data-view="home">
+      <div class="icon">🎯</div>
+      <div>
+        <div class="label">1 - Jogo do Milhão</div>
+        <div class="sublabel">24 perguntas · 6 blocos do Canvas</div>
+      </div>
+    </button>
+    <button class="nav-item" data-view="nao">
+      <div class="icon">🛑</div>
+      <div>
+        <div class="label">2 - Dizendo NÃO</div>
+        <div class="sublabel">Simulador · NÃO + Dado + Alternativa</div>
+      </div>
+    </button>
+    <button class="nav-item" data-view="roleplay">
+      <div class="icon">🎭</div>
+      <div>
+        <div class="label">3 - Role-Play</div>
+        <div class="sublabel">Jornada do Herói · Valdir Ramos</div>
+      </div>
+    </button>
+    <button class="nav-item" data-view="estudo">
+      <div class="icon">📚</div>
+      <div>
+        <div class="label">4 - Estudo do Canvas</div>
+        <div class="sublabel">6 blocos · Resumo + Referências</div>
+      </div>
+    </button>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="status">
+      <span class="dot"></span>
+      <span>Hub ativo · 4 módulos disponíveis</span>
+    </div>
+    <div style="margin-top:8px">
+      <span class="kbd">1</span> Quiz · <span class="kbd">2</span> NÃO · <span class="kbd">3</span> RP · <span class="kbd">4</span> Estudo
+    </div>
+  </div>
+</aside>
+
+<button class="sidebar-toggle" id="sidebar-toggle" title="Esconder/Mostrar (H)">
+  <span class="arrow">◀</span>
+</button>
+
+<main class="main" id="main">
+  <div class="topbar">
+    <div class="topbar-title">
+      <span class="crumb">TMO</span>
+      <span class="sep">/</span>
+      <span class="crumb">Preparação</span>
+      <span class="sep">/</span>
+      <span class="crumb active" id="topbar-current">Jogo do Milhão</span>
+    </div>
+    <div class="topbar-actions">
+      <button class="topbar-btn primary" id="btn-fullscreen">⛶ Tela cheia</button>
+    </div>
+  </div>
+
+  <div class="content-container">
+
+    <!-- ============ VIEW 1: HOME - JOGO DO MILHÃO ============ -->
+    <div class="content-view home-view active" id="view-home">
+      <div class="home-header">
+        <span class="emoji-big">🎯</span>
+        <h1>Jogo do Milhão · Banca TMO</h1>
+        <p>24 perguntas simuladas · 4 por bloco do Canvas · Responda como se estivesse diante da banca</p>
+      </div>
+
+      <div class="scoreboard">
+        <div class="score-card">
+          <div class="num" id="score-total">0</div>
+          <div class="lbl">Pontos</div>
+        </div>
+        <div class="score-card green">
+          <div class="num" id="score-correct">0</div>
+          <div class="lbl">Corretas</div>
+        </div>
+        <div class="score-card" style="--card-color: var(--red);">
+          <div class="num" id="score-wrong" style="color:var(--red);">0</div>
+          <div class="lbl">Incorretas</div>
+        </div>
+        <div class="score-card yellow">
+          <div class="num" id="score-percent">0%</div>
+          <div class="lbl">Aproveitamento</div>
+        </div>
+        <div class="score-card blue">
+          <div class="num" id="score-current">1/24</div>
+          <div class="lbl">Progresso</div>
+        </div>
+      </div>
+
+      <div class="block-tabs" id="block-tabs"></div>
+      <div class="progress-dots" id="progress-dots"></div>
+
+      <div id="quiz-area">
+        <div class="question-area" id="question-area">
+          <div class="question-number" id="question-number"></div>
+          <div class="question-text" id="question-text"></div>
+          <div class="options-grid" id="options-grid"></div>
+          <div class="feedback-box" id="feedback-box"></div>
+        </div>
+        <div class="quiz-nav">
+          <button class="quiz-btn" id="btn-prev" disabled>← Anterior</button>
+          <button class="quiz-btn" id="btn-shuffle">🔀 Embaralhar</button>
+          <button class="quiz-btn primary" id="btn-next">Próxima →</button>
+        </div>
+      </div>
+
+      <div class="result-screen" id="result-screen">
+        <div class="trophy">🏆</div>
+        <h2>Simulação Concluída!</h2>
+        <p style="color:var(--text-dim);margin-top:8px;">Você respondeu todas as 24 perguntas da banca</p>
+        <div class="final-score" id="final-score">0%</div>
+        <p style="color:var(--text-dim);font-size:13px;" id="final-msg"></p>
+        <button class="quiz-btn primary" style="margin:20px auto 0;" id="btn-restart">🔄 Recomeçar</button>
+      </div>
+    </div>
+
+    <!-- ============ VIEW 2: DIZENDO NÃO (iframe) ============ -->
+    <div class="content-view" id="view-nao">
+      <iframe src="governanca.html"></iframe>
+    </div>
+
+    <!-- ============ VIEW 3: ROLE-PLAY (iframe) ============ -->
+    <div class="content-view" id="view-roleplay">
+      <iframe src="heroi.html"></iframe>
+    </div>
+
+    <!-- ============ VIEW 4: ESTUDO CANVA ============ -->
+    <div class="content-view study-view" id="view-estudo">
+      <div class="study-header">
+        <h1>📚 Guia de Estudo · Canvas de GMO</h1>
+        <p>Resumo dos 6 blocos com referências aos materiais · Grupo 1 · Operacional · Campo Digital</p>
+      </div>
+
+      <!-- BLOCO 1 -->
+      <div class="study-block open" data-block="1">
+        <div class="study-block-header">
+          <div class="study-block-num">1</div>
+          <div class="study-block-title">
+            <h3>Problema · A dor de negócio em uma frase</h3>
+            <p>O que justifica a mudança? Qual o custo de não agir?</p>
+          </div>
+          <div class="study-block-toggle">▼</div>
+        </div>
+        <div class="study-block-body">
+          <div class="study-block-content">
+            <div class="study-section">
+              <h4>📖 O que é este bloco</h4>
+              <p>O Bloco 1 do Canvas é a <strong>fundação de todo o plano</strong>. Ele responde à pergunta mais importante: <em>"qual dor de negócio justifica o investimento nessa mudança?"</em>. Segundo o Guia Prático do PMI, formular a mudança começa por delimitar o escopo e esclarecer os resultados esperados. Se o grupo não concorda sobre o problema, todo o resto será uma negociação disfarçada (Desafio, Slide 05).</p>
+            </div>
+            <div class="study-section">
+              <h4>🌾 Aplicação ao Campo Digital (Grupo 1)</h4>
+              <div class="highlight-box">
+                <strong>Problema declarado:</strong> A transição digital do chão de fábrica está travada por resistência cultural e medo de coerção punitiva — simbolizada pelo Turno B a apenas 31% de adoção, pelo uso do papel como "porto seguro" e pelo slide vazado de produtividade individual.
+              </div>
+              <p>Isso ameaça diretamente:</p>
+              <ul>
+                <li>✅ A meta de 100% sem papel</li>
+                <li>✅ A auditoria da montadora em 15/12 (22% do faturamento)</li>
+                <li>✅ A margem EBITDA (atual 7%)</li>
+              </ul>
+            </div>
+            <div class="study-section">
+              <h4>🔑 Conceitos-chave</h4>
+              <div class="key-concept">
+                <strong>Círculo Dourado (Simon Sinek):</strong> Comece pelo PORQUÊ. A dor precisa ser compreendida por qualquer operador. Se você não consegue escrever o problema em uma frase que o Valdir do Turno B repetiria para um colega, o projeto ainda não sabe por que existe.
+              </div>
+              <div class="key-concept">
+                <strong>Sensor de Urgência (Kotter, Passo 1):</strong> Urgência não é pânico. É a percepção compartilhada, baseada em fatos, de que o status quo tem custo. No nosso caso: auditoria da montadora = 22% do faturamento em risco.
+              </div>
+            </div>
+            <div class="study-section">
+              <h4>📑 Referências para estudo aprofundado</h4>
+              <div class="refs-container">
+                <span class="ref-badge">Desafio · <strong>Slide 04</strong> · Entregável 1</span>
+                <span class="ref-badge">Desafio · <strong>Slide 05</strong> · Canvas A3</span>
+                <span class="ref-badge">Desafio · <strong>Slide 09</strong> · Cenário Grupo 1</span>
+                <span class="ref-badge">Gestão · <strong>Slides 01-02</strong> · Output ≠ Outcome</span>
+                <span class="ref-badge">Gestão · <strong>Slide 06</strong> · Curva de Mudança</span>
+                <span class="ref-badge">Gestão · <strong>Slide 10</strong> · Kotter Passo 1</span>
+                <span class="ref-badge">Gestão · <strong>Slide 16</strong> · Círculo Dourado</span>
+                <span class="ref-badge">Gestão · <strong>Slide 29</strong> · Canvas Bloco 1</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BLOCO 2 -->
+      <div class="study-block" data-block="2">
+        <div class="study-block-header">
+          <div class="study-block-num">2</div>
+          <div class="study-block-title">
+            <h3>Gap As-Is → To-Be · Análise de Impacto</h3>
+            <p>O que muda, para quem, com que severidade (5 dimensões)</p>
+          </div>
+          <div class="study-block-toggle">▼</div>
+        </div>
+        <div class="study-block-body">
+          <div class="study-block-content">
+            <div class="study-section">
+              <h4>📖 O que é este bloco</h4>
+              <p>A <strong>Análise de Impacto da Mudança</strong> traduz a estratégia em realidade operacional. Ela compara o estado atual (As-Is) com o estado futuro (To-Be) em 5 dimensões: <strong>Processos, Sistemas, Estrutura, Papéis e Cultura</strong>. Para cada cargo/departamento, atribui-se um nível de severidade: Baixo, Médio, Alto ou Crítico (Gestão, Slide 12).</p>
+            </div>
+            <div class="study-section">
+              <h4>🌾 Aplicação ao Campo Digital</h4>
+              <table style="width:100%;border-collapse:collapse;font-size:12px;margin:10px 0;">
+                <tr style="background:var(--bg-3);">
+                  <th style="padding:8px;text-align:left;border:1px solid var(--border);">Dimensão</th>
+                  <th style="padding:8px;text-align:left;border:1px solid var(--border);">As-Is</th>
+                  <th style="padding:8px;text-align:left;border:1px solid var(--border);">To-Be</th>
+                  <th style="padding:8px;text-align:left;border:1px solid var(--border);">Sev.</th>
+                </tr>
+                <tr>
+                  <td style="padding:8px;border:1px solid var(--border);">Processos</td>
+                  <td style="padding:8px;border:1px solid var(--border);">71% registros nos últimos 40min</td>
+                  <td style="padding:8px;border:1px solid var(--border);">100% OS em tempo real</td>
+                  <td style="padding:8px;border:1px solid var(--border);color:var(--yellow);">ALTA</td>
+                </tr>
+                <tr style="background:var(--bg-3);">
+                  <td style="padding:8px;border:1px solid var(--border);">Sistemas</td>
+                  <td style="padding:8px;border:1px solid var(--border);">34% fotos fora do padrão</td>
+                  <td style="padding:8px;border:1px solid var(--border);">&lt;5% erro + Modo Offline</td>
+                  <td style="padding:8px;border:1px solid var(--border);color:var(--red);">CRÍTICA</td>
+                </tr>
+                <tr>
+                  <td style="padding:8px;border:1px solid var(--border);">Cultura</td>
+                  <td style="padding:8px;border:1px solid var(--border);">Medo de vigilância</td>
+                  <td style="padding:8px;border:1px solid var(--border);">Segurança psicológica</td>
+                  <td style="padding:8px;border:1px solid var(--border);color:var(--red);">CRÍTICA</td>
+                </tr>
+              </table>
+            </div>
+            <div class="study-section">
+              <h4>🔑 Conceitos-chave</h4>
+              <div class="key-concept">
+                <strong>Regra de ouro do PMI:</strong> O esforço de gestão de mudanças deve ser proporcional à ameaça percebida pelas pessoas, não ao tamanho técnico da entrega. Mudança de 1ª ordem para a organização pode ser vivida como 2ª ordem para o indivíduo quando mexe com renda e controle.
+              </div>
+              <div class="key-concept">
+                <strong>Ação por nível de impacto:</strong> Baixo → comunicação; Médio → treino prático; Alto → co-desenho + champions; Crítico → conversa individual + revisão de cargo/meta.
+              </div>
+            </div>
+            <div class="study-section">
+              <h4>📑 Referências para estudo aprofundado</h4>
+              <div class="refs-container">
+                <span class="ref-badge">Desafio · <strong>Slide 04</strong> · Entregável 1</span>
+                <span class="ref-badge">Desafio · <strong>Slide 05</strong> · Canvas Bloco 2</span>
+                <span class="ref-badge">Gestão · <strong>Slide 02</strong> · Tipologia (1ª/2ª/3ª ordem)</span>
+                <span class="ref-badge">Gestão · <strong>Slide 03</strong> · Cultura organizacional</span>
+                <span class="ref-badge">Gestão · <strong>Slide 12</strong> · Análise de Impacto</span>
+                <span class="ref-badge">Gestão · <strong>Slide 29</strong> · Canvas Bloco 2</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BLOCO 3 -->
+      <div class="study-block" data-block="3">
+        <div class="study-block-header">
+          <div class="study-block-num">3</div>
+          <div class="study-block-title">
+            <h3>Poder e Medos · Mapeamento Político</h3>
+            <p>Quem aprova, acelera ou bloqueia · Causa raiz da resistência</p>
+          </div>
+          <div class="study-block-toggle">▼</div>
+        </div>
+        <div class="study-block-body">
+          <div class="study-block-content">
+            <div class="study-section">
+              <h4>📖 O que é este bloco</h4>
+              <p>Não basta uma grade de poder e interesse. O Desafio exige a <strong>terceira variável: o MEDO</strong>. Para cada stakeholder crítico, é preciso identificar o que ele teme perder e traçar a rota de migração da posição atual (C) para a desejada (D). A resistência não é pirraça — é ameaça percebida (Gestão, Slide 07).</p>
+            </div>
+            <div class="study-section">
+              <h4>🌾 Aplicação ao Campo Digital</h4>
+              <table style="width:100%;border-collapse:collapse;font-size:12px;margin:10px 0;">
+                <tr style="background:var(--bg-3);">
+                  <th style="padding:8px;text-align:left;border:1px solid var(--border);">Stakeholder</th>
+                  <th style="padding:8px;text-align:left;border:1px solid var(--border);">Medo Real</th>
+                  <th style="padding:8px;text-align:left;border:1px solid var(--border);">C → D</th>
+                  <th style="padding:8px;text-align:left;border:1px solid var(--border);">Rota</th>
+                </tr>
+                <tr>
+                  <td style="padding:8px;border:1px solid var(--border);">Valdir Ramos</td>
+                  <td style="padding:8px;border:1px solid var(--border);">Parecer obsoleto</td>
+                  <td style="padding:8px;border:1px solid var(--border);">RESIST. → APOIADOR</td>
+                  <td style="padding:8px;border:1px solid var(--border);">Co-criação das telas</td>
+                </tr>
+                <tr style="background:var(--bg-3);">
+                  <td style="padding:8px;border:1px solid var(--border);">Edson "Paraná"</td>
+                  <td style="padding:8px;border:1px solid var(--border);">Perder variável</td>
+                  <td style="padding:8px;border:1px solid var(--border);">RESIST. → APOIADOR</td>
+                  <td style="padding:8px;border:1px solid var(--border);">Treino Offline + Garantia</td>
+                </tr>
+                <tr>
+                  <td style="padding:8px;border:1px solid var(--border);">Ricardo Almeida</td>
+                  <td style="padding:8px;border:1px solid var(--border);">Não entregar</td>
+                  <td style="padding:8px;border:1px solid var(--border);">APOIADOR → LÍDER</td>
+                  <td style="padding:8px;border:1px solid var(--border);">De fiscal para protetor</td>
+                </tr>
+                <tr style="background:var(--bg-3);">
+                  <td style="padding:8px;border:1px solid var(--border);">Sindicato</td>
+                  <td style="padding:8px;border:1px solid var(--border);">Mudança unilateral</td>
+                  <td style="padding:8px;border:1px solid var(--border);">NEUTRO → APOIADOR</td>
+                  <td style="padding:8px;border:1px solid var(--border);">Ofício respondido</td>
+                </tr>
+              </table>
+            </div>
+            <div class="study-section">
+              <h4>🔑 Conceitos-chave</h4>
+              <div class="key-concept">
+                <strong>Resistência declarada vs. silenciosa:</strong> A declarada é AMIGA — aparece, pode ser debatida. A silenciosa é LETAL — concorda na sala, sabota no corredor. No nosso caso, os registros em bloco no fim do turno são resistência silenciosa clássica.
+              </div>
+              <div class="key-concept">
+                <strong>Co-criação (Kotter & Schlesinger):</strong> Convidar o crítico mais severo para o comitê de desenho. Ninguém sabota a própria obra. Valdir no comitê de telas = resistência transformada em patrocínio.
+              </div>
+              <div class="highlight-box">
+                <strong>⚠️ Cuidado:</strong> Ignorar conflito político não é diplomacia — é omissão. Se o cenário tem alguém que perde autoridade, você precisa dizer isso com todas as letras.
+              </div>
+            </div>
+            <div class="study-section">
+              <h4>📑 Referências para estudo aprofundado</h4>
+              <div class="refs-container">
+                <span class="ref-badge">Desafio · <strong>Slide 04</strong> · Entregável 2</span>
+                <span class="ref-badge">Desafio · <strong>Slide 05</strong> · Canvas Bloco 3</span>
+                <span class="ref-badge">Gestão · <strong>Slide 07</strong> · Causas raiz da resistência</span>
+                <span class="ref-badge">Gestão · <strong>Slide 08</strong> · Mapeamento político</span>
+                <span class="ref-badge">Gestão · <strong>Slide 09</strong> · Estratégias de mitigação</span>
+                <span class="ref-badge">Gestão · <strong>Slide 13</strong> · Matriz de engajamento C→D</span>
+                <span class="ref-badge">Gestão · <strong>Slide 29</strong> · Canvas Bloco 3</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BLOCO 4 -->
+      <div class="study-block" data-block="4">
+        <div class="study-block-header">
+          <div class="study-block-num">4</div>
+          <div class="study-block-title">
+            <h3>Rota ADKAR · Ponto de Barreira por Público</h3>
+            <p>Onde a mudança trava · Intervenção cirúrgica</p>
+          </div>
+          <div class="study-block-toggle">▼</div>
+        </div>
+        <div class="study-block-body">
+          <div class="study-block-content">
+            <div class="study-section">
+              <h4>📖 O que é este bloco</h4>
+              <p>O modelo <strong>ADKAR</strong> (Prosci) olha a mudança do ponto de vista de cada indivíduo: <strong>A</strong>wareness → <strong>D</strong>esire → <strong>K</strong>nowledge → <strong>A</strong>bility → <strong>R</strong>einforcement. O <strong>ponto de barreira</strong> é a primeira letra em que a pessoa trava. Regra: não adianta trabalhar a letra seguinte enquanto a anterior não estiver resolvida (Gestão, Slide 11).</p>
+            </div>
+            <div class="study-section">
+              <h4>🌾 Aplicação ao Campo Digital</h4>
+              <div class="highlight-box">
+                <strong>🔴 Planta (Operadores):</strong> Barreira = <strong>Ability</strong><br>
+                Treinamento foi só teórico (4h sem prática). O operador pode saber usar o app na sala e travar no campo, com pressa, sinal fraco e supervisor cobrando.<br><br>
+                <strong>🌾 Campo (Técnicos):</strong> Barreira = <strong>Awareness</strong><br>
+                Não sabem que o Modo Offline existe.
+              </div>
+              <p><strong>Intervenção:</strong> Oficinas de 30min no posto (Gemba) com Superusuários + Guia de bolso do Modo Offline.</p>
+              <p><strong>Quick Win (15 dias):</strong> Ranking de Produtividade por TURNO (não individual) com premiação mensal coletiva. Remove o medo individual e gera união.</p>
+            </div>
+            <div class="study-section">
+              <h4>🔑 Conceitos-chave</h4>
+              <div class="key-concept">
+                <strong>Tragédia do treinamento:</strong> Treinar (K) quem ainda não quer (D) é queimar verba. A sala fica com braço cruzado, celular na mão, perguntas hostis. A empresa paga o treinamento e o conhecimento não é absorvido.
+              </div>
+              <div class="key-concept">
+                <strong>Saber ≠ Fazer:</strong> Entre Knowledge e Ability existe um abismo. Quem tirou 10 no treinamento pode travar na primeira segunda-feira de Go-Live. O plano precisa prever prática em ambiente realista e acompanhamento no posto.
+              </div>
+              <div class="key-concept">
+                <strong>Quick Wins (Kotter, Passo 6):</strong> Transformações sem resultados visíveis em 12-24 meses perdem o fôlego. O ranking por turno é uma vitória rápida concreta, com prazo e responsável.
+              </div>
+            </div>
+            <div class="study-section">
+              <h4>📑 Referências para estudo aprofundado</h4>
+              <div class="refs-container">
+                <span class="ref-badge">Desafio · <strong>Slide 04</strong> · Entregável 4</span>
+                <span class="ref-badge">Desafio · <strong>Slide 05</strong> · Canvas Bloco 4</span>
+                <span class="ref-badge">Gestão · <strong>Slide 06</strong> · Curva de Mudança / Vale da Morte</span>
+                <span class="ref-badge">Gestão · <strong>Slide 10</strong> · Kotter 8 passos</span>
+                <span class="ref-badge">Gestão · <strong>Slide 11</strong> · ADKAR completo</span>
+                <span class="ref-badge">Gestão · <strong>Slide 25</strong> · Plano integrado</span>
+                <span class="ref-badge">Gestão · <strong>Slide 29</strong> · Canvas Bloco 4</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BLOCO 5 -->
+      <div class="study-block" data-block="5">
+        <div class="study-block-header">
+          <div class="study-block-num">5</div>
+          <div class="study-block-title">
+            <h3>Storytelling · Framework Narrativo</h3>
+            <p>Qual framework, para qual público, em que momento</p>
+          </div>
+          <div class="study-block-toggle">▼</div>
+        </div>
+        <div class="study-block-body">
+          <div class="study-block-content">
+            <div class="study-section">
+              <h4>📖 O que é este bloco</h4>
+              <p>O 5º entregável exige o uso obrigatório de um dos <strong>9 frameworks de storytelling</strong>. A escolha não pode ser por gosto — precisa decorrer do diagnóstico ADKAR e da matriz de engajamento. A banca vai perguntar: <em>"por que ESTE framework, para ESTE público, NESTE momento?"</em> (Desafio, Slide 12).</p>
+            </div>
+            <div class="study-section">
+              <h4>🌾 Aplicação ao Campo Digital</h4>
+              <div class="highlight-box">
+                <strong>Framework escolhido:</strong> 🦸 <strong>A Jornada do Herói (Adaptada)</strong><br>
+                <strong>Público:</strong> Chão de fábrica (Valdir e Edson como protagonistas)<br>
+                <strong>Momento:</strong> Reunião de turno e Town Hall pré-Onda 2
+              </div>
+              <p><strong>Mensagem-Chave:</strong></p>
+              <div class="key-concept">
+                "Vocês são os heróis que seguram essa planta. O app não é o fiscal; é a espada que protege o conhecimento de vocês contra auditorias e garante que o prêmio do turno chegue inteiro, sem burocracia de papel."
+              </div>
+            </div>
+            <div class="study-section">
+              <h4>🔑 Os 9 Frameworks · Matriz de Seleção</h4>
+              <table style="width:100%;border-collapse:collapse;font-size:12px;margin:10px 0;">
+                <tr style="background:var(--bg-3);">
+                  <th style="padding:8px;border:1px solid var(--border);">Público</th>
+                  <th style="padding:8px;border:1px solid var(--border);">Objetivo</th>
+                  <th style="padding:8px;border:1px solid var(--border);">Frameworks</th>
+                </tr>
+                <tr>
+                  <td style="padding:8px;border:1px solid var(--border);">Diretoria / Sponsors</td>
+                  <td style="padding:8px;border:1px solid var(--border);">Objetividade e decisão</td>
+                  <td style="padding:8px;border:1px solid var(--border);">Pirâmide de Minto · ABT</td>
+                </tr>
+                <tr style="background:var(--bg-3);">
+                  <td style="padding:8px;border:1px solid var(--border);">Town Hall / Anúncios</td>
+                  <td style="padding:8px;border:1px solid var(--border);">Visão e propósito</td>
+                  <td style="padding:8px;border:1px solid var(--border);">Círculo Dourado · 3 Atos</td>
+                </tr>
+                <tr>
+                  <td style="padding:8px;border:1px solid var(--border);">Ponta operacional</td>
+                  <td style="padding:8px;border:1px solid var(--border);">Empatia e WIIFM</td>
+                  <td style="padding:8px;border:1px solid var(--border);">StoryBrand · O quê/E daí/E agora</td>
+                </tr>
+                <tr style="background:var(--bg-3);">
+                  <td style="padding:8px;border:1px solid var(--border);">Crise / Cultura</td>
+                  <td style="padding:8px;border:1px solid var(--border);">Resiliência e transparência</td>
+                  <td style="padding:8px;border:1px solid var(--border);">Jornada do Herói · STARR · C.H.A.I.R.</td>
+                </tr>
+              </table>
+            </div>
+            <div class="study-section">
+              <h4>🔑 Conceitos-chave</h4>
+              <div class="key-concept">
+                <strong>Jornada do Herói (Campbell):</strong> O colaborador é o herói, o projeto é o guia. Se o líder se coloca como herói, a equipe vira figurante — ou pior, o obstáculo.
+              </div>
+              <div class="key-concept">
+                <strong>WIIFM (What's in it for me?):</strong> A pergunta silenciosa que cada pessoa faz. Se não for respondida, trava a letra D do ADKAR. O StoryBrand é a ferramenta mais direta para respondê-la.
+              </div>
+              <div class="highlight-box">
+                <strong>⚠️ Ética do storytelling:</strong> Estrutura narrativa é ferramenta a serviço da verdade, não de manipulação. Um framework bem aplicado sobre uma mensagem falsa perde todos os pontos do critério de narrativa.
+              </div>
+            </div>
+            <div class="study-section">
+              <h4>📑 Referências para estudo aprofundado</h4>
+              <div class="refs-container">
+                <span class="ref-badge">Desafio · <strong>Slide 04</strong> · Entregável 5</span>
+                <span class="ref-badge">Desafio · <strong>Slide 06</strong> · Regras do Role-Play</span>
+                <span class="ref-badge">Desafio · <strong>Slide 12</strong> · Guia dos 9 frameworks</span>
+                <span class="ref-badge">Gestão · <strong>Slide 15</strong> · Matriz de seleção</span>
+                <span class="ref-badge">Gestão · <strong>Slide 16</strong> · Círculo Dourado</span>
+                <span class="ref-badge">Gestão · <strong>Slide 17</strong> · Pirâmide de Minto</span>
+                <span class="ref-badge">Gestão · <strong>Slide 18</strong> · ABT</span>
+                <span class="ref-badge">Gestão · <strong>Slide 19</strong> · O quê/E daí/E agora</span>
+                <span class="ref-badge">Gestão · <strong>Slide 20</strong> · STARR</span>
+                <span class="ref-badge">Gestão · <strong>Slide 21</strong> · 3 Atos</span>
+                <span class="ref-badge">Gestão · <strong>Slide 22</strong> · Jornada do Herói</span>
+                <span class="ref-badge">Gestão · <strong>Slide 23</strong> · StoryBrand</span>
+                <span class="ref-badge">Gestão · <strong>Slide 24</strong> · C.H.A.I.R.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BLOCO 6 -->
+      <div class="study-block" data-block="6">
+        <div class="study-block-header">
+          <div class="study-block-num">6</div>
+          <div class="study-block-title">
+            <h3>Métricas P5 · Adoção e Sustentabilidade</h3>
+            <p>Atividade · Adoção · Negócio · Pessoas · Planeta · Prosperidade</p>
+          </div>
+          <div class="study-block-toggle">▼</div>
+        </div>
+        <div class="study-block-body">
+          <div class="study-block-content">
+            <div class="study-section">
+              <h4>📖 O que é este bloco</h4>
+              <p>O último bloco do Canvas mede o sucesso em <strong>três camadas</strong> (Atividade, Adoção, Negócio) e aplica as <strong>5 perspectivas do Padrão P5</strong> da GPM: Pessoas, Planeta, Prosperidade, Processo e Produto. Benefício sem dono é benefício perdido (Gestão, Slide 27).</p>
+            </div>
+            <div class="study-section">
+              <h4>🌾 Aplicação ao Campo Digital</h4>
+              <table style="width:100%;border-collapse:collapse;font-size:12px;margin:10px 0;">
+                <tr style="background:var(--bg-3);">
+                  <th style="padding:8px;border:1px solid var(--border);">Pilar P5</th>
+                  <th style="padding:8px;border:1px solid var(--border);">Indicador (Meta 30/11)</th>
+                </tr>
+                <tr>
+                  <td style="padding:8px;border:1px solid var(--border);">👥 Pessoas</td>
+                  <td style="padding:8px;border:1px solid var(--border);">100% treinados no Gemba; 0 ofícios; privacidade garantida</td>
+                </tr>
+                <tr style="background:var(--bg-3);">
+                  <td style="padding:8px;border:1px solid var(--border);">🌍 Planeta</td>
+                  <td style="padding:8px;border:1px solid var(--border);">-38 mil folhas/mês (100% sem papel)</td>
+                </tr>
+                <tr>
+                  <td style="padding:8px;border:1px solid var(--border);">💰 Prosperidade</td>
+                  <td style="padding:8px;border:1px solid var(--border);">Faturamento de campo: 12 → 3 dias; Prêmio coletivo mantido</td>
+                </tr>
+                <tr style="background:var(--bg-3);">
+                  <td style="padding:8px;border:1px solid var(--border);">🔄 Processo</td>
+                  <td style="padding:8px;border:1px solid var(--border);">&lt;5% fotos fora do padrão; 90% OS em tempo real</td>
+                </tr>
+                <tr>
+                  <td style="padding:8px;border:1px solid var(--border);">📦 Produto</td>
+                  <td style="padding:8px;border:1px solid var(--border);">100% conformidade na rastreabilidade (auditoria 15/12)</td>
+                </tr>
+              </table>
+            </div>
+            <div class="study-section">
+              <h4>🔑 Conceitos-chave</h4>
+              <div class="key-concept">
+                <strong>3 camadas de indicadores:</strong><br>
+                • <strong>Atividade (Leading):</strong> cobertura de comunicação, presença em treinamentos, champions ativos<br>
+                • <strong>Adoção (Lagging):</strong> uso proficiente, tempo de execução, erros pós-Go-Live<br>
+                • <strong>Negócio (Outcome):</strong> benefícios do Business Case, ROI, satisfação do cliente
+              </div>
+              <div class="key-concept">
+                <strong>Padrão P5 (GPM):</strong> Integra sustentabilidade à gestão de projetos. Em transformações com automação/IA, a pergunta sobre o que acontece com as pessoas não é só comunicação — é responsabilidade do projeto.
+              </div>
+              <div class="key-concept">
+                <strong>Sustentação (ADKAR - R):</strong> Os primeiros 90 dias pós-Go-Live são o período de maior risco de retrocesso. Reforço = mexer em metas, KPIs, avaliação de desempenho e reconhecimento.
+              </div>
+              <div class="highlight-box">
+                <strong>⚠️ Regra final:</strong> A gestão de mudanças só é bem-sucedida quando a camada de NEGÓCIO atinge o patamar projetado. Treinamento com 100% de presença e benefício zero = projeto sem sucesso.
+              </div>
+            </div>
+            <div class="study-section">
+              <h4>📑 Referências para estudo aprofundado</h4>
+              <div class="refs-container">
+                <span class="ref-badge">Desafio · <strong>Slide 04</strong> · Entregável 6</span>
+                <span class="ref-badge">Desafio · <strong>Slide 05</strong> · Canvas Bloco 6</span>
+                <span class="ref-badge">Gestão · <strong>Slide 22</strong> · Jornada do Herói + P5</span>
+                <span class="ref-badge">Gestão · <strong>Slide 25</strong> · Plano integrado</span>
+                <span class="ref-badge">Gestão · <strong>Slide 27</strong> · Indicadores de sucesso</span>
+                <span class="ref-badge">Gestão · <strong>Slide 28</strong> · Sustentação e ancoragem</span>
+                <span class="ref-badge">Gestão · <strong>Slide 29</strong> · Canvas Bloco 6</span>
+                <span class="ref-badge">Gestão · <strong>Slide 31</strong> · Encerramento P5</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</main>
+
+<button class="mobile-toggle" id="mobile-toggle">☰</button>
+
+<script>
+// ==================== NAVEGAÇÃO ====================
+const navItems = document.querySelectorAll('.nav-item');
+const views = document.querySelectorAll('.content-view');
+const topbarCurrent = document.getElementById('topbar-current');
+const sidebar = document.getElementById('sidebar');
+const main = document.getElementById('main');
+const toggleBtn = document.getElementById('sidebar-toggle');
+
+const viewLabels = {
+  home: 'Jogo do Milhão',
+  nao: 'Dizendo NÃO',
+  roleplay: 'Role-Play',
+  estudo: 'Estudo do Canvas'
+};
+
+function switchView(viewName) {
+  views.forEach(v => v.classList.remove('active'));
+  navItems.forEach(n => n.classList.remove('active'));
+  const targetView = document.getElementById('view-' + viewName);
+  if (targetView) targetView.classList.add('active');
+  navItems.forEach(n => {
+    if (n.dataset.view === viewName) n.classList.add('active');
+  });
+  topbarCurrent.textContent = viewLabels[viewName] || viewName;
+  sidebar.classList.remove('open');
+}
+
+navItems.forEach(item => {
+  item.addEventListener('click', () => switchView(item.dataset.view));
+});
+
+toggleBtn.addEventListener('click', () => {
+  sidebar.classList.toggle('collapsed');
+  main.classList.toggle('expanded');
+  toggleBtn.classList.toggle('collapsed');
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if (e.key === '1') switchView('home');
+  if (e.key === '2') switchView('nao');
+  if (e.key === '3') switchView('roleplay');
+  if (e.key === '4') switchView('estudo');
+  if (e.key === 'h' || e.key === 'H') {
+    sidebar.classList.toggle('collapsed');
+    main.classList.toggle('expanded');
+    toggleBtn.classList.toggle('collapsed');
+  }
+});
+
+document.getElementById('btn-fullscreen').addEventListener('click', () => {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(() => {});
+  } else {
+    document.exitFullscreen();
+  }
+});
+
+document.getElementById('mobile-toggle').addEventListener('click', () => {
+  sidebar.classList.toggle('open');
+});
+
+// ==================== STUDY BLOCKS ACCORDION ====================
+document.querySelectorAll('.study-block-header').forEach(header => {
+  header.addEventListener('click', () => {
+    header.parentElement.classList.toggle('open');
+  });
+});
+
+// ==================== JOGO DO MILHÃO ====================
+const allQuestions = [
+  // BLOCO 1 - PROBLEMA (4)
+  {
+    block: 1, blockName: "Problema",
+    q: "A banca questiona: 'Qual é a dor de negócio que justifica este projeto, em uma frase que o operador do Turno B entenderia?' Qual resposta demonstra maturidade executiva?",
+    options: [
+      "A empresa precisa se digitalizar para acompanhar o mercado global.",
+      "A auditoria da montadora em 15/12 pode cancelar 22% do faturamento se a rastreabilidade continuar em papel.",
+      "O aplicativo mobile vai aumentar a produtividade em 30% segundo benchmarks do setor.",
+      "A diretoria decidiu pela transformação digital e precisamos engajar todos."
+    ],
+    correct: 1,
+    explanation: "A resposta correta conecta a dor a um fato verificável (auditoria + % do faturamento), não a jargão ou decisão unilateral. É o Círculo Dourado aplicado: o PORQUÊ precisa ser verdadeiro e verificável."
+  },
+  {
+    block: 1, blockName: "Problema",
+    q: "Segundo Kotter, qual é o ERRO mais destrutivo ao estabelecer o senso de urgência?",
+    options: [
+      "Comunicar demais sobre a mudança.",
+      "Declarar vitória cedo demais sem que a mudança tenha chegado à cultura.",
+      "Envolver muitos stakeholders no processo.",
+      "Investir excessivamente em treinamento."
+    ],
+    correct: 1,
+    explanation: "Kotter considera declarar vitória cedo demais um dos erros mais destrutivos. A festa acontece, a equipe é desmobilizada, e 6 meses depois a organização voltou ao As-Is."
+  },
+  {
+    block: 1, blockName: "Problema",
+    q: "A banca pergunta: 'Se vocês não conseguem escrever o problema em uma frase que o Valdir repetiria, o que isso indica?'",
+    options: [
+      "Que a comunicação do projeto precisa ser melhorada com mais e-mails.",
+      "Que o problema é de treinamento dos operadores.",
+      "Que o projeto ainda não sabe por que existe — a conversa precisa voltar ao Business Case.",
+      "Que é necessário contratar uma agência de comunicação interna."
+    ],
+    correct: 2,
+    explanation: "Conforme o material: 'Se vocês não conseguem escrever essa frase, o problema não é de comunicação. É que o próprio projeto ainda não sabe por que existe.' A conversa volta ao Business Case antes de voltar ao comunicado."
+  },
+  {
+    block: 1, blockName: "Problema",
+    q: "Qual a diferença fundamental entre OUTPUT e OUTCOME que justifica a existência do projeto de GMO?",
+    options: [
+      "Output é o custo do projeto; Outcome é o lucro gerado.",
+      "Output é a entrega técnica (sistema instalado); Outcome é a mudança de comportamento e resultado quando as pessoas adotam a entrega.",
+      "Output é o que o PMO entrega; Outcome é o que o RH entrega.",
+      "Não há diferença significativa — são sinônimos no PMBOK."
+    ],
+    correct: 1,
+    explanation: "Output = entrega técnica (software, procedimento). Outcome = mudança de comportamento e resultado quando as pessoas passam a usar a entrega de forma proficiente, contínua e voluntária. Valor só existe quando há adoção."
+  },
+
+  // BLOCO 2 - GAP AS-IS / TO-BE (4)
+  {
+    block: 2, blockName: "Gap As-Is/To-Be",
+    q: "A banca pergunta: 'Como vocês classificam a mudança do Grupo 1 e por quê?'",
+    options: [
+      "Mudança de 3ª ordem, pois altera o modelo de negócio.",
+      "Mudança de 1ª ordem para a organização, mas pode ser vivida como 2ª ordem para o indivíduo quando mexe com renda e controle.",
+      "Mudança de 2ª ordem, pois é irreversível e ameaça competências fundamentais.",
+      "Mudança de 1ª ordem pura, sem complexidade adicional."
+    ],
+    correct: 1,
+    explanation: "A armadilha está exatamente aí: mudança de 1ª ordem para a organização (procedimentos e ferramentas) pode ser vivida como 2ª ordem para o indivíduo quando mexe com renda (prêmio) e sensação de controle (vigilância)."
+  },
+  {
+    block: 2, blockName: "Gap As-Is/To-Be",
+    q: "Na análise de impacto, qual ação é adequada para um público com impacto CRÍTICO?",
+    options: [
+      "Apenas comunicação e guia rápido.",
+      "Treinamento prático e canal de dúvidas.",
+      "Co-desenho, champions e suporte no Go-Live.",
+      "Conversa individual, revisão de cargo/meta e acompanhamento próximo da liderança."
+    ],
+    correct: 3,
+    explanation: "Para impacto crítico: conversa individual, revisão de cargos e metas com RH, acompanhamento próximo da liderança. Impacto alto usa co-desenho/champions. Médio usa treino. Baixo usa comunicação."
+  },
+  {
+    block: 2, blockName: "Gap As-Is/To-Be",
+    q: "O conceito de 'capacidade de absorção' do PMI alerta que:",
+    options: [
+      "As pessoas têm capacidade ilimitada de aprender novas ferramentas.",
+      "Organizações e pessoas têm limite para absorver mudanças em um período — empilhar mudanças gera colapso.",
+      "A capacidade de absorção só se aplica a mudanças de 3ª ordem.",
+      "É um conceito exclusivo de ambientes ágeis."
+    ],
+    correct: 1,
+    explanation: "O PMI afirma textualmente que organizações e pessoas têm limite para absorver mudanças em determinado período. Quando a mesma área recebe 4-5 projetos simultâneos, lançar mais um sem repriorizar é assinar a sentença de colapso."
+  },
+  {
+    block: 2, blockName: "Gap As-Is/To-Be",
+    q: "Segundo Edgar Schein, em qual camada do iceberg cultural mora a resistência?",
+    options: [
+      "Nos artefatos visíveis (organograma, sistemas).",
+      "Nos valores declarados (quadro da recepção).",
+      "Nas premissas básicas — crenças profundas sobre o que é recompensado ou punido.",
+      "Em nenhuma camada — resistência é sempre individual."
+    ],
+    correct: 2,
+    explanation: "A resistência mora na parte submersa: as premissas básicas, crenças profundas e inconscientes sobre o que funciona e o que é punido. Cultura = comportamentos que a organização efetivamente recompensa, não o que diz valorizar."
+  },
+
+  // BLOCO 3 - PODER E MEDOS (4)
+  {
+    block: 3, blockName: "Poder e Medos",
+    q: "A banca pergunta: 'Qual a diferença entre resistência declarada e silenciosa, e por que isso importa no cenário de vocês?'",
+    options: [
+      "Não há diferença prática — ambas devem ser combatidas com coerção.",
+      "A declarada é amiga (pode ser debatida); a silenciosa é letal (concorda na sala, sabota no corredor).",
+      "A silenciosa é mais fácil de tratar porque é visível.",
+      "A declarada indica falta de comprometimento da equipe."
+    ],
+    correct: 1,
+    explanation: "Resistência declarada é amiga: aparece, pode ser debatida, traz informação valiosa. A silenciosa é letal: o gestor sorri, concorda na frente do diretor, e depois orienta a equipe a continuar com a planilha antiga. No nosso caso, registros em bloco no fim do turno = sabotagem silenciosa."
+  },
+  {
+    block: 3, blockName: "Poder e Medos",
+    q: "Qual a melhor estratégia para tratar o gerente mais crítico do projeto, segundo Kotter e Schlesinger?",
+    options: [
+      "Coerção explícita com ameaça de advertência.",
+      "Ignorar e seguir em frente com os apoiadores.",
+      "Co-criação: convidá-lo formalmente para o comitê de desenho da solução.",
+      "Manipulação e cooptação dissimulada."
+    ],
+    correct: 2,
+    explanation: "Co-criação (cooptação legítima com transparência): o crítico conhece os problemas reais melhor que ninguém, vira coautor (ninguém sabota a própria obra), e a equipe dele vê que sua voz foi ouvida. Quanto mais para baixo na escada, mais rápido o efeito e maior o custo de longo prazo."
+  },
+  {
+    block: 3, blockName: "Poder e Medos",
+    q: "Na matriz de engajamento, o que significa a distância entre C (Current) e D (Desired)?",
+    options: [
+      "O orçamento necessário para o projeto.",
+      "O trabalho de gestão política que o projeto precisa fazer — a rota de migração.",
+      "O tempo estimado para conclusão do projeto.",
+      "O número de stakeholders envolvidos."
+    ],
+    correct: 1,
+    explanation: "A distância entre C e D é o trabalho de gestão política. Para cada stakeholder crítico, desenha-se uma rota de migração: o que essa pessoa precisa ver, ouvir ou receber para mudar de posição? Com responsável, prazo e evidência."
+  },
+  {
+    block: 3, blockName: "Poder e Medos",
+    q: "A banca pergunta: 'Se o Valdir é referência técnica há 20 anos e resiste ao app, qual é a ameaça real para ele?'",
+    options: [
+      "Aprender uma tela nova.",
+      "Perder o status, autoridade informal e identidade profissional — um estagiário aprende em uma tarde o que ele domina há décadas.",
+      "Ser demitido imediatamente.",
+      "Ter que trabalhar mais horas."
+    ],
+    correct: 1,
+    explanation: "Para o operador sênior, o que está em jogo não é a tela nova — é o status, a autoridade informal e a identidade profissional. Se vocês responderem só com treinamento, não resolvem. Se o transformarem em referência do novo processo, a resistência vira patrocínio."
+  },
+
+  // BLOCO 4 - ROTA ADKAR (4)
+  {
+    block: 4, blockName: "Rota ADKAR",
+    q: "A banca pergunta: 'Por que vocês diagnosticaram Ability como barreira para os operadores e não Knowledge?'",
+    options: [
+      "Porque Knowledge é mais fácil de treinar.",
+      "Porque o operador pode saber usar o app na sala de treinamento e travar no campo, com pressa, sinal fraco e supervisor cobrando — Saber ≠ Fazer.",
+      "Porque não havia orçamento para treinamento teórico.",
+      "Porque o modelo ADKAR não considera Knowledge importante."
+    ],
+    correct: 1,
+    explanation: "Entre K e A existe um abismo. Quem tirou 10 no treinamento pode travar na primeira segunda-feira de Go-Live. O plano precisa prever prática em ambiente realista, acompanhamento no posto e tempo de adaptação. Ability = fazer com proficiência sob pressão."
+  },
+  {
+    block: 4, blockName: "Rota ADKAR",
+    q: "Segundo a Prosci, qual a 'tragédia' que acontece quando a gestão coloca todo mundo em treinamento na véspera do Go-Live?",
+    options: [
+      "As pessoas ficam muito cansadas para o Go-Live.",
+      "Metade não sabe PORQUÊ a mudança acontece (trava em A), a outra metade sabe e não concorda (trava em D). Treinar quem não quer é queimar verba.",
+      "O instrutor não domina o conteúdo técnico.",
+      "A empresa gastaria menos fazendo EAD."
+    ],
+    correct: 1,
+    explanation: "A tragédia: sala com braço cruzado, celular na mão, perguntas hostis. O instrutor vira para-raios de toda a frustração. A empresa pagou o treinamento e as horas das pessoas, e o conhecimento não foi absorvido. Treinar (K) quem ainda não quer (D) é queimar verba."
+  },
+  {
+    block: 4, blockName: "Rota ADKAR",
+    q: "Qual a intervenção adequada quando o ponto de barreira é DESIRE (D)?",
+    options: [
+      "Mais treinamento técnico (K).",
+      "Comunicados em massa por e-mail.",
+      "Conversa individual, envolvimento, tratamento das perdas e alinhamento de incentivos.",
+      "Coerção com ameaça de advertência."
+    ],
+    correct: 2,
+    explanation: "Se trava em Desire: conversa individual, envolvimento, tratamento das perdas e alinhamento de incentivos. Desejo não se ordena — depende do que a pessoa ganha ou perde, do contexto dela, da confiança na liderança. É o WIIFM em ação."
+  },
+  {
+    block: 4, blockName: "Rota ADKAR",
+    q: "O 'Quick Win' do ranking por TURNO (não individual) atende a qual princípio de Kotter e qual objetivo estratégico?",
+    options: [
+      "Passo 1 (Urgência) — criar pânico na operação.",
+      "Passo 6 (Vitórias de curto prazo) — gerar resultado visível em 12-24 meses e remover o medo individual de vigilância.",
+      "Passo 8 (Ancorar na cultura) — dispensa outras ações.",
+      "Passo 3 (Visão estratégica) — substitui o plano completo."
+    ],
+    correct: 1,
+    explanation: "Kotter Passo 6: gerar vitórias de curto prazo. Transformações sem resultados visíveis em 12-24 meses perdem o fôlego. O ranking por turno é concreto, com prazo (15 dias) e responsável, e remove o medo individual — gerando união em vez de exposição."
+  },
+
+  // BLOCO 5 - STORYTELLING (4)
+  {
+    block: 5, blockName: "Storytelling",
+    q: "A banca pergunta: 'Por que vocês escolheram a Jornada do Herói e não o StoryBrand, que é mais indicado para ponta operacional?'",
+    options: [
+      "Porque a Jornada do Herói é mais fácil de aplicar.",
+      "Porque o diagnóstico ADKAR mostrou barreira em Desire, e a Jornada trabalha desejo colocando o operador como protagonista que supera monstros (medos).",
+      "Porque o StoryBrand é considerado ultrapassado pelo PMI.",
+      "Por escolha pessoal do grupo, sem base técnica."
+    ],
+    correct: 1,
+    explanation: "Defesa forte conecta o framework ao ponto de barreira. A Jornada do Herói trabalha Desire (D) ao colocar o colaborador como herói que enfrenta provações (medo de vigilância/corte) e retorna com elixir (proteção do prêmio). StoryBrand também responderia, mas a Jornada é mais adequada para mudanças de identidade profissional longa."
+  },
+  {
+    block: 5, blockName: "Storytelling",
+    q: "Qual a decisão narrativa CRUCIAL na Jornada do Herói aplicada à GMO?",
+    options: [
+      "O líder do projeto é o herói que salva a empresa.",
+      "A diretoria é a protagonista da transformação.",
+      "O colaborador é o herói; o projeto e a liderança são o guia/mentor.",
+      "Não há herói — a história é sobre a empresa."
+    ],
+    correct: 2,
+    explanation: "O erro clássico da liderança corporativa é se colocar como herói. Quando o líder é herói, a equipe vira figurante — ou pior, o obstáculo. Na GMO humanizada, o colaborador é o herói; a liderança e o projeto são o mentor/guia."
+  },
+  {
+    block: 5, blockName: "Storytelling",
+    q: "Qual framework é mais adequado para comunicar uma decisão dura como descontinuação de linha ou reestruturação?",
+    options: [
+      "Círculo Dourado (Simon Sinek).",
+      "Pirâmide de Minto (Barbara Minto).",
+      "C.H.A.I.R. — Confiança, Honestidade, Adaptabilidade, Impacto, Regrets.",
+      "ABT (E, Mas, Portanto)."
+    ],
+    correct: 2,
+    explanation: "C.H.A.I.R. é o framework das notícias duras: cancelamento, reestruturação, corte. Cada letra é uma lente de postura. A mais rara e poderosa é R (Regrets) — o líder reconhece publicamente o que lamenta. Isso humaniza e torna a decisão mais crível."
+  },
+  {
+    block: 5, blockName: "Storytelling",
+    q: "A banca pergunta: 'O que é WIIFM e por que ele é central no StoryBrand?'",
+    options: [
+      "With Immediate Information For Workers — um modelo de comunicação interna.",
+      "What's In It For Me (O que eu ganho com isso?) — a pergunta silenciosa que cada pessoa faz diante de qualquer mudança; se não respondida, trava o Desire.",
+      "Work In Integrated Frameworks — método ágil de entrega.",
+      "When It Is Finished, Move — princípio de encerramento de projetos."
+    ],
+    correct: 1,
+    explanation: "WIIFM = What's in it for me? É a pergunta silenciosa que trava a letra D do ADKAR. O StoryBrand é a ferramenta mais direta para respondê-la, colocando o colaborador como herói e mostrando ganhos reais (menos retrabalho, proteção em auditoria, etc)."
+  },
+
+  // BLOCO 6 - MÉTRICAS P5 (4)
+  {
+    block: 6, blockName: "Métricas P5",
+    q: "A banca pergunta: 'Qual a diferença entre indicadores de atividade, adoção e negócio? Dê um exemplo de cada no cenário de vocês.'",
+    options: [
+      "São sinônimos — todos medem a mesma coisa de formas diferentes.",
+      "Atividade (leading): % presença no treinamento; Adoção (lagging): % OS abertas em tempo real; Negócio (outcome): faturamento de campo 12→3 dias.",
+      "Atividade é o mais importante; negócio é secundário.",
+      "Só indicadores de negócio importam para a diretoria."
+    ],
+    correct: 1,
+    explanation: "3 camadas distintas: Atividade (leading) = esforço executado; Adoção (lagging) = comportamento mudou; Negócio (outcome) = benefício materializado. Sucesso só existe quando a camada de NEGÓCIO atinge o patamar projetado."
+  },
+  {
+    block: 6, blockName: "Métricas P5",
+    q: "O Padrão P5 da GPM avalia impactos do projeto em 5 perspectivas. Quais são elas?",
+    options: [
+      "Planejamento, Processo, Pessoas, Produto, Lucro.",
+      "Pessoas, Planeta, Prosperidade, Processo, Produto.",
+      "Power, People, Profit, Planet, Purpose.",
+      "Premissas, Práticas, Resultados, Riscos, Recursos."
+    ],
+    correct: 1,
+    explanation: "P5 = Pessoas, Planeta, Prosperidade, Processo, Produto. O PMBOK 8 incorporou como princípio a integração da sustentabilidade em todas as áreas. Em GMO, significa conduzir transformações que respeitam as pessoas e geram prosperidade duradoura."
+  },
+  {
+    block: 6, blockName: "Métricas P5",
+    q: "Por que os primeiros 90 dias pós-Go-Live são o período mais perigoso do projeto?",
+    options: [
+      "Porque os usuários ainda não conhecem o sistema.",
+      "Porque a equipe está cansada, o sponsor já olha para a próxima prioridade, e a 'gravidade corporativa' traz o As-Is de volta (planilhas paralelas, controles informais).",
+      "Porque é quando a auditoria da montadora acontece.",
+      "Porque o orçamento do projeto acaba nesse período."
+    ],
+    correct: 1,
+    explanation: "Gravidade corporativa = tendência natural de toda organização voltar ao As-Is, porque o jeito antigo é conhecido e confortável. Sinais de retrocesso: planilhas paralelas ressuscitam, aprovações por WhatsApp voltam, gestores abrem exceções."
+  },
+  {
+    block: 6, blockName: "Métricas P5",
+    q: "A banca pergunta: 'Qual a regra de ouro sobre medição de benefícios e quem é responsável por ela?'",
+    options: [
+      "Benefícios são medidos pelo PMO durante o projeto.",
+      "A medição acontece depois do encerramento; por isso, antes de encerrar, é preciso definir quem na operação é o DONO de cada indicador, com frequência e fórum de governança. Benefício sem dono é benefício perdido.",
+      "Benefícios são medidos apenas no encerramento formal do projeto.",
+      "O RH é responsável por todos os indicadores de benefício."
+    ],
+    correct: 1,
+    explanation: "A medição de benefícios normalmente acontece depois do encerramento formal. Por isso, o plano precisa definir ANTES do encerramento: quem na operação é o dono de cada indicador, com que frequência será acompanhado, e em que fórum será reportado. Benefício sem dono = benefício perdido."
+  }
+];
+
+// State
+let questions = [];
+let currentIndex = 0;
+let answers = [];
+let score = { correct: 0, wrong: 0 };
+let currentFilter = 'all';
+
+function shuffleArray(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function initQuiz(filter = 'all') {
+  currentFilter = filter;
+  if (filter === 'all') {
+    questions = shuffleArray(allQuestions);
+  } else {
+    questions = shuffleArray(allQuestions.filter(q => q.block === parseInt(filter)));
+  }
+  currentIndex = 0;
+  answers = new Array(questions.length).fill(null);
+  score = { correct: 0, wrong: 0 };
+  renderBlockTabs();
+  renderProgressDots();
+  renderQuestion();
+  updateScoreboard();
+  document.getElementById('quiz-area').style.display = 'block';
+  document.getElementById('result-screen').classList.remove('show');
+}
+
+function renderBlockTabs() {
+  const tabs = document.getElementById('block-tabs');
+  const blocks = [
+    { id: 'all', label: 'Todos', count: 24 },
+    { id: '1', label: '1·Problema', count: 4 },
+    { id: '2', label: '2·Gap', count: 4 },
+    { id: '3', label: '3·Poder', count: 4 },
+    { id: '4', label: '4·ADKAR', count: 4 },
+    { id: '5', label: '5·Story', count: 4 },
+    { id: '6', label: '6·P5', count: 4 }
+  ];
+  tabs.innerHTML = blocks.map(b => `
+    <button class="block-tab ${currentFilter === b.id ? 'active' : ''}" data-filter="${b.id}">
+      ${b.label} <span class="count">${b.count}</span>
+    </button>
+  `).join('');
+  tabs.querySelectorAll('.block-tab').forEach(btn => {
+    btn.addEventListener('click', () => initQuiz(btn.dataset.filter));
+  });
+}
+
+function renderProgressDots() {
+  const dots = document.getElementById('progress-dots');
+  dots.innerHTML = questions.map((_, i) => {
+    let cls = 'progress-dot';
+    if (i === currentIndex) cls += ' current';
+    else if (answers[i] !== null) cls += answers[i].correct ? ' correct' : ' wrong';
+    return `<div class="${cls}" data-idx="${i}"></div>`;
+  }).join('');
+  dots.querySelectorAll('.progress-dot').forEach(dot => {
+    dot.addEventListener('click', () => {
+      currentIndex = parseInt(dot.dataset.idx);
+      renderQuestion();
+      renderProgressDots();
+    });
+  });
+}
+
+function renderQuestion() {
+  const q = questions[currentIndex];
+  const area = document.getElementById('question-area');
+  document.getElementById('question-number').innerHTML = `
+    <span class="block-badge">Bloco ${q.block}</span>
+    Pergunta ${currentIndex + 1} de ${questions.length}
+  `;
+  document.getElementById('question-text').textContent = q.q;
+  
+  const letters = ['A', 'B', 'C', 'D'];
+  const grid = document.getElementById('options-grid');
+  grid.innerHTML = q.options.map((opt, i) => `
+    <button class="option-btn" data-idx="${i}">
+      <span class="letter">${letters[i]}</span>
+      <span>${opt}</span>
+    </button>
+  `).join('');
+
+  grid.querySelectorAll('.option-btn').forEach(btn => {
+    btn.addEventListener('click', () => selectAnswer(parseInt(btn.dataset.idx)));
+  });
+
+  const feedback = document.getElementById('feedback-box');
+  feedback.classList.remove('show', 'correct', 'wrong');
+
+  if (answers[currentIndex] !== null) {
+    showPreviousAnswer();
+  }
+
+  document.getElementById('btn-prev').disabled = currentIndex === 0;
+  document.getElementById('btn-next').textContent = currentIndex === questions.length - 1 ? '🏁 Finalizar' : 'Próxima →';
+}
+
+function showPreviousAnswer() {
+  const q = questions[currentIndex];
+  const ans = answers[currentIndex];
+  const btns = document.querySelectorAll('.option-btn');
+  btns.forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === q.correct) btn.classList.add('correct');
+    if (i === ans.selected && !ans.correct) btn.classList.add('wrong');
+  });
+  const feedback = document.getElementById('feedback-box');
+  feedback.classList.add('show', ans.correct ? 'correct' : 'wrong');
+  feedback.innerHTML = `
+    <strong>${ans.correct ? '✅ Correto!' : '❌ Incorreto'}</strong>
+    ${q.explanation}
+  `;
+}
+
+function selectAnswer(selectedIdx) {
+  const q = questions[currentIndex];
+  const correct = selectedIdx === q.correct;
+  answers[currentIndex] = { selected: selectedIdx, correct };
+  if (correct) score.correct++; else score.wrong++;
+
+  const btns = document.querySelectorAll('.option-btn');
+  btns.forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === q.correct) btn.classList.add('correct');
+    if (i === selectedIdx && !correct) btn.classList.add('wrong');
+  });
+
+  const feedback = document.getElementById('feedback-box');
+  feedback.classList.add('show', correct ? 'correct' : 'wrong');
+  feedback.innerHTML = `
+    <strong>${correct ? '✅ Correto! +10 pontos' : '❌ Incorreto'}</strong>
+    ${q.explanation}
+  `;
+
+  updateScoreboard();
+  renderProgressDots();
+}
+
+function updateScoreboard() {
+  const total = score.correct * 10;
+  const answered = score.correct + score.wrong;
+  const percent = answered > 0 ? Math.round((score.correct / answered) * 100) : 0;
+  document.getElementById('score-total').textContent = total;
+  document.getElementById('score-correct').textContent = score.correct;
+  document.getElementById('score-wrong').textContent = score.wrong;
+  document.getElementById('score-percent').textContent = percent + '%';
+  document.getElementById('score-current').textContent = `${currentIndex + 1}/${questions.length}`;
+}
+
+document.getElementById('btn-prev').addEventListener('click', () => {
+  if (currentIndex > 0) {
+    currentIndex--;
+    renderQuestion();
+    renderProgressDots();
+    updateScoreboard();
+  }
+});
+
+document.getElementById('btn-next').addEventListener('click', () => {
+  if (currentIndex < questions.length - 1) {
+    currentIndex++;
+    renderQuestion();
+    renderProgressDots();
+    updateScoreboard();
+  } else {
+    showFinalResult();
+  }
+});
+
+document.getElementById('btn-shuffle').addEventListener('click', () => {
+  initQuiz(currentFilter);
+});
+
+document.getElementById('btn-restart').addEventListener('click', () => {
+  initQuiz(currentFilter);
+});
+
+function showFinalResult() {
+  const answered = score.correct + score.wrong;
+  const percent = answered > 0 ? Math.round((score.correct / answered) * 100) : 0;
+  document.getElementById('quiz-area').style.display = 'none';
+  const result = document.getElementById('result-screen');
+  result.classList.add('show');
+  document.getElementById('final-score').textContent = percent + '%';
+  let msg = '';
+  if (percent >= 90) msg = '🏆 Maturidade executiva excepcional! Você está pronto para a banca.';
+  else if (percent >= 75) msg = '✅ Bom desempenho. Revise os blocos com erro para consolidar.';
+  else if (percent >= 50) msg = '⚠️ Desempenho adequado. Recomenda-se revisão do Estudo do Canvas (módulo 4).';
+  else msg = '📚 Desempenho abaixo do esperado. Revise TODO o material antes da banca.';
+  document.getElementById('final-msg').textContent = msg;
+}
+
+// Init
+initQuiz('all');
+</script>
+</body>
+</html>
