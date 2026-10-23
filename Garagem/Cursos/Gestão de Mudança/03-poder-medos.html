@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>03 · Poder e medos | Campo Digital</title>
+<style>
+:root{--bg:#0B1220;--panel:#111C2E;--line:#26364F;--ink:#F3F6FB;--mut:#9DB0C9;--teal:#2DD4BF;--orange:#FF8A3D;--red:#FF6B6B;--gold:#F5C451}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:"Segoe UI",Inter,system-ui,sans-serif;padding:22px}
+.topbar{max-width:1560px;margin:0 auto 12px;display:flex;justify-content:space-between;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--mut)}
+.topbar b{color:var(--teal)}
+.scroll{overflow-x:auto}
+.slide{container-type:inline-size;width:100%;min-width:1000px;max-width:1560px;aspect-ratio:16/9;margin:0 auto;padding:2.4cqw 2.7cqw;display:flex;flex-direction:column;gap:1.3cqw;overflow:hidden;border:1px solid var(--line);border-radius:14px;background:radial-gradient(900px 500px at 90% -10%,rgba(45,212,191,.10),transparent 60%),radial-gradient(700px 500px at -10% 110%,rgba(255,138,61,.09),transparent 60%),var(--panel)}
+.eyebrow{font-size:1cqw;letter-spacing:.22em;text-transform:uppercase;color:var(--teal);font-weight:700;margin-bottom:.5cqw}
+h1{font-size:3cqw;line-height:1.08;letter-spacing:-.02em;font-weight:800}
+.sub{font-size:1.25cqw;color:var(--mut);margin-top:.5cqw}
+.body{flex:1;min-height:0;display:grid;grid-template-columns:1.05fr 1fr;gap:1.2cqw}
+.card{background:rgba(255,255,255,.025);border:1px solid var(--line);border-radius:10px;padding:1.2cqw;display:flex;flex-direction:column;min-height:0}
+.card h2{font-size:1.02cqw;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);margin-bottom:.8cqw}
+p,li,td,th{font-size:1.05cqw;line-height:1.4}
+.mut{color:var(--mut)}.t{color:var(--teal)}.o{color:var(--orange)}
+.mx{display:grid;grid-template-columns:1.7cqw 1fr 1fr;grid-template-rows:1fr 1fr 1.3cqw;gap:.45cqw;flex:1}
+.yl{grid-column:1;grid-row:1/3;writing-mode:vertical-rl;transform:rotate(180deg);display:flex;align-items:center;justify-content:center;font-size:.8cqw;letter-spacing:.2em;color:var(--mut)}
+.q{border:1px solid var(--line);border-radius:8px;padding:.75cqw;background:rgba(255,255,255,.02);font-size:.95cqw}
+.q b{font-size:1.12cqw;display:block}
+.q small{display:block;font-size:.86cqw;color:var(--mut);margin-top:.3cqw;line-height:1.35}
+.q.hot{border-color:rgba(255,138,61,.5);background:rgba(255,138,61,.07)}
+.q.hot b{color:var(--orange)}
+.axis{font-size:.78cqw;letter-spacing:.16em;text-transform:uppercase;color:var(--mut);text-align:center;align-self:center}
+.cd{margin-top:.9cqw;border-top:1px solid var(--line);padding-top:.8cqw;display:flex;align-items:center;gap:.8cqw;flex-wrap:wrap}
+.cd span{font-size:.95cqw}
+.c{color:var(--red);border:1px solid rgba(255,107,107,.4);padding:.3cqw .7cqw;border-radius:99px}
+.d{color:var(--teal);border:1px solid rgba(45,212,191,.4);padding:.3cqw .7cqw;border-radius:99px}
+.cd p{font-size:.92cqw;color:var(--mut);flex-basis:100%}
+.abc{display:flex;flex-direction:column;gap:.75cqw;flex:1}
+.abc-row{display:grid;grid-template-columns:3cqw 1fr;gap:.9cqw;border:1px solid var(--line);border-radius:9px;padding:.9cqw;background:rgba(255,255,255,.02)}
+.letter{font-size:2cqw;font-weight:800;color:var(--teal);line-height:1}
+.abc-row h3{font-size:1.2cqw;margin-bottom:.3cqw}
+.abc-row p{font-size:1cqw;color:var(--mut)}
+.abc-row small{display:block;font-size:.88cqw;color:var(--gold);margin-top:.4cqw}
+.foot{display:flex;justify-content:space-between;align-items:center;gap:1.2cqw;border-top:1px solid var(--line);padding-top:.8cqw;font-size:.88cqw;color:var(--mut)}
+.fala{border-left:.28cqw solid var(--orange);padding-left:.9cqw;font-size:1.05cqw;font-style:italic}
+.nav{max-width:1560px;margin:14px auto 0;display:flex;justify-content:space-between;align-items:center;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)}
+.back{display:inline-flex;gap:8px;align-items:center;background:var(--teal);color:#06231F;font-weight:800;font-size:13px;letter-spacing:0;text-transform:none;text-decoration:none;padding:11px 18px;border-radius:8px;transition:.18s}
+.back:hover{background:#5EEAD4;transform:translateY(-2px)}
+@media print{body{padding:0}.topbar,.nav{display:none}.slide{min-width:0;border-radius:0}@page{size:landscape;margin:8mm}}
+</style>
+</head>
+<body>
+<div class="topbar"><span><b>Campo Digital</b> / Onda 2</span><span>Canvas GMO · Bloco 03 de 06</span></div>
+<div class="scroll">
+<section class="slide">
+  <header>
+    <div class="eyebrow">03 / Poder e medos · stakeholders e patrocínio</div>
+    <h1>Mapeamento de Forças e Resistências</h1>
+    <p class="sub">Poder × interesse × medo → movimento de engajamento → sponsor com ações, datas e evidências</p>
+  </header>
+
+  <div class="body">
+    <section class="card">
+      <h2>Matriz de poder × interesse · e o medo por trás de cada ator</h2>
+      <div class="mx">
+        <div class="yl">PODER →</div>
+        <div class="q"><b>Valdir · líder do Turno B</b><small>Poder informal alto, interesse na ferramenta imposto como baixo. Mede: “parecer ultrapassado e perder o prêmio”. <b class="o">Manter como aliado, não como cobrador.</b></small></div>
+        <div class="q hot"><b>Ricardo · sponsor / Sandra · planta</b><small>Ricardo teme não mostrar resultado ao conselho; Sandra teme parar a linha. <b class="o">Engajar profundamente e exigir compromissos.</b></small></div>
+        <div class="q"><b>Áreas indiretas</b><small>Manter informados com comunicado curto e mensal; sem esforço ativo de convencimento.</small></div>
+        <div class="q"><b>Operadores do Turno B · Edson</b><small>Alto interesse, poder formal baixo. Medem: “erro na foto vira perda de prêmio”. <b class="t">Proteger, ouvir e capacitar.</b></small></div>
+        <div></div><div class="axis">Interesse baixo</div><div class="axis">Interesse alto</div>
+      </div>
+      <div class="cd">
+        <span class="c">C · Valdir resistente</span><span class="o">→</span><span class="d">D · Valdir aliado</span>
+        <p>Escuta 1:1 no Gemba (05/11) · coautoria do ranking coletivo · pacto de não punição · reconhecimento público da experiência. <b class="t">Se Valdir adere, o Turno B adere; se ele bloqueia, o turno sabotava.</b></p>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Modelo ABC · exigências ao patrocinador Ricardo</h2>
+      <div class="abc">
+        <div class="abc-row"><div class="letter">A</div><div>
+          <h3>Ativo e visível</h3>
+          <p>Abre o Town Hall da Onda 2 em <b>10/11</b> e visita o Gemba do Turno B em <b>05/11</b>.</p>
+          <small>Evidência: convite formal + pauta com o tema “proteção do turno”.</small>
+        </div></div>
+        <div class="abc-row"><div class="letter">B</div><div>
+          <h3>Building coalition · construir coalizão</h3>
+          <p>Alinha com <b>Sindicato e RH</b> a política da variável 2026: o app não será base para corte de prêmio.</p>
+          <small>Evidência: ata de reunião com Sindicato e RH.</small>
+        </div></div>
+        <div class="abc-row"><div class="letter">C</div><div>
+          <h3>Communicate directly · falar diretamente</h3>
+          <p>Grava vídeo de <b>2 minutos</b>: “O app protege o prêmio de vocês” — sem corporatês, sem ameaça.</p>
+          <small>Evidência: vídeo fixado no app e reprisado na TV do refeitório.</small>
+        </div></div>
+      </div>
+    </section>
+  </div>
+
+  <footer class="foot">
+    <p class="fala">“Ricardo não pode ser um nome no organograma: três ações, três datas, três evidências.”</p>
+    <span>Medo operacional → resistência tática → risco estratégico<br>TMO · Grupo 1</span>
+  </footer>
+</section>
+</div>
+<div class="nav"><span>Bloco 03 / 06 · Poder e medos</span>
+  <a href="canva.html">← Voltar ao Canvas</a></div>
+</body>
+</html>

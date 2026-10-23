@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bloco 2: Gap As-Is / To-Be | Projeto Campo Digital</title>
+<style>
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 40px; line-height: 1.6; }
+  .container { max-width: 1200px; margin: 0 auto; }
+  .header { border-bottom: 2px solid #f59e0b; padding-bottom: 10px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; }
+  .header h1 { margin: 0; color: #f59e0b; font-size: 2rem; }
+  .header .badge { background: #1e293b; padding: 8px 16px; border-radius: 20px; font-size: 0.9rem; color: #94a3b8; border: 1px solid #334155; }
+  .card { background: #1e293b; border-radius: 12px; padding: 30px; margin-bottom: 30px; border-left: 5px solid #f59e0b; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+  .card h2 { margin-top: 0; color: #f8fafc; font-size: 1.5rem; }
+  table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+  th, td { padding: 15px; text-align: left; border-bottom: 1px solid #334155; }
+  th { background: #0f172a; color: #f59e0b; }
+  .sev-critica { color: #ef4444; font-weight: bold; }
+  .sev-alta { color: #f59e0b; font-weight: bold; }
+  .quote { background: #0f172a; border-left: 4px solid #3b82f6; padding: 20px; margin: 20px 0; font-style: italic; color: #cbd5e1; font-size: 1.1rem; }
+  .btn-back { display: block; text-align: center; margin-top: 50px; }
+  .btn-back a { background: #f59e0b; color: #0f172a; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>🔄 BLOCO 2: Gap As-Is / To-Be</h1>
+    <span class="badge">Análise de Impacto</span>
+  </div>
+
+  <div class="card">
+    <h2>📊 Análise de Impacto: O Custo Invisível da Não-Adoção</h2>
+    <p>O maior gap não é técnico, é de percepção. O app não pode ser visto como um 'dedo-duro', mas como o escudo do técnico contra a auditoria da montadora.</p>
+    
+    <table>
+      <thead>
+        <tr>
+          <th>Dimensão</th>
+          <th>As-Is (Atual - 6ª Semana)</th>
+          <th>To-Be (Meta 30/11)</th>
+          <th>Severidade</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Processos</strong></td>
+          <td>71% dos registros feitos nos últimos 40min (transcrição do papel).</td>
+          <td>100% das OS abertas e fechadas em tempo real no app.</td>
+          <td class="sev-alta">ALTA</td>
+        </tr>
+        <tr>
+          <td><strong>Sistemas</strong></td>
+          <td>34% fotos fora do padrão; Wi-Fi instável; Modo Offline desconhecido.</td>
+          <td>&lt;5% erro em fotos; Modo Offline dominado pelo campo.</td>
+          <td class="sev-critica">CRÍTICA</td>
+        </tr>
+        <tr>
+          <td><strong>Estrutura</strong></td>
+          <td>Supervisores ainda distribuem papel "por garantia".</td>
+          <td>Supervisores atuam como coaches de qualidade no Gemba.</td>
+          <td>MÉDIA</td>
+        </tr>
+        <tr>
+          <td><strong>Papéis</strong></td>
+          <td>Operador focado em "bater meta" de quantidade.</td>
+          <td>Operador focado em rastreabilidade e qualidade (proteção).</td>
+          <td class="sev-alta">ALTA</td>
+        </tr>
+        <tr>
+          <td><strong>Cultura</strong></td>
+          <td>Medo de vigilância e corte de prêmio (Slide vazado).</td>
+          <td>Segurança psicológica: app visto como proteção, não punição.</td>
+          <td class="sev-critica">CRÍTICA</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card" style="border-left-color: #10b981;">
+    <h2>💡 A Virada de Chave (WIIFM - O que eu ganho com isso?)</h2>
+    <div class="quote">
+      "O aplicativo não é o fiscal. É a espada que protege o conhecimento de vocês contra auditorias e garante que o prêmio do turno chegue inteiro, sem burocracia de papel."
+    </div>
+    <p><strong>Para o Operador (Turno B):</strong> Fim das discussões sobre "quem fez o quê". O app prova que você fez seu trabalho.</p>
+    <p><strong>Para o Técnico (Campo):</strong> O Modo Offline garante que você receba sua variável mesmo sem sinal na soja.</p>
+    <p><strong>Para a Empresa:</strong> Aprovação na auditoria da montadora (22% do faturamento) e fim de 38 mil formulários/mês.</p>
+  </div>
+
+  <div class="btn-back">
+    <a href="canva.html">← Voltar ao Canvas</a>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>04 · Rota ADKAR | Campo Digital</title>
+<style>
+:root{--bg:#0B1220;--panel:#111C2E;--line:#26364F;--ink:#F3F6FB;--mut:#9DB0C9;--teal:#2DD4BF;--orange:#FF8A3D;--red:#FF6B6B;--gold:#F5C451}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:"Segoe UI",Inter,system-ui,sans-serif;padding:22px}
+.topbar{max-width:1560px;margin:0 auto 12px;display:flex;justify-content:space-between;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--mut)}
+.topbar b{color:var(--teal)}
+.scroll{overflow-x:auto}
+.slide{container-type:inline-size;width:100%;min-width:1000px;max-width:1560px;aspect-ratio:16/9;margin:0 auto;padding:2.4cqw 2.7cqw;display:flex;flex-direction:column;gap:1.2cqw;overflow:hidden;border:1px solid var(--line);border-radius:14px;background:radial-gradient(900px 500px at 90% -10%,rgba(45,212,191,.10),transparent 60%),radial-gradient(700px 500px at -10% 110%,rgba(255,138,61,.09),transparent 60%),var(--panel)}
+.eyebrow{font-size:1cqw;letter-spacing:.22em;text-transform:uppercase;color:var(--teal);font-weight:700;margin-bottom:.5cqw}
+h1{font-size:3cqw;line-height:1.08;letter-spacing:-.02em;font-weight:800}
+.sub{font-size:1.25cqw;color:var(--mut);margin-top:.5cqw}
+.body{flex:1;min-height:0;display:flex;flex-direction:column;gap:1cqw}
+.top{display:grid;grid-template-columns:1.55fr 1fr;gap:1cqw;flex:1;min-height:0}
+.card{background:rgba(255,255,255,.025);border:1px solid var(--line);border-radius:10px;padding:1.1cqw;min-height:0}
+.card h2{font-size:1.02cqw;letter-spacing:.16em;text-transform:uppercase;color:var(--teal);margin-bottom:.7cqw}
+p,li,td,th{font-size:1.02cqw;line-height:1.4}
+.mut{color:var(--mut)}.t{color:var(--teal)}.o{color:var(--orange)}
+.rail{display:flex;gap:.45cqw;margin-bottom:.7cqw}
+.rail span{flex:1;text-align:center;font-size:.82cqw;letter-spacing:.08em;padding:.45cqw;border:1px solid var(--line);border-radius:6px;color:var(--mut)}
+.rail span.hit{background:var(--teal);border-color:var(--teal);color:#06231F;font-weight:800}
+table{width:100%;border-collapse:collapse}
+th{font-size:.78cqw;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);text-align:left;padding:.45cqw .55cqw;border-bottom:1px solid var(--line)}
+td{padding:.55cqw .55cqw;border-bottom:1px solid rgba(255,255,255,.07);vertical-align:top}
+tr:last-child td{border-bottom:0}
+.qw{border:1px solid rgba(255,138,61,.4);background:rgba(255,138,61,.07);border-radius:10px;padding:1.1cqw;display:flex;flex-direction:column;gap:.6cqw}
+.qw .big{font-size:2.6cqw;font-weight:800;color:var(--orange);line-height:1}
+.qw h3{font-size:1.3cqw;margin:.2cqw 0}
+.qw p{font-size:1cqw;color:var(--mut)}
+.qw small{font-size:.9cqw;color:var(--gold)}
+.coringa{border-top:1px solid var(--line);padding-top:.6cqw;font-size:.9cqw;color:var(--mut)}
+.timeline{display:grid;grid-template-columns:repeat(4,1fr);gap:.8cqw}
+.week{border:1px solid var(--line);border-radius:9px;padding:.85cqw;background:rgba(255,255,255,.02)}
+.week em{font-style:normal;font-size:.8cqw;letter-spacing:.14em;color:var(--teal);text-transform:uppercase}
+.week strong{display:block;font-size:1.18cqw;margin:.3cqw 0}
+.week p{font-size:.94cqw;color:var(--mut)}
+.foot{display:flex;justify-content:space-between;align-items:center;gap:1.2cqw;border-top:1px solid var(--line);padding-top:.8cqw;font-size:.88cqw;color:var(--mut)}
+.fala{border-left:.28cqw solid var(--orange);padding-left:.9cqw;font-size:1.05cqw;font-style:italic}
+.nav{max-width:1560px;margin:14px auto 0;display:flex;justify-content:space-between;align-items:center;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)}
+.back{display:inline-flex;gap:8px;align-items:center;background:var(--teal);color:#06231F;font-weight:800;font-size:13px;letter-spacing:0;text-transform:none;text-decoration:none;padding:11px 18px;border-radius:8px;transition:.18s}
+.back:hover{background:#5EEAD4;transform:translateY(-2px)}
+@media print{body{padding:0}.topbar,.nav{display:none}.slide{min-width:0;border-radius:0}@page{size:landscape;margin:8mm}}
+</style>
+</head>
+<body>
+<div class="topbar"><span><b>Campo Digital</b> / Onda 2</span><span>Canvas GMO · Bloco 04 de 06</span></div>
+<div class="scroll">
+<section class="slide">
+  <header>
+    <div class="eyebrow">04 / Rota ADKAR · plano de transição</div>
+    <h1>Do Medo ao Hábito: a Rota de Adoção</h1>
+    <p class="sub">Barreira por público × passo de Kotter × quick win × quatro semanas de transição</p>
+  </header>
+
+  <div class="body">
+    <div class="top">
+      <section class="card">
+        <h2>ADKAR por público · intervenir onde trava, não onde é conveniente</h2>
+        <div class="rail"><span>A · Consciência</span><span class="hit">D · Desejo</span><span>K · Conhecimento</span><span>A · Capacidade</span><span>R · Reforço</span></div>
+        <table>
+          <thead><tr><th>Público</th><th>Onde trava</th><th>Intervenção</th><th>Kotter</th><th>Evidência de saída</th></tr></thead>
+          <tbody>
+            <tr><td><b>Valdir e Turno B</b></td><td class="o">Desejo<br><span class="mut">medo de vigilância e perda do prêmio</span></td><td>Pacto de não punição, ranking coletivo e coautoria da regra.</td><td>2 · Coalizão<br>4 · Comunicação</td><td>Fecha a própria OS sem papel por 5 dias seguidos.</td></tr>
+            <tr><td><b>Operadores e planta</b></td><td class="o">Capacidade<br><span class="mut">treino prático foi dispensado</span></td><td>30 min no Gemba + guia de bolso do Modo Offline + superusuário.</td><td>5 · Empoderar<br>6 · Vitórias rápidas</td><td>100% do Turno B aprovado em tarefa real, não em lista de presença.</td></tr>
+            <tr><td><b>Ricardo · sponsor</b></td><td class="o">Consciência<br><span class="mut">vê papel como indisciplina</span></td><td>Briefing do custo da não-adoção + três compromissos ABC.</td><td>1 · Urgência<br>3 · Visão</td><td>Três ações assinadas com data e evidência.</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="qw">
+        <span class="big">15 dias</span>
+        <h3>Quick win · Ranking de Produtividade por TURNO</h3>
+        <p>Premiação mensal <b>coletiva</b>, nunca individual. <b>Bonûs</b>, Turno que atingir a meta sem papel. Oficinas de 30 min no posto (Gemba) com superusuários + guia de bolso do Modo Offline.</p>
+        <small>Responsável: TMO com Valdir · marco: D+15<br>Efeito: remove o medo individual e gera união de turno.</small>
+       
+      </section>
+    </div>
+
+    <section class="card">
+      <h2>Próximos passos · as próximas quatro semanas</h2>
+      <div class="timeline">
+        <div class="week"><em>Semana 1</em><strong>Condição mínima</strong><p>6 pontos de Wi-Fi ativos, Modo Offline testado e guia de bolso na mão do técnico.</p></div>
+        <div class="week"><em>Semana 2</em><strong>Patrocínio na linha</strong><p>05/11 · Ricardo no Gemba do Turno B. 10/11 · Town Hall da Onda 2. Ata com Sindicato.</p></div>
+        <div class="week"><em>Semana 3</em><strong>Go-Live · 16/11</strong><p>Dupla escrita monitorada, superusuários postados e fechamento de OS no ponto de trabalho.</p></div>
+        <div class="week"><em>Semana 4</em><strong>Pós-Go-Live</strong><p>Auditoria da qualidade das fotos, ajuste de telas e escuta do turno. Papel encerrado em 30/11.</p></div>
+      </div>
+    </section>
+  </div>
+
+  <footer class="foot">
+    <p class="fala">“Se a barreira é Desejo, treinamento sozinho não resolve: primeiro a regra, depois a ferramenta.”</p>
+    <span>Decisões difíceis hoje, ROI protegido amanhã.<br>TMO · Grupo 1</span>
+  </footer>
+</section>
+</div>
+<div class="nav"><span>Bloco 04 / 06 · Rota ADKAR</span>
+  <a href="canva.html">← Voltar ao Canvas</a></div>
+</body>
+</html>
