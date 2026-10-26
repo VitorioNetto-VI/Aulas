@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/fonts/inter@latest/latin-400-normal.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/fonts/inter@latest/latin-600-normal.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/fonts/inter@latest/latin-700-normal.css">
-    <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gun@1.4.0/gun.js"></script>
     <style>
         :root {
             --bg-color: #0f0f1a;
@@ -37,7 +37,6 @@
             color: var(--text-color);
             min-height: 100vh;
             overflow-x: hidden;
-            transition: var(--transition);
         }
 
         body::before {
@@ -267,17 +266,6 @@
             box-shadow: 0 4px 12px var(--accent-glow);
         }
 
-        .btn-ghost {
-            background: transparent;
-            border: 1px solid var(--card-border);
-            color: var(--text-color);
-        }
-
-        .btn-ghost:hover {
-            background: var(--card-bg);
-            border-color: var(--accent);
-        }
-
         /* STREAM */
         .stream-container {
             background: var(--card-bg);
@@ -335,88 +323,6 @@
         .stream-placeholder { text-align: center; color: #555; }
         .stream-placeholder .icon { font-size: 2.5rem; margin-bottom: 8px; }
         .stream-placeholder p { font-size: 0.8rem; }
-
-        /* COLLAB PAD - ESTILO DONTPAD */
-        .collab-pad {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: var(--radius);
-            overflow: hidden;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            min-height: 400px;
-        }
-
-        .collab-header {
-            padding: 10px 16px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 1px solid var(--card-border);
-            background: rgba(124, 58, 237, 0.05);
-        }
-
-        .collab-title {
-            font-weight: 600;
-            font-size: 0.85rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .collab-users {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            font-size: 0.75rem;
-            color: var(--success);
-        }
-
-        .collab-editor {
-            flex: 1;
-            width: 100%;
-            min-height: 350px;
-            padding: 20px;
-            background: transparent;
-            border: none;
-            color: var(--text-color);
-            font-family: 'Inter', monospace;
-            font-size: 0.95rem;
-            line-height: 1.8;
-            resize: none;
-            outline: none;
-        }
-
-        .collab-editor::placeholder { color: #444; }
-
-        .typing-indicator {
-            padding: 6px 16px;
-            font-size: 0.72rem;
-            color: var(--accent);
-            border-top: 1px solid var(--card-border);
-            min-height: 28px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .typing-dots { display: inline-flex; gap: 3px; }
-
-        .typing-dots span {
-            width: 4px; height: 4px;
-            background: var(--accent);
-            border-radius: 50%;
-            animation: typing-bounce 1.4s infinite;
-        }
-
-        .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
-        .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
-
-        @keyframes typing-bounce {
-            0%, 60%, 100% { transform: translateY(0); }
-            30% { transform: translateY(-4px); }
-        }
 
         /* EFFECTS BAR */
         .effects-bar {
@@ -693,27 +599,6 @@
             animation: pulse-dot 1s infinite;
         }
 
-        /* COLOR INPUTS */
-        .color-input-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .color-input-wrapper input[type="color"] {
-            width: 28px; height: 28px;
-            border: 1px solid var(--input-border);
-            border-radius: 4px;
-            cursor: pointer;
-            background: none;
-            padding: 1px;
-        }
-
-        .color-input-wrapper label {
-            font-size: 0.7rem;
-            color: #888;
-        }
-
         /* TOAST */
         .toast-container {
             position: fixed;
@@ -836,7 +721,7 @@
             <span class="room-label">streampad.vercel.app/#</span>
             <input type="text" class="room-input" id="roomInput" placeholder="nome-da-sala" value="">
             <button class="btn-icon" id="btnGoRoom" title="Ir para sala">🚀</button>
-            <button class="btn-icon" id="btnCopyRoom" title="Copiar link">📋</button>
+            <button class="btn-icon" id="btnCopyRoom" title="Copiar link"></button>
         </div>
 
         <div class="header-right">
@@ -844,7 +729,7 @@
                 <span class="online-dot" id="connectionDot"></span>
                 <span id="onlineCount">Conectando...</span>
             </div>
-            <input type="text" class="username-input" id="usernameInput" placeholder="Seu nome..." value="Anônimo">
+            <input type="text" class="username-input" id="usernameInput" placeholder="Seu nome..." value="">
         </div>
     </header>
 
@@ -858,25 +743,6 @@
                     <span class="toolbar-label">📺 Stream:</span>
                     <input type="text" class="toolbar-input" id="inputStreamUrl" placeholder="Cole link do YouTube (vídeo ou playlist)...">
                     <button class="btn" id="btnSetStream">Definir</button>
-                </div>
-
-                <div class="toolbar-divider"></div>
-
-                <div class="toolbar-group">
-                    <span class="toolbar-label">🎨 Cores:</span>
-                    <div class="color-input-wrapper">
-                        <label>Fundo</label>
-                        <input type="color" id="colorBg" value="#0f0f1a">
-                    </div>
-                    <div class="color-input-wrapper">
-                        <label>Sistema</label>
-                        <input type="color" id="colorSystem" value="#1a1a2e">
-                    </div>
-                    <div class="color-input-wrapper">
-                        <label>Texto</label>
-                        <input type="color" id="colorText" value="#e0e0ff">
-                    </div>
-                    <button class="btn" id="btnApplyColors">Aplicar</button>
                 </div>
             </div>
 
@@ -896,27 +762,12 @@
                 </div>
             </div>
 
-            <!-- COLLAB PAD -->
-            <div class="collab-pad">
-                <div class="collab-header">
-                    <div class="collab-title">
-                        <span>📝</span> Pad Colaborativo
-                    </div>
-                    <div class="collab-users">
-                        <span>👥</span>
-                        <span id="collabUsers">1 editando</span>
-                    </div>
-                </div>
-                <textarea class="collab-editor" id="collabEditor" placeholder="Comece a digitar aqui... Tudo que você escrever aparece em tempo real para todas as pessoas que estão nesta sala.&#10;&#10;Exemplo: acesse streampad.vercel.app/#neto e compartilhe o link. Todos que acessarem esse link verão o mesmo conteúdo, ao mesmo tempo."></textarea>
-                <div class="typing-indicator" id="typingIndicator"></div>
-            </div>
-
             <!-- EFFECTS BAR -->
             <div class="effects-bar">
                 <span class="effects-label">✨ Efeitos:</span>
                 <button class="effect-btn" data-effect="shake">📳 Tremer</button>
                 <button class="effect-btn" data-effect="flash">⚡ Flash</button>
-                <button class="effect-btn" data-effect="nudge">🔔 Nudge</button>
+                <button class="effect-btn" data-effect="nudge"> Nudge</button>
                 <button class="effect-btn" data-effect="rainbow">🌈 Rainbow</button>
                 <button class="effect-btn" data-effect="fire">🔥 Fogo</button>
                 <button class="effect-btn" data-effect="hearts">💕 Corações</button>
@@ -932,8 +783,8 @@
                 <button class="emoji-btn" data-emoji="😛">😛</button>
                 <button class="emoji-btn" data-emoji="😉">😉</button>
                 <button class="emoji-btn" data-emoji="😮">😮</button>
-                <button class="emoji-btn" data-emoji="😡">😡</button>
-                <button class="emoji-btn" data-emoji="😘">😘</button>
+                <button class="emoji-btn" data-emoji="">😡</button>
+                <button class="emoji-btn" data-emoji="😘"></button>
                 <button class="emoji-btn" data-emoji="😎">😎</button>
                 <button class="emoji-btn" data-emoji="😭">😭</button>
                 <button class="emoji-btn" data-emoji="❤️">❤️</button>
@@ -951,7 +802,7 @@
                 </div>
             </div>
             <div class="chat-messages" id="chatMessages">
-                <div class="chat-msg-system">Bem-vindo ao StreamPad! 🎬</div>
+                <div class="chat-msg-system">Conectando...</div>
             </div>
             <div class="chat-input-area">
                 <div class="recording-indicator" id="recordingIndicator">
@@ -964,8 +815,8 @@
                         <textarea class="chat-input" id="chatInput" placeholder="Mensagem..." rows="1"></textarea>
                         <div class="chat-input-actions">
                             <button class="chat-action-btn" id="btnAttach" title="Anexar imagem">📎</button>
-                            <button class="chat-action-btn" id="btnVoice" title="Gravar áudio">🎤</button>
-                            <button class="chat-action-btn" id="btnEmoji" title="Emoji">😄</button>
+                            <button class="chat-action-btn" id="btnVoice" title="Gravar áudio"></button>
+                            <button class="chat-action-btn" id="btnEmoji" title="Emoji"></button>
                         </div>
                     </div>
                     <button class="chat-send-btn" id="btnSend" title="Enviar">📤</button>
@@ -976,9 +827,11 @@
 
     <script>
     /* ============================================
-       StreamPad - Tudo em um único arquivo
-       Comportamento estilo DontPad
-       Sincronização via Gun.js
+       StreamPad - Versão Final
+       - Sem Pad Colaborativo
+       - Chat persistente (estático/mural)
+       - YouTube sincronizado entre todos
+       - Tudo compartilhado na mesma sala
        ============================================ */
 
     // ==========================================
@@ -1011,7 +864,7 @@
     }
 
     // ==========================================
-    // RoomManager - Gerencia a sala (hash da URL)
+    // RoomManager
     // ==========================================
     class RoomManager {
         constructor() {
@@ -1030,9 +883,7 @@
             this.input.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') this.goToRoom();
             });
-
             document.getElementById('btnGoRoom').addEventListener('click', () => this.goToRoom());
-
             document.getElementById('btnCopyRoom').addEventListener('click', () => this.copyLink());
         }
 
@@ -1061,7 +912,7 @@
     }
 
     // ==========================================
-    // GunSync - Sincronização em tempo real
+    // GunSync - Sincronização via Gun.js
     // ==========================================
     class GunSync {
         constructor(roomId, eventBus) {
@@ -1069,8 +920,6 @@
             this.eventBus = eventBus;
             this.userId = 'u_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
             this.onlineUsers = new Map();
-            this.seenMessages = new Set();
-            this.seenEffects = new Set();
             this.gun = null;
             this.roomNode = null;
             this.init();
@@ -1078,53 +927,42 @@
 
         init() {
             try {
+                // Inicializa Gun.js com múltiplos relays para redundância
                 this.gun = Gun({
                     peers: [
                         'https://gun-manhattan.herokuapp.com/gun',
-                        'https://gun-us.herokuapp.com/gun'
+                        'https://gun-us.herokuapp.com/gun',
+                        'https://peer.wallie.io/gun'
                     ],
-                    localStorage: false
+                    localStorage: false,
+                    radisk: false
                 });
 
-                this.roomNode = this.gun.get('streampad_v2').get(this.roomId);
+                // Nó da sala
+                this.roomNode = this.gun.get('streampad_final').get(this.roomId);
 
-                // Chat messages
+                console.log('🔗 Gun.js inicializado, sala:', this.roomId);
+
+                // === CHAT - Carrega mensagens existentes E escuta novas ===
+                // .map().on() retorna TUDO que já existe + escuta mudanças
                 this.roomNode.get('chat').map().on((data, key) => {
-                    if (!data || data.senderId === this.userId) return;
-                    if (this.seenMessages.has(key)) return;
-                    this.seenMessages.add(key);
+                    if (!data || !data.timestamp) return;
+                    if (data.senderId === this.userId) return; // ignora minhas próprias (já renderizadas)
                     this.eventBus.emit('gun:chat', data);
                 });
 
-                // Collab pad
-                this.roomNode.get('collab').on((data) => {
-                    if (!data || data.senderId === this.userId) return;
-                    this.eventBus.emit('gun:collab', data);
-                });
-
-                // Stream
+                // === STREAM - Carrega URL atual E escuta mudanças ===
                 this.roomNode.get('stream').on((data) => {
-                    if (!data || data.senderId === this.userId) return;
+                    if (!data || !data.url) return;
+                    if (data.senderId === this.userId) return;
+                    console.log('📺 Stream recebida de outro usuário:', data.url);
                     this.eventBus.emit('gun:stream', data);
                 });
 
-                // Colors/Theme
-                this.roomNode.get('theme').on((data) => {
-                    if (!data || data.senderId === this.userId) return;
-                    this.eventBus.emit('gun:theme', data);
-                });
-
-                // Effects
-                this.roomNode.get('effects').map().on((data, key) => {
-                    if (!data || data.senderId === this.userId) return;
-                    if (this.seenEffects.has(key)) return;
-                    this.seenEffects.add(key);
-                    this.eventBus.emit('gun:effect', data);
-                });
-
-                // Presence
+                // === PRESENÇA ===
                 this.roomNode.get('presence').map().on((data, key) => {
-                    if (!data || data.userId === this.userId) return;
+                    if (!data || !data.userId) return;
+                    if (data.userId === this.userId) return;
                     if (Date.now() - data.timestamp < 10000) {
                         this.onlineUsers.set(data.userId, data);
                     } else {
@@ -1133,19 +971,23 @@
                     this.updateOnlineCount();
                 });
 
-                // Typing
-                this.roomNode.get('typing').map().on((data, key) => {
-                    if (!data || data.senderId === this.userId) return;
-                    this.eventBus.emit('gun:typing', data);
+                // === EFEITOS ===
+                this.roomNode.get('effects').map().on((data, key) => {
+                    if (!data || !data.effect) return;
+                    if (data.senderId === this.userId) return;
+                    this.eventBus.emit('gun:effect', data);
                 });
 
-                // Announce presence
+                // Anuncia presença
                 this.announcePresence();
-                setInterval(() => this.announcePresence(), 3000);
-                setInterval(() => this.cleanPresence(), 5000);
+                this.presenceInterval = setInterval(() => this.announcePresence(), 3000);
+                this.cleanInterval = setInterval(() => this.cleanPresence(), 5000);
 
-                this.eventBus.emit('gun:connected');
-                console.log('✅ Gun.js conectado à sala:', this.roomId);
+                // Timeout de conexão
+                setTimeout(() => {
+                    this.eventBus.emit('gun:connected');
+                }, 1000);
+
             } catch (e) {
                 console.error('Erro Gun.js:', e);
                 this.eventBus.emit('gun:error', e);
@@ -1176,52 +1018,27 @@
         sendChat(msg) {
             if (!this.roomNode) return;
             const id = 'm_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
-            this.seenMessages.add(id);
+            // Salva no Gun.js - fica persistente na sala
             this.roomNode.get('chat').get(id).put(msg);
-        }
-
-        sendCollab(content) {
-            if (!this.roomNode) return;
-            this.roomNode.get('collab').put({
-                content,
-                senderId: this.userId,
-                timestamp: Date.now()
-            });
+            console.log('💬 Mensagem enviada:', msg.text);
         }
 
         sendStream(url) {
             if (!this.roomNode) return;
+            // Salva a URL da stream - todos que entrarem depois vão ver
             this.roomNode.get('stream').put({
-                url,
+                url: url,
                 senderId: this.userId,
                 timestamp: Date.now()
             });
-        }
-
-        sendTheme(theme) {
-            if (!this.roomNode) return;
-            this.roomNode.get('theme').put({
-                ...theme,
-                senderId: this.userId,
-                timestamp: Date.now()
-            });
+            console.log('📺 Stream enviada:', url);
         }
 
         sendEffect(effect, username) {
             if (!this.roomNode) return;
             const id = 'e_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
-            this.seenEffects.add(id);
             this.roomNode.get('effects').get(id).put({
                 effect,
-                username,
-                senderId: this.userId,
-                timestamp: Date.now()
-            });
-        }
-
-        sendTyping(username) {
-            if (!this.roomNode) return;
-            this.roomNode.get('typing').get('t_' + this.userId).put({
                 username,
                 senderId: this.userId,
                 timestamp: Date.now()
@@ -1237,16 +1054,20 @@
     class StreamManager {
         constructor() {
             this.currentUrl = '';
+            this.loaded = false;
         }
 
-        setStream(url) {
+        setStream(url, isRemote = false) {
+            if (this.currentUrl === url && this.loaded) return;
             this.currentUrl = url;
+            this.loaded = true;
             this.loadStream(url);
         }
 
         loadStream(url) {
             const player = document.getElementById('streamPlayer');
             const badge = document.getElementById('liveBadge');
+            const inputUrl = document.getElementById('inputStreamUrl');
 
             if (!url) {
                 player.innerHTML = '<div class="stream-placeholder"><div class="icon">📺</div><p>Cole um link do YouTube na barra acima para iniciar a transmissão compartilhada</p></div>';
@@ -1272,8 +1093,9 @@
             }
 
             if (embedUrl) {
-                player.innerHTML = `<iframe src="${embedUrl}" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe>`;
+                player.innerHTML = `<iframe src="${embedUrl}" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe>`;
                 if (badge) badge.style.display = 'inline';
+                if (inputUrl && !isRemote) inputUrl.value = url;
             }
         }
 
@@ -1292,22 +1114,6 @@
         extractPlaylistId(url) {
             const m = url.match(/[?&]list=([a-zA-Z0-9_-]+)/);
             return m ? m[1] : null;
-        }
-    }
-
-    // ==========================================
-    // ThemeManager
-    // ==========================================
-    class ThemeManager {
-        apply(data) {
-            const root = document.documentElement;
-            if (data.bg) root.style.setProperty('--bg-color', data.bg);
-            if (data.system) root.style.setProperty('--system-color', data.system);
-            if (data.text) root.style.setProperty('--text-color', data.text);
-
-            if (data.bg) document.getElementById('colorBg').value = data.bg;
-            if (data.system) document.getElementById('colorSystem').value = data.system;
-            if (data.text) document.getElementById('colorText').value = data.text;
         }
     }
 
@@ -1475,7 +1281,7 @@
     }
 
     // ==========================================
-    // ChatManager
+    // ChatManager - Chat persistente (mural estático)
     // ==========================================
     class ChatManager {
         constructor(gunSync, eventBus) {
@@ -1484,6 +1290,7 @@
             this.isRecording = false;
             this.mediaRecorder = null;
             this.audioChunks = [];
+            this.renderedMessages = new Set();
             this.init();
         }
 
@@ -1493,8 +1300,12 @@
         }
 
         setupListeners() {
-            this.eventBus.on('gun:chat', (data) => this.addMessage(data));
-            this.eventBus.on('gun:typing', (data) => this.showTyping(data.username));
+            // Quando receber mensagem do Gun.js (de outro usuário)
+            this.eventBus.on('gun:chat', (data) => {
+                if (this.renderedMessages.has(data.id)) return;
+                this.renderedMessages.add(data.id);
+                this.addMessage(data);
+            });
         }
 
         getUsername() {
@@ -1511,7 +1322,10 @@
                 timestamp: Date.now(),
                 senderId: this.gunSync.getUserId()
             };
+            // Renderiza localmente primeiro
+            this.renderedMessages.add(msg.id);
             this.addMessage(msg);
+            // Envia para o Gun.js (persiste na sala)
             this.gunSync.sendChat(msg);
         }
 
@@ -1558,17 +1372,6 @@
             return d.innerHTML;
         }
 
-        sendTyping() {
-            this.gunSync.sendTyping(this.getUsername());
-        }
-
-        showTyping(username) {
-            const ind = document.getElementById('typingIndicator');
-            ind.innerHTML = `<div class="typing-dots"><span></span><span></span><span></span></div> ${this.escapeHtml(username)} está digitando...`;
-            clearTimeout(this.typingTimeout);
-            this.typingTimeout = setTimeout(() => { ind.innerHTML = ''; }, 2000);
-        }
-
         async startRecording() {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -1578,7 +1381,7 @@
                 this.mediaRecorder.onstop = () => {
                     const blob = new Blob(this.audioChunks, { type: 'audio/webm' });
                     const reader = new FileReader();
-                    reader.onloadend = () => this.sendMessage('🎤 Áudio gravado', reader.result);
+                    reader.onloadend = () => this.sendMessage(' Áudio gravado', reader.result);
                     reader.readAsDataURL(blob);
                     stream.getTracks().forEach(t => t.stop());
                 };
@@ -1600,53 +1403,6 @@
     }
 
     // ==========================================
-    // CollabPad
-    // ==========================================
-    class CollabPad {
-        constructor(gunSync, eventBus) {
-            this.gunSync = gunSync;
-            this.eventBus = eventBus;
-            this.editor = document.getElementById('collabEditor');
-            this.isSyncing = false;
-            this.debounceTimer = null;
-            this.init();
-        }
-
-        init() {
-            this.editor.addEventListener('input', () => {
-                if (this.isSyncing) return;
-                clearTimeout(this.debounceTimer);
-                this.debounceTimer = setTimeout(() => {
-                    this.gunSync.sendCollab(this.editor.value);
-                }, 150);
-            });
-
-            this.eventBus.on('gun:collab', (data) => {
-                if (data.content === undefined) return;
-                this.isSyncing = true;
-                const pos = this.editor.selectionStart;
-                const oldLen = this.editor.value.length;
-                this.editor.value = data.content;
-                const diff = data.content.length - oldLen;
-                try { this.editor.setSelectionRange(pos + diff, pos + diff); } catch (e) {}
-                this.isSyncing = false;
-            });
-
-            this.eventBus.on('gun:typing', (data) => {
-                const ind = document.getElementById('typingIndicator');
-                ind.innerHTML = `<div class="typing-dots"><span></span><span></span><span></span></div> ${data.username} está editando...`;
-                clearTimeout(this.typingTimeout);
-                this.typingTimeout = setTimeout(() => { ind.innerHTML = ''; }, 2000);
-            });
-
-            this.editor.addEventListener('keydown', () => {
-                const username = document.getElementById('usernameInput').value.trim() || 'Alguém';
-                this.gunSync.sendTyping(username);
-            });
-        }
-    }
-
-    // ==========================================
     // App
     // ==========================================
     class App {
@@ -1655,16 +1411,13 @@
             this.room = new RoomManager();
             this.gunSync = new GunSync(this.room.getRoomId(), this.eventBus);
             this.stream = new StreamManager();
-            this.theme = new ThemeManager();
             this.effects = new EffectsManager();
             this.chat = new ChatManager(this.gunSync, this.eventBus);
-            this.collabPad = new CollabPad(this.gunSync, this.eventBus);
             this.init();
         }
 
         init() {
             this.bindStream();
-            this.bindTheme();
             this.bindChat();
             this.bindEffects();
             this.bindEmojis();
@@ -1677,6 +1430,7 @@
                 const dot = document.getElementById('connectionDot');
                 if (dot) dot.classList.remove('connecting', 'offline');
                 Toast.show(`Conectado à sala "${this.room.getRoomId()}"`, '🎉');
+                this.chat.addSystem(`Você entrou na sala "${this.room.getRoomId()}"`);
             });
 
             this.eventBus.on('gun:error', () => {
@@ -1687,52 +1441,41 @@
             this.eventBus.on('gun:online', ({ count }) => {
                 document.getElementById('chatOnlineCount').textContent = count + ' online';
                 document.getElementById('onlineCount').textContent = count + ' online';
-                document.getElementById('collabUsers').textContent = count + ' editando';
             });
 
+            // STREAM - Quando outro usuário define uma stream, carrega para todos
             this.eventBus.on('gun:stream', (data) => {
                 if (data.url) {
-                    this.stream.setStream(data.url);
+                    console.log('📺 Recebendo stream de outro usuário:', data.url);
+                    this.stream.setStream(data.url, true);
                     document.getElementById('inputStreamUrl').value = data.url;
-                    this.chat.addSystem('A stream foi atualizada');
+                    this.chat.addSystem('📺 A stream foi atualizada por outro usuário');
                 }
             });
 
-            this.eventBus.on('gun:theme', (data) => {
-                this.theme.apply(data);
-            });
-
+            // EFEITOS - Quando outro usuário envia efeito
             this.eventBus.on('gun:effect', (data) => {
                 this.effects.trigger(data.effect);
-                this.chat.addSystem(`${data.username} enviou um efeito: ${data.effect}`);
+                this.chat.addSystem(`✨ ${data.username} enviou: ${data.effect}`);
             });
         }
 
         bindStream() {
-            document.getElementById('btnSetStream').addEventListener('click', () => {
-                const url = document.getElementById('inputStreamUrl').value.trim();
+            const btnSet = document.getElementById('btnSetStream');
+            const inputUrl = document.getElementById('inputStreamUrl');
+
+            btnSet.addEventListener('click', () => {
+                const url = inputUrl.value.trim();
                 if (url) {
-                    this.stream.setStream(url);
+                    this.stream.setStream(url, false);
                     this.gunSync.sendStream(url);
                     Toast.show('Stream definida para todos na sala!', '📺');
+                    this.chat.addSystem('📺 Stream atualizada');
                 }
             });
 
-            document.getElementById('inputStreamUrl').addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') document.getElementById('btnSetStream').click();
-            });
-        }
-
-        bindTheme() {
-            document.getElementById('btnApplyColors').addEventListener('click', () => {
-                const theme = {
-                    bg: document.getElementById('colorBg').value,
-                    system: document.getElementById('colorSystem').value,
-                    text: document.getElementById('colorText').value
-                };
-                this.theme.apply(theme);
-                this.gunSync.sendTheme(theme);
-                Toast.show('Cores aplicadas para todos na sala!', '🎨');
+            inputUrl.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') btnSet.click();
             });
         }
 
@@ -1756,7 +1499,6 @@
             input.addEventListener('input', () => {
                 input.style.height = 'auto';
                 input.style.height = Math.min(input.scrollHeight, 80) + 'px';
-                this.chat.sendTyping();
             });
 
             document.getElementById('btnVoice').addEventListener('click', () => {
@@ -1799,7 +1541,7 @@
                     this.effects.trigger(effect);
                     const username = document.getElementById('usernameInput').value.trim() || 'Anônimo';
                     this.gunSync.sendEffect(effect, username);
-                    this.chat.addSystem(`Você enviou o efeito: ${effect}`);
+                    this.chat.addSystem(`✨ Você enviou: ${effect}`);
                 });
             });
         }
