@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>🎮 Simulador Gamificado - Sistemas Paralelos e Distribuídos</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+  body {
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    min-height: 100vh;
+    color: #fff;
+    padding: 20px;
+  }
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    background: rgba(255,255,255,0.05);
+    border-radius: 20px;
+    padding: 30px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  h1 {
+    text-align: center;
+    font-size: 2.2em;
+    margin-bottom: 10px;
+    background: linear-gradient(90deg, #00f2fe, #4facfe);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .subtitle { text-align: center; color: #aaa; margin-bottom: 25px; }
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin-bottom: 25px;
+  }
+  .stat-box {
+    background: rgba(0,0,0,0.3);
+    padding: 15px;
+    border-radius: 12px;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .stat-label { font-size: 0.8em; color: #aaa; text-transform: uppercase; }
+  .stat-value { font-size: 1.8em; font-weight: bold; color: #00f2fe; }
+  .progress-bar {
+    height: 10px;
+    background: rgba(0,0,0,0.3);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #00f2fe, #4facfe);
+    transition: width 0.5s;
+  }
+  .question-box {
+    background: rgba(0,0,0,0.3);
+    padding: 25px;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    border-left: 4px solid #4facfe;
+  }
+  .question-number {
+    display: inline-block;
+    background: #4facfe;
+    color: #000;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    font-size: 0.9em;
+  }
+  .question-text { font-size: 1.05em; line-height: 1.6; margin-bottom: 15px; }
+  .support-text {
+    background: rgba(255,255,255,0.05);
+    padding: 12px;
+    border-radius: 8px;
+    border-left: 3px solid #f39c12;
+    font-style: italic;
+    color: #ddd;
+    margin-bottom: 15px;
+    font-size: 0.95em;
+  }
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option {
+    background: rgba(255,255,255,0.08);
+    padding: 15px;
+    border-radius: 10px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.3s;
+  }
+  .option:hover { background: rgba(79,172,254,0.2); border-color: #4facfe; }
+  .option.correct { background: rgba(46,204,113,0.3); border-color: #2ecc71; }
+  .option.wrong { background: rgba(231,76,60,0.3); border-color: #e74c3c; }
+  .option.disabled { cursor: not-allowed; opacity: 0.7; }
+  .feedback {
+    padding: 15px;
+    border-radius: 10px;
+    margin-top: 15px;
+    display: none;
+  }
+  .feedback.show { display: block; animation: slideIn 0.4s; }
+  .feedback.success { background: rgba(46,204,113,0.2); border-left: 4px solid #2ecc71; }
+  .feedback.error { background: rgba(231,76,60,0.2); border-left: 4px solid #e74c3c; }
+  @keyframes slideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+  .btn {
+    background: linear-gradient(90deg, #00f2fe, #4facfe);
+    color: #000;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 25px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 1em;
+    margin-top: 15px;
+    transition: transform 0.2s;
+  }
+  .btn:hover { transform: scale(1.05); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .mode-select {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin: 30px 0;
+    flex-wrap: wrap;
+  }
+  .mode-card {
+    background: rgba(255,255,255,0.08);
+    padding: 25px;
+    border-radius: 15px;
+    cursor: pointer;
+    flex: 1;
+    min-width: 250px;
+    text-align: center;
+    border: 2px solid transparent;
+    transition: all 0.3s;
+  }
+  .mode-card:hover { border-color: #4facfe; transform: translateY(-5px); }
+  .mode-icon { font-size: 3em; margin-bottom: 10px; }
+  .lives { color: #e74c3c; font-size: 1.5em; letter-spacing: 3px; }
+  .final-screen { text-align: center; padding: 30px; }
+  .trophy { font-size: 5em; margin: 20px 0; }
+  .grade {
+    font-size: 3em;
+    font-weight: bold;
+    background: linear-gradient(90deg, #00f2fe, #4facfe);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  textarea {
+    width: 100%;
+    min-height: 150px;
+    background: rgba(0,0,0,0.3);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 10px;
+    padding: 12px;
+    font-size: 1em;
+    resize: vertical;
+  }
+  .discursive-answer {
+    background: rgba(46,204,113,0.1);
+    padding: 15px;
+    border-radius: 10px;
+    border-left: 4px solid #2ecc71;
+    margin-top: 15px;
+    font-size: 0.95em;
+    line-height: 1.6;
+  }
+  .badge {
+    display: inline-block;
+    background: #f39c12;
+    color: #000;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    margin-left: 8px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>🎮 Simulador Gamificado</h1>
+  <p class="subtitle">Sistemas Paralelos e Distribuídos - UniSENAI MT</p>
+
+  <div id="start-screen">
+    <div class="stats">
+      <div class="stat-box">
+        <div class="stat-label">🏆 XP Total</div>
+        <div class="stat-value" id="total-xp">0</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">🎯 Nível</div>
+        <div class="stat-value" id="level">1</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">❤️ Vidas</div>
+        <div class="stat-value lives" id="lives">♥♥♥</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">⏱️ Tempo</div>
+        <div class="stat-value" id="timer">00:00</div>
+      </div>
+    </div>
+
+    <h2 style="text-align:center; margin: 20px 0;">Escolha o Modo de Jogo</h2>
+    <div class="mode-select">
+      <div class="mode-card" onclick="startGame('study')">
+        <div class="mode-icon">📚</div>
+        <h3>Modo Estudo</h3>
+        <p>Sem tempo limite, vidas infinitas, explicações detalhadas após cada resposta.</p>
+      </div>
+      <div class="mode-card" onclick="startGame('exam')">
+        <div class="mode-icon">⚡</div>
+        <h3>Modo Simulado</h3>
+        <p>Cronometrado, 3 vidas, pontuação máxima. Ideal para testar seus conhecimentos!</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="game-screen" style="display:none;">
+    <div class="stats">
+      <div class="stat-box">
+        <div class="stat-label">🏆 XP</div>
+        <div class="stat-value" id="current-xp">0</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">📊 Questão</div>
+        <div class="stat-value"><span id="current-q">1</span>/20</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">❤️ Vidas</div>
+        <div class="stat-value lives" id="current-lives">♥♥♥</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">⏱️ Tempo</div>
+        <div class="stat-value" id="game-timer">00:00</div>
+      </div>
+    </div>
+
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress" style="width:0%"></div>
+    </div>
+
+    <div id="question-container"></div>
+  </div>
+
+  <div id="final-screen" style="display:none;"></div>
+</div>
+
+<script>
+const questions = [
+  {
+    q: "Uma empresa de tecnologia precisa processar um grande volume de imagens para aplicar um filtro de brilho, enquanto, simultaneamente, outra parte do sistema compacta arquivos de log e atualiza a interface gráfica para o usuário. Considerando os conceitos de paralelismo apresentados no material, assinale a alternativa que classifica corretamente as operações descritas.",
+    options: [
+      "Ambas as operações caracterizam-se como paralelismo de dados, pois ocorrem no mesmo intervalo de tempo.",
+      "A aplicação do filtro nas imagens é um exemplo de paralelismo de dados, enquanto a compactação e a atualização da interface configuram paralelismo de tarefas.",
+      "Ambas as operações são exemplos de paralelismo de tarefas, pois envolvem a manipulação de arquivos e interfaces.",
+      "A aplicação do filtro é um paralelismo de tarefas, e as demais operações são exemplos de paralelismo de dados."
+    ],
+    correct: 1,
+    explanation: "Paralelismo de dados = mesma operação em múltiplos dados (filtro em várias imagens). Paralelismo de tarefas = operações diferentes simultâneas (compactar, atualizar UI)."
+  },
+  {
+    q: "Um desenvolvedor está otimizando uma aplicação Python que processa listas massivas de dados. Ele decide utilizar a biblioteca concurrent.futures com ThreadPoolExecutor e define max_workers=8. Com base no material, sobre a relação entre hardware e software nesse cenário, é correto afirmar que:",
+    options: [
+      "O ThreadPoolExecutor representa a camada de hardware, enquanto os 8 núcleos físicos representam a camada de software.",
+      "A GPU é a única camada de hardware capaz de executar threads de software gerenciadas pelo Python.",
+      "Os 8 núcleos físicos (Multicore) representam a camada de hardware, e as threads gerenciadas pelo ThreadPoolExecutor representam a camada de software.",
+      "O paralelismo de software dispensa totalmente a necessidade de múltiplos núcleos de processamento no hardware para obter ganho de velocidade."
+    ],
+    correct: 2,
+    explanation: "Hardware = Multicore (núcleos físicos). Software = Threads (ThreadPoolExecutor). São camadas complementares que trabalham juntas."
+  },
+  {
+    q: "Conforme o estudo de caso apresentado, um sistema processa 100 imagens sequencialmente, levando 5 segundos por imagem, totalizando 500 segundos. Ao implementar paralelismo com 8 threads (núcleos), o tempo de processamento é reduzido para aproximadamente 62,5 segundos. Qual é a porcentagem aproximada de redução no tempo total?",
+    options: ["50,0%", "75,0%", "87,5%", "95,0%"],
+    correct: 2,
+    explanation: "Cálculo: (500 - 62,5) / 500 × 100 = 87,5% de redução. Uma melhoria expressiva!"
+  },
+  {
+    q: "Sobre a arquitetura de replicação Master-Slave do MySQL, assinale a alternativa correta.",
+    support: "O MySQL Master recebe todas as operações de escrita e grava as mudanças no Binary Log (binlog). Os Slaves se conectam ao Master, leem o binlog e aplicam as mudanças localmente.",
+    options: [
+      "Os Slaves são responsáveis por receber todas as operações de escrita para garantir a consistência forte imediata.",
+      "O Master grava as mudanças no Binary Log, e os Slaves leem esse log para aplicar as mudanças localmente, o que permite distribuir as requisições de leitura.",
+      "A replicação ocorre exclusivamente por meio de filas RabbitMQ, sem a utilização do Binary Log do MySQL.",
+      "Os Slaves operam na porta 3306, enquanto o Master opera nas portas 3307 a 3309."
+    ],
+    correct: 1,
+    explanation: "O Master recebe escritas e grava no binlog. Os Slaves leem o binlog para replicar os dados e servem requisições de leitura distribuídas."
+  },
+  {
+    q: "Qual tipo de replicação é recomendado para ambientes de produção por ser considerado mais seguro, e qual é sua característica principal?",
+    options: [
+      "STATEMENT, pois replica a query SQL completa, garantindo compatibilidade com sistemas legados.",
+      "MIXED, pois é o padrão do MySQL 5.7+ e alterna automaticamente entre os outros dois tipos.",
+      "ROW, pois replica as mudanças de linha, oferecendo maior segurança e confiabilidade em produção.",
+      "GTID, pois replica exclusivamente transações com identificadores globais, ignorando o conteúdo das linhas."
+    ],
+    correct: 2,
+    explanation: "ROW replica as mudanças de linha específicas, sendo mais seguro que STATEMENT (que replica a query completa) para ambientes de produção."
+  },
+  {
+    q: "O que o indicador 'lag de replicação' representa no contexto do sistema distribuído?",
+    options: [
+      "O tempo que o RabbitMQ leva para enfileirar uma operação de leitura antes de enviá-la ao Slave.",
+      "O atraso temporal entre uma escrita ser realizada no Master e a sua efetiva aplicação e reflexão nos Slaves.",
+      "A falha permanente de um Slave, que exige uma promoção automática e imediata a Master.",
+      "O tempo de execução de uma query SELECT distribuída entre múltiplos núcleos de processamento."
+    ],
+    correct: 1,
+    explanation: "Lag de replicação = atraso entre escrita no Master e aplicação nos Slaves. É um conceito-chave da consistência eventual."
+  },
+  {
+    q: "Qual é a principal vantagem do Docker Compose em comparação ao uso de ferramentas como XAMPP para orquestrar um cluster MySQL com replicação?",
+    options: [
+      "O XAMPP oferece melhor isolamento e reprodutibilidade para criar múltiplas instâncias de banco de dados simultaneamente.",
+      "O Docker permite subir múltiplos containers com um único comando, garantindo isolamento, reprodutibilidade e evitando conflitos de porta.",
+      "O Docker Compose elimina a necessidade de configurar o Binary Log e o GTID no MySQL, automatizando a consistência forte.",
+      "O XAMPP é a única ferramenta capaz de gerenciar filas RabbitMQ em conjunto com instâncias do MySQL."
+    ],
+    correct: 1,
+    explanation: "Docker oferece isolamento, reprodutibilidade e facilidade para criar múltiplas instâncias sem conflitos de porta — ideal para clusters."
+  },
+  {
+    q: "Qual é o principal benefício do padrão 'Write-Behind' na arquitetura que integra RabbitMQ e Banco de Dados?",
+    options: [
+      "Garantir que as leituras sejam feitas diretamente no Master, evitando qualquer possibilidade de lag nos Slaves.",
+      "Proteger o sistema contra picos de tráfego e falhas temporárias do banco, enfileirando as escritas antes da persistência definitiva.",
+      "Eliminar a necessidade de ACK (Acknowledgement) no processamento das mensagens, tornando o sistema mais rápido.",
+      "Converter automaticamente a replicação do tipo ROW para STATEMENT, otimizando o uso da rede."
+    ],
+    correct: 1,
+    explanation: "Write-Behind: escritas vão primeiro para a fila, depois para o banco. Protege contra picos e falhas temporárias."
+  },
+  {
+    q: "Que técnica de distribuição de carga é utilizada pelo DatabaseRouter com a lógica 'self.current_slave_index = (self.current_slave_index + 1) % len(self.slaves_config)'?",
+    options: [
+      "Hashing consistente, para garantir que um mesmo usuário sempre acesse o mesmo Slave.",
+      "Round-Robin, para distribuir as requisições de leitura sequencialmente entre os Slaves disponíveis, balanceando a carga.",
+      "Least Connections, para direcionar a leitura sempre ao Slave com o menor número de conexões ativas.",
+      "Broadcast, para enviar a mesma requisição de leitura a todos os Slaves simultaneamente."
+    ],
+    correct: 1,
+    explanation: "Round-Robin: distribuição sequencial e circular entre os nós disponíveis, garantindo balanceamento uniforme."
+  },
+  {
+    q: "Qual problema intrínseco da comunicação síncrona é resolvido pelo desacoplamento temporal oferecido pelo RabbitMQ?",
+    options: [
+      "A necessidade de persistência de mensagens em disco para auditoria futura.",
+      "A dependência de que produtor e consumidor estejam ativos e disponíveis no mesmo instante para a troca de informações.",
+      "A impossibilidade de utilizar a linguagem Python para o desenvolvimento de sistemas distribuídos robustos.",
+      "A obrigatoriedade de usar replicação do tipo ROW no banco de dados para garantir a integridade."
+    ],
+    correct: 1,
+    explanation: "Comunicação síncrona exige que ambos estejam online ao mesmo tempo. O Message Broker desacopla temporalmente essa dependência."
+  },
+  {
+    q: "Assinale a alternativa que apresenta a combinação correta de práticas para evitar a perda de dados em caso de falha do consumidor no RabbitMQ.",
+    options: [
+      "auto_ack=True e durable=False, para garantir processamento rápido.",
+      "auto_ack=False e durable=True, com confirmação explícita de processamento via basic_ack.",
+      "prefetch_count=0 e remoção imediata da fila assim que a mensagem for enviada ao consumidor.",
+      "Uso exclusivo de filas não duráveis com delivery_mode=1 para economizar recursos de disco."
+    ],
+    correct: 1,
+    explanation: "auto_ack=False exige ACK manual, durable=True persiste em disco. Juntos, garantem entrega confiável mesmo com falhas."
+  },
+  {
+    q: "Qual é a função do comando channel.basic_qos(prefetch_count=1) no master_consumer.py?",
+    options: [
+      "Garantir que o RabbitMQ envie todas as mensagens da fila de uma única vez para o consumidor mais rápido.",
+      "Implementar o Fair Dispatch, assegurando que um worker receba apenas uma mensagem por vez, evitando sobrecarga em workers lentos.",
+      "Configurar a Dead Letter Queue para receber mensagens automaticamente após 1 segundo de processamento.",
+      "Desativar o ACK manual, permitindo que o RabbitMQ remova a mensagem da fila assim que ela for despachada."
+    ],
+    correct: 1,
+    explanation: "Fair Dispatch com prefetch_count=1: cada worker recebe apenas 1 mensagem por vez, evitando sobrecarga em workers lentos."
+  },
+  {
+    q: "Para um sistema que processa tarefas discretas e independentes (contagem de palavras em textos), qual Message Broker é mais adequado segundo o material?",
+    options: [
+      "Apache Kafka, pois possui throughput extremo e é ideal para tarefas discretas e work queues.",
+      "RabbitMQ, pois seu modelo de 'Fila Inteligente' e entrega por Push é ideal para tarefas discretas e Work Queues.",
+      "Apache Kafka, pois utiliza o modelo de entrega por Push, garantindo latência muito baixa para RPC.",
+      "RabbitMQ, pois funciona como um Log de Commit Distribuído com persistência em disco por padrão."
+    ],
+    correct: 1,
+    explanation: "RabbitMQ = Fila Inteligente, Push, ideal para tarefas discretas. Kafka = Log distribuído, Pull, ideal para streaming."
+  },
+  {
+    q: "Quando ocorre um json.JSONDecodeError, a mensagem é rejeitada com basic_nack(requeue=False). Qual a lógica por trás dessa decisão?",
+    options: [
+      "A mensagem será reprocessada infinitamente até que o JSON seja corrigido automaticamente pelo sistema.",
+      "A mensagem é descartada permanentemente sem qualquer registro, apenas para economizar espaço em disco.",
+      "A mensagem problemática é rejeitada sem retornar à fila principal, evitando um loop infinito de falhas, podendo ser direcionada para uma Dead Letter Queue (DLQ).",
+      "O sistema é reiniciado automaticamente para limpar o cache de memória e restabelecer a conexão."
+    ],
+    correct: 2,
+    explanation: "requeue=False evita loop infinito de falhas. A mensagem vai para DLQ para análise posterior, sem travar o sistema."
+  },
+  {
+    q: "Um órgão público recebe 300 documentos/segundo em um servidor com 64 núcleos, mas processa 1 por vez. Qual combinação de técnicas resolveria o gargalo?",
+    options: [
+      "Utilizar apenas replicação Master-Slave, sem paralelismo, pois o problema é exclusivamente de armazenamento em disco.",
+      "Distribuir os documentos recebidos entre os 64 núcleos disponíveis simultaneamente, aplicando paralelismo de tarefas ou dados, possivelmente auxiliado por filas para absorver picos.",
+      "Substituir o processamento paralelo por comunicação síncrona via Sockets TCP para garantir a ordem exata e sequencial dos documentos.",
+      "Configurar o RabbitMQ para operar no modo Kafka, transformando o sistema em um Log de Commit Distribuído para processamento síncrono."
+    ],
+    correct: 1,
+    explanation: "Paralelismo aproveita os 64 núcleos. Filas absorvem picos. Combinação ideal para o cenário descrito."
+  },
+  {
+    q: "Assinale a alternativa que descreve corretamente uma vantagem da arquitetura com 1 Master e 3 Slaves.",
+    options: [
+      "A capacidade de realizar backups em um Slave sem afetar a performance do Master.",
+      "A garantia de consistência forte absoluta, eliminando qualquer possibilidade de lag de replicação.",
+      "A obrigatoriedade de que todas as operações passem exclusivamente pelo RabbitMQ, sem contato direto com o MySQL.",
+      "A redução drástica do número de containers Docker necessários, consolidando toda a infraestrutura em uma única instância."
+    ],
+    correct: 0,
+    explanation: "Backups em Slaves não afetam o Master. Outras vantagens: alta disponibilidade e performance de leitura triplicada."
+  },
+  {
+    q: "DISCURSIVA - Startup de imagens médicas: 10.000 exames/dia, 2 min/exame sequencial. Identifique o tipo de paralelismo mais adequado, explique o impacto dos Multicores/GPUs e cite uma biblioteca Python para implementação.",
+    type: "discursive",
+    keywords: ["dados", "concurrent.futures", "thread", "nucleos", "gpu", "simultane"],
+    model_answer: "a) Paralelismo de DADOS é mais adequado, pois a mesma operação (análise de exame) é aplicada a múltiplos dados (imagens diferentes). b) Multicores/GPUs permitem processar vários exames simultaneamente, reduzindo drasticamente o tempo total (analogia: com 8 núcleos, tempo cai para ~1/8). c) Biblioteca: concurrent.futures com ThreadPoolExecutor ou ProcessPoolExecutor, definindo max_workers conforme núcleos disponíveis."
+  },
+  {
+    q: "DISCURSIVA - E-commerce com lentidão em consultas: proponha arquitetura com 1 Master e 3 Slaves. Descreva distribuição de leitura/escrita, explique Consistência Eventual e lag, e indique o tipo de replicação recomendado.",
+    type: "discursive",
+    keywords: ["escrita", "leitura", "master", "slave", "eventual", "row", "binlog"],
+    model_answer: "a) Escritas vão para o Master; leituras são distribuídas entre os 3 Slaves (Round-Robin). b) Consistência Eventual = dados não atualizam instantaneamente nos Slaves. Lag = atraso entre escrita no Master e aplicação nos Slaves via binlog. c) Replicação ROW recomendada para produção, pois replica mudanças de linha específicas, sendo mais segura."
+  },
+  {
+    q: "DISCURSIVA - Plataforma de notificações push com acoplamento temporal: proponha solução com Message Broker. Explique como resolve acoplamento, função do Buffering/Write-Behind e importância do ACK/persistência.",
+    type: "discursive",
+    keywords: ["broker", "desacopl", "buffer", "ack", "persisten", "fila"],
+    model_answer: "a) RabbitMQ desacopla temporalmente: Producer envia para fila e segue (fire-and-forget), Consumer processa quando disponível. b) Buffering acumula mensagens em picos; Write-Behind enfileira escritas antes de persistir, protegendo contra sobrecarga. c) ACK manual (auto_ack=False) garante remoção só após sucesso; persistência (durable=True) salva em disco, sobrevivendo a restarts."
+  },
+  {
+    q: "DISCURSIVA - Desenvolvedor usou auto_ack=True sem tratamento de exceções, causando perda de mensagens. Explique por que auto_ack=True é inadequado, como basic_nack com requeue=False trata mensagens malformadas e a utilidade da DLQ.",
+    type: "discursive",
+    keywords: ["auto_ack", "basic_ack", "basic_nack", "requeue", "dlq", "dead letter"],
+    model_answer: "a) auto_ack=True remove mensagem ao enviar ao consumer, mesmo se falhar. auto_ack=False com basic_ack garante remoção só após sucesso. b) basic_nack com requeue=False rejeita mensagens malformadas sem devolvê-las à fila, evitando loop infinito de falhas. c) DLQ (Dead Letter Queue) isola mensagens problemáticas para análise posterior, sem interromper fluxo principal."
+  }
+];
+
+let state = {
+  mode: null,
+  currentQ: 0,
+  xp: 0,
+  lives: 3,
+  startTime: null,
+  timerInterval: null,
+  answers: []
+};
+
+function startGame(mode) {
+  state.mode = mode;
+  state.currentQ = 0;
+  state.xp = 0;
+  state.lives = mode === 'exam' ? 3 : 999;
+  state.startTime = Date.now();
+  state.answers = [];
+  
+  document.getElementById('start-screen').style.display = 'none';
+  document.getElementById('game-screen').style.display = 'block';
+  
+  state.timerInterval = setInterval(updateTimer, 1000);
+  showQuestion();
+}
+
+function updateTimer() {
+  const elapsed = Math.floor((Date.now() - state.startTime) / 1000);
+  const min = String(Math.floor(elapsed / 60)).padStart(2, '0');
+  const sec = String(elapsed % 60).padStart(2, '0');
+  const timeStr = `${min}:${sec}`;
+  document.getElementById('timer').textContent = timeStr;
+  document.getElementById('game-timer').textContent = timeStr;
+}
+
+function updateStats() {
+  document.getElementById('current-xp').textContent = state.xp;
+  document.getElementById('total-xp').textContent = state.xp;
+  document.getElementById('current-q').textContent = state.currentQ + 1;
+  document.getElementById('level').textContent = Math.floor(state.xp / 100) + 1;
+  
+  if (state.mode === 'exam') {
+    const hearts = '♥'.repeat(state.lives) + '♡'.repeat(3 - state.lives);
+    document.getElementById('current-lives').textContent = hearts;
+    document.getElementById('lives').textContent = hearts;
+  } else {
+    document.getElementById('current-lives').textContent = '∞';
+    document.getElementById('lives').textContent = '∞';
+  }
+  
+  const progress = (state.currentQ / questions.length) * 100;
+  document.getElementById('progress').style.width = progress + '%';
+}
+
+function showQuestion() {
+  if (state.currentQ >= questions.length || (state.mode === 'exam' && state.lives <= 0)) {
+    endGame();
+    return;
+  }
+  
+  const q = questions[state.currentQ];
+  const container = document.getElementById('question-container');
+  
+  let html = `<div class="question-box">
+    <span class="question-number">Questão ${state.currentQ + 1} de 20</span>`;
+  
+  if (q.type === 'discursive') {
+    html += `<span class="badge">📝 DISCURSIVA</span>`;
+  }
+  
+  html += `<div class="question-text">${q.q}</div>`;
+  
+  if (q.support) {
+    html += `<div class="support-text">📖 ${q.support}</div>`;
+  }
+  
+  if (q.type === 'discursive') {
+    html += `<textarea id="discursive-answer" placeholder="Digite sua resposta aqui..."></textarea>
+      <button class="btn" onclick="submitDiscursive()">📤 Enviar Resposta</button>
+      <div id="feedback" class="feedback"></div>`;
+  } else {
+    html += `<div class="options">`;
+    q.options.forEach((opt, i) => {
+      html += `<div class="option" onclick="selectOption(${i})" id="opt-${i}">
+        <strong>${String.fromCharCode(65 + i)})</strong> ${opt}
+      </div>`;
+    });
+    html += `</div><div id="feedback" class="feedback"></div>`;
+  }
+  
+  html += `</div>`;
+  container.innerHTML = html;
+  updateStats();
+}
+
+function selectOption(idx) {
+  const q = questions[state.currentQ];
+  const options = document.querySelectorAll('.option');
+  options.forEach(o => o.classList.add('disabled'));
+  
+  const isCorrect = idx === q.correct;
+  document.getElementById(`opt-${idx}`).classList.add(isCorrect ? 'correct' : 'wrong');
+  
+  if (!isCorrect) {
+    document.getElementById(`opt-${q.correct}`).classList.add('correct');
+  }
+  
+  showFeedback(isCorrect, q.explanation);
+  
+  if (isCorrect) {
+    state.xp += 10;
+  } else if (state.mode === 'exam') {
+    state.lives--;
+  }
+  
+  state.answers.push({ q: state.currentQ, correct: isCorrect });
+  
+  setTimeout(() => {
+    state.currentQ++;
+    showQuestion();
+  }, 3500);
+}
+
+function submitDiscursive() {
+  const answer = document.getElementById('discursive-answer').value.trim();
+  const q = questions[state.currentQ];
+  
+  if (answer.length < 30) {
+    alert('Por favor, escreva uma resposta mais completa (mínimo 30 caracteres).');
+    return;
+  }
+  
+  // Avalia por palavras-chave
+  const answerLower = answer.toLowerCase();
+  const found = q.keywords.filter(kw => answerLower.includes(kw));
+  const score = Math.round((found.length / q.keywords.length) * 10);
+  const isGood = score >= 5;
+  
+  if (isGood) state.xp += score;
+  
+  const feedback = document.getElementById('feedback');
+  feedback.className = `feedback show ${isGood ? 'success' : 'error'}`;
+  feedback.innerHTML = `
+    <strong>${isGood ? '🎉' : '📚'} Pontuação: ${score}/10 XP</strong><br>
+    <small>Palavras-chave identificadas: ${found.length}/${q.keywords.length}</small>
+    <div class="discursive-answer">
+      <strong>💡 Resposta modelo sugerida:</strong><br>
+      ${q.model_answer.replace(/\n/g, '<br>')}
+    </div>
+  `;
+  
+  state.answers.push({ q: state.currentQ, correct: isGood, score });
+  
+  setTimeout(() => {
+    state.currentQ++;
+    showQuestion();
+  }, 8000);
+}
+
+function showFeedback(isCorrect, explanation) {
+  const feedback = document.getElementById('feedback');
+  feedback.className = `feedback show ${isCorrect ? 'success' : 'error'}`;
+  feedback.innerHTML = `
+    <strong>${isCorrect ? '🎉 Correto! +10 XP' : '❌ Incorreto!'}</strong><br>
+    <small>${explanation}</small>
+  `;
+}
+
+function endGame() {
+  clearInterval(state.timerInterval);
+  document.getElementById('game-screen').style.display = 'none';
+  const final = document.getElementById('final-screen');
+  final.style.display = 'block';
+  
+  const correctCount = state.answers.filter(a => a.correct).length;
+  const totalDiscursive = questions.filter(q => q.type === 'discursive').length;
+  const totalMC = questions.length - totalDiscursive;
+  const mcCorrect = state.answers.filter((a, i) => questions[i].type !== 'discursive' && a.correct).length;
+  
+  const percentage = (correctCount / questions.length) * 100;
+  let trophy, message;
+  
+  if (percentage >= 90) { trophy = '🏆'; message = 'MESTRE DOS SISTEMAS DISTRIBUÍDOS!'; }
+  else if (percentage >= 70) { trophy = '🥇'; message = 'EXCELENTE! Você domina o conteúdo!'; }
+  else if (percentage >= 50) { trophy = '🥈'; message = 'BOM TRABALHO! Continue estudando!'; }
+  else if (percentage >= 30) { trophy = '🥉'; message = 'QUASE LÁ! Revise os conceitos.'; }
+  else { trophy = '📚'; message = 'Hora de revisar o material!'; }
+  
+  const elapsed = Math.floor((Date.now() - state.startTime) / 1000);
+  const min = Math.floor(elapsed / 60);
+  const sec = elapsed % 60;
+  
+  final.innerHTML = `
+    <div class="final-screen">
+      <div class="trophy">${trophy}</div>
+      <h2>${message}</h2>
+      <div class="grade">${Math.round(percentage)}%</div>
+      <p style="margin: 20px 0; color: #aaa;">Aproveitamento geral</p>
+      
+      <div class="stats" style="grid-template-columns: repeat(3, 1fr);">
+        <div class="stat-box">
+          <div class="stat-label">🏆 XP Total</div>
+          <div class="stat-value">${state.xp}</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">✅ Acertos</div>
+          <div class="stat-value">${correctCount}/${questions.length}</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">⏱️ Tempo</div>
+          <div class="stat-value">${min}:${String(sec).padStart(2,'0')}</div>
+        </div>
+      </div>
+      
+      <div style="margin-top: 20px; text-align: left; background: rgba(0,0,0,0.3); padding: 20px; border-radius: 12px;">
+        <h3 style="margin-bottom: 15px;">📊 Análise de Desempenho</h3>
+        <p><strong>Questões de Múltipla Escolha:</strong> ${mcCorrect}/${totalMC} corretas</p>
+        <p><strong>Questões Discursivas:</strong> ${state.answers.filter(a => questions[a.q]?.type === 'discursive' && a.correct).length}/${totalDiscursive} bem avaliadas</p>
+        <p style="margin-top: 15px;"><strong>🎯 Nível alcançado:</strong> ${Math.floor(state.xp / 100) + 1}</p>
+        <p><strong>💡 Dica:</strong> ${percentage < 70 ? 'Revise os conceitos de replicação Master-Slave e Message Brokers.' : 'Excelente! Tente o modo Simulado para desafiar seus limites!'}</p>
+      </div>
+      
+      <button class="btn" onclick="location.reload()" style="margin-top: 25px;">🔄 Jogar Novamente</button>
+    </div>
+  `;
+}
+</script>
+</body>
+</html>
